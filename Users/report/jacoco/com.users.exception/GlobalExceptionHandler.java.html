@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Users</a> &gt; <a href="index.source.html" class="el_package">com.users.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.users.exception;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * Global exception handler for handling various exceptions across the application.
+ * &lt;p&gt;
+ * This class uses Spring's {@link ControllerAdvice} to handle exceptions globally
+ * and return appropriate error responses.
+ * &lt;/p&gt;
+ */
+@ControllerAdvice
+<span class="fc" id="L26">public class GlobalExceptionHandler {</span>
+
+  @ExceptionHandler(UserAlreadyExistsException.class)
+  @ResponseStatus(HttpStatus.CONFLICT)
+  @ResponseBody
+  public final ErrorResponse handleUserAlreadyExistsException(UserAlreadyExistsException ex, HttpServletRequest request) {
+<span class="nc" id="L32">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  @ExceptionHandler(InvalidCredentialsException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  public ErrorResponse handleInvalidCredentialsException(InvalidCredentialsException ex, HttpServletRequest request) {
+<span class="nc" id="L39">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.UNAUTHORIZED.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorResponse handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+<span class="nc" id="L46">    List&lt;String&gt; errors = ex.getBindingResult()</span>
+<span class="nc" id="L47">      .getFieldErrors()</span>
+<span class="nc" id="L48">      .stream()</span>
+<span class="nc" id="L49">      .map(FieldError::getDefaultMessage)</span>
+<span class="nc" id="L50">      .collect(Collectors.toList());</span>
+
+<span class="nc" id="L52">    String errorMessage = String.join(&quot;,&quot;, errors);</span>
+<span class="nc" id="L53">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), &quot;Validation failed: &quot; + errorMessage,</span>
+<span class="nc" id="L54">      request.getRequestURI());</span>
+  }
+
+  @ExceptionHandler(UserNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public ErrorResponse handleUserNotFoundException(UserNotFoundException ex, HttpServletRequest request) {
+<span class="nc" id="L61">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
+
+  }
+
+  @ExceptionHandler(AddressNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public ErrorResponse handleAddressNotFoundException(AddressNotFoundException ex, HttpServletRequest request) {
+<span class="nc" id="L69">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  @ExceptionHandler(InsufficientBalanceException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public final ErrorResponse handleInsufficientBalanceException(InsufficientBalanceException ex, HttpServletRequest request) {
+<span class="nc" id="L76">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+<span class="nc bnc" id="L79" title="All 32 branches missed.">  @Data</span>
+<span class="nc" id="L80">  @AllArgsConstructor</span>
+  public static class ErrorResponse {
+<span class="nc" id="L82">    private LocalDateTime timestamp;</span>
+<span class="nc" id="L83">    private int status;</span>
+<span class="nc" id="L84">    private String message;</span>
+<span class="nc" id="L85">    private String path;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

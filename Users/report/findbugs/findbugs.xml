@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<BugCollection version='3.0.1' threshold='low' effort='max'><Error></Error><Project><SrcDir>D:\Capstone\backend\Users\src\main\java</SrcDir><SrcDir>D:\Capstone\backend\Users\target\generated-sources\annotations</SrcDir><SrcDir>D:\Capstone\backend\Users\src\test\java</SrcDir><SrcDir>D:\Capstone\backend\Users\target\generated-test-sources\test-annotations</SrcDir></Project></BugCollection>
