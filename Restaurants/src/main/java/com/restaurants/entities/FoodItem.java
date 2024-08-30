@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import java.math.BigDecimal;
 
 /**
@@ -51,9 +52,8 @@ public class FoodItem {
    */
   private BigDecimal price;
 
-  /**
-   * URL of the image representing the food item.
-   */
-  private String imageUrl;
+  @Lob
+  private byte[] imageData;
+
 
 }

@@ -1,4 +1,4 @@
-package com.restaurants.serviceimpl;
+package com.restaurants.service.serviceImpl;
 
 import com.restaurants.constants.RestaurantConstants;
 import com.restaurants.dto.indto.RestaurantInDto;

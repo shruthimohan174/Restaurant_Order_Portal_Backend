@@ -1,4 +1,4 @@
-package com.restaurants.serviceimpl;
+package com.restaurants.service.serviceImpl;
 
 import com.restaurants.constants.RestaurantConstants;
 import com.restaurants.dtoconversion.DtoConversion;
@@ -115,6 +115,4 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
       return new CategoryNotFoundException(RestaurantConstants.CATEGORY_NOT_FOUND);
     });
   }
-
-
 }

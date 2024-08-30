@@ -3,6 +3,7 @@ package com.restaurants.service;
 import com.restaurants.entities.FoodItem;
 import com.restaurants.dto.indto.FoodItemInDto;
 import com.restaurants.dto.outdto.FoodItemOutDto;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public interface FoodItemService {
    * @param request the details of the food item to be added
    * @return the created food item
    */
-  FoodItemOutDto addFoodItems(FoodItemInDto request);
+  FoodItemOutDto addFoodItems(FoodItemInDto request, MultipartFile image);
 
   /**
    * Updates an existing food item.

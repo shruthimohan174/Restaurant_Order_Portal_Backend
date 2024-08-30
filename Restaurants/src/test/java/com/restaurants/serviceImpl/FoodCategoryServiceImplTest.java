@@ -1,4 +1,4 @@
-package com.restaurants;
+package com.restaurants.serviceImpl;
 
 import com.restaurants.dto.indto.FoodCategoryInDto;
 import com.restaurants.dto.outdto.FoodCategoryOutDto;
@@ -7,7 +7,7 @@ import com.restaurants.entities.Restaurant;
 import com.restaurants.exception.CategoryNotFoundException;
 import com.restaurants.repositories.FoodCategoryRepository;
 import com.restaurants.service.RestaurantService;
-import com.restaurants.serviceimpl.FoodCategoryServiceImpl;
+import com.restaurants.service.serviceImpl.FoodCategoryServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,7 +63,7 @@ class FoodCategoryServiceImplTest {
   }
 
   @Test
-  void addCategory_Success() {
+  void addCategoryTest() {
     when(restaurantService.findRestaurantById(1)).thenReturn(restaurant);
     when(foodCategoryRepository.save(any(FoodCategory.class))).thenReturn(foodCategory);
 
@@ -76,7 +76,7 @@ class FoodCategoryServiceImplTest {
   }
 
   @Test
-  void updateCategory_Success() {
+  void updateCategoryTest() {
     FoodCategoryInDto updateRequest = new FoodCategoryInDto();
     updateRequest.setCategoryName("Updated Category");
     updateRequest.setRestaurantId(1);
@@ -93,7 +93,7 @@ class FoodCategoryServiceImplTest {
   }
 
   @Test
-  void findCategoryById_NotFound() {
+  void findCategoryByIdNotFoundTest() {
     when(foodCategoryRepository.findById(1)).thenReturn(Optional.empty());
 
     assertThrows(CategoryNotFoundException.class, () -> foodCategoryService.findCategoryById(1));
@@ -101,7 +101,7 @@ class FoodCategoryServiceImplTest {
   }
 
   @Test
-  void viewAllCategory_Success() {
+  void viewAllCategoryTest() {
     FoodCategory category1 = new FoodCategory();
     category1.setId(1);
     category1.setCategoryName("Fast Food");
@@ -119,7 +119,7 @@ class FoodCategoryServiceImplTest {
   }
 
   @Test
-  void findCategoryByRestaurantId_Success() {
+  void findCategoryByRestaurantIdTest() {
     FoodCategory category1 = new FoodCategory();
     category1.setId(1);
     category1.setCategoryName("Fast Food");

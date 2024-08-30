@@ -2,6 +2,7 @@ package com.restaurants.dto.outdto;
 
 import lombok.Data;
 
+import javax.persistence.Lob;
 import java.math.BigDecimal;
 
 /**
@@ -44,8 +45,6 @@ public class FoodItemOutDto {
    */
   private BigDecimal price;
 
-  /**
-   * URL of the image representing the food item.
-   */
-  private String imageUrl;
+  @Lob
+  private byte[] imageData;
 }

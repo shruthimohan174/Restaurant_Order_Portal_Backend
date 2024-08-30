@@ -1,4 +1,4 @@
-package com.restaurants.serviceimpl;
+package com.restaurants.service.serviceImpl;
 
 import com.restaurants.constants.RestaurantConstants;
 import com.restaurants.dto.indto.FoodItemInDto;
@@ -8,6 +8,7 @@ import com.restaurants.entities.FoodCategory;
 import com.restaurants.entities.FoodItem;
 import com.restaurants.entities.Restaurant;
 import com.restaurants.exception.FoodItemNotFoundException;
+import com.restaurants.exception.ImageProcessingException;
 import com.restaurants.repositories.FoodItemRepository;
 import com.restaurants.service.FoodCategoryService;
 import com.restaurants.service.FoodItemService;
@@ -16,7 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,11 +48,18 @@ public class FoodItemServiceImpl implements FoodItemService {
    * @return the added food item
    */
   @Override
-  public FoodItemOutDto addFoodItems(FoodItemInDto request) {
+  public FoodItemOutDto addFoodItems(FoodItemInDto request, MultipartFile image) {
     logger.info("Adding food item: {}", request);
     Restaurant restaurantResponse=restaurantService.findRestaurantById(request.getRestaurantId());
     FoodCategory categoryResponse=foodCategoryService.findCategoryById(request.getCategoryId());
     FoodItem foodItem= DtoConversion.convertFoodItemRequestToFoodItem(request);
+    if (image != null && !image.isEmpty()) {
+      try{
+        foodItem.setImageData(request.getImage().getBytes());
+      }catch(IOException e){
+        throw new ImageProcessingException(RestaurantConstants.ERROR_PROCESSING_IMAGE);
+      }
+    }
     FoodItem saved=foodItemRepository.save(foodItem);
     logger.info("Food item added successfully: {}", saved);
     return  DtoConversion.convertFoodItemToFoodItemResponse(saved);

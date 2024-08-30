@@ -2,6 +2,7 @@ package com.restaurants.dto.indto;
 
 import lombok.Data;
 import org.apache.logging.log4j.core.config.plugins.validation.constraints.NotBlank;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 
@@ -56,5 +57,5 @@ public class FoodItemInDto {
   /**
    * URL of the image representing the food item.
    */
-  private String imageUrl;
+  private MultipartFile image;
 }

@@ -1,7 +1,8 @@
 package com.restaurants.dto.outdto;
 
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
+
+import javax.persistence.Lob;
 
 /**
  * Data transfer object for output data related to restaurants.
@@ -38,6 +39,7 @@ public class RestaurantOutDto {
    */
   private String openingHours;
 
-  private MultipartFile image;
+  @Lob
+  private byte[] imageData;
 
 }

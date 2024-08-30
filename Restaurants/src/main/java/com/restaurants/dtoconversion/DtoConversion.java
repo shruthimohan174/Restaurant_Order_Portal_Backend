@@ -44,6 +44,7 @@ public final class DtoConversion {
     response.setContactNumber(restaurant.getContactNumber());
     response.setRestaurantName(restaurant.getRestaurantName());
     response.setOpeningHours(restaurant.getOpeningHours());
+    response.setImageData(restaurant.getImageData());
     response.setUserId(restaurant.getUserId());
     return response;
   }
@@ -85,7 +86,6 @@ public final class DtoConversion {
     FoodItem items=new FoodItem();
     items.setCategoryId(request.getCategoryId());
     items.setDescription(request.getDescription());
-    items.setImageUrl(request.getImageUrl());
     items.setPrice(request.getPrice());
     items.setIsVeg(request.getIsVeg());
     items.setItemName(request.getItemName());
@@ -104,9 +104,9 @@ public final class DtoConversion {
     response.setId(items.getId());
     response.setCategoryId(items.getCategoryId());
     response.setDescription(items.getDescription());
-    response.setImageUrl(items.getImageUrl());
     response.setPrice(items.getPrice());
     response.setIsVeg(items.getIsVeg());
+    response.setImageData(items.getImageData());
     response.setItemName(items.getItemName());
     response.setRestaurantId(items.getRestaurantId());
 
@@ -123,7 +123,6 @@ public final class DtoConversion {
   public static FoodItem updateFoodItemRequest(FoodItemInDto request, FoodItem existingItem){
     existingItem.setDescription(request.getDescription());
     existingItem.setItemName(request.getItemName());
-    existingItem.setImageUrl(request.getImageUrl());
     existingItem.setPrice(request.getPrice());
     existingItem.setIsVeg(request.getIsVeg());
     return existingItem;
