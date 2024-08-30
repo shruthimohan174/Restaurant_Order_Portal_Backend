@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RestaurantInDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Restaurants</a> &gt; <a href="index.source.html" class="el_package">com.restaurants.dto.indto</a> &gt; <span class="el_source">RestaurantInDto.java</span></div><h1>RestaurantInDto.java</h1><pre class="source lang-java linenums">package com.restaurants.dto.indto;
+
+import lombok.Data;
+import org.apache.logging.log4j.core.config.plugins.validation.constraints.NotBlank;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+/**
+ * Data transfer object for input data related to restaurants.
+ */
+<span class="pc bpc" id="L13" title="33 of 54 branches missed.">@Data</span>
+public class RestaurantInDto {
+
+  /**
+   * The ID of the user who owns the restaurant.
+   * Cannot be blank.
+   */
+  @NotBlank(message = &quot;user ID cannot be blank&quot;)
+<span class="fc" id="L21">  private Integer userId;</span>
+
+  /**
+   * The name of the restaurant.
+   * Cannot be blank.
+   */
+  @NotBlank(message = &quot;Restaurant name cannot be blank&quot;)
+<span class="fc" id="L28">  private String restaurantName;</span>
+
+  /**
+   * The address of the restaurant.
+   * Cannot be blank.
+   */
+  @NotBlank(message = &quot;Address cannot be blank&quot;)
+<span class="fc" id="L35">  private String address;</span>
+
+  /**
+   * The contact number of the restaurant.
+   * Must be exactly 10 digits long and start with 7, 8, or 9.
+   */
+  @Size(min = 10, max = 10, message = &quot;Phone number must be exactly 10 digits long.&quot;)
+  @Pattern(
+    regexp = &quot;^[789]\\d{9}$&quot;,
+    message = &quot;Phone number must start with 7, 8, or 9.&quot;
+  )
+<span class="fc" id="L46">  private String contactNumber;</span>
+
+  /**
+   * The opening hours of the restaurant.
+   */
+<span class="fc" id="L51">  private String openingHours;</span>
+
+  /**
+   * The image representing the food item.
+   */
+<span class="fc" id="L56">  private MultipartFile image;</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

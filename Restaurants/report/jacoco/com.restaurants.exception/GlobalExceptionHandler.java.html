@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Restaurants</a> &gt; <a href="index.source.html" class="el_package">com.restaurants.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.restaurants.exception;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * Global exception handler to manage exceptions thrown across the application.
+ */
+@ControllerAdvice
+<span class="fc" id="L22">public class GlobalExceptionHandler {</span>
+
+  /**
+   * Handles {@link CategoryNotFoundException} and returns a standardized error response.
+   *
+   * @param ex      the exception thrown
+   * @param request the HTTP request that caused the exception
+   * @return the error response
+   */
+  @ExceptionHandler(CategoryNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public final ErrorResponse handleCategoryNotFoundException(CategoryNotFoundException ex, HttpServletRequest request) {
+<span class="nc" id="L35">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link RestaurantNotFoundException} and returns a standardized error response.
+   *
+   * @param ex      the exception thrown
+   * @param request the HTTP request that caused the exception
+   * @return the error response
+   */
+  @ExceptionHandler(RestaurantNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public final ErrorResponse handleRestaurantNotFoundException(RestaurantNotFoundException ex, HttpServletRequest request) {
+<span class="nc" id="L49">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link FoodItemNotFoundException} and returns a standardized error response.
+   *
+   * @param ex      the exception thrown
+   * @param request the HTTP request that caused the exception
+   * @return the error response
+   */
+  @ExceptionHandler(FoodItemNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public final ErrorResponse handleFoodItemNotFoundException(FoodItemNotFoundException ex, HttpServletRequest request) {
+<span class="nc" id="L63">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link MethodArgumentNotValidException} and returns a standardized error response for validation errors.
+   *
+   * @param ex      the exception thrown
+   * @param request the HTTP request that caused the exception
+   * @return the error response
+   */
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorResponse handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+<span class="nc" id="L77">    List&lt;String&gt; errors = ex.getBindingResult()</span>
+<span class="nc" id="L78">      .getFieldErrors()</span>
+<span class="nc" id="L79">      .stream()</span>
+<span class="nc" id="L80">      .map(FieldError::getDefaultMessage)</span>
+<span class="nc" id="L81">      .collect(Collectors.toList());</span>
+
+<span class="nc" id="L83">    String errorMessage = String.join(&quot;,&quot;, errors);</span>
+<span class="nc" id="L84">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), &quot;Validation failed: &quot; + errorMessage,</span>
+<span class="nc" id="L85">      request.getRequestURI());</span>
+  }
+
+  /**
+   * Represents the error response returned by the exception handler.
+   */
+<span class="nc bnc" id="L91" title="All 32 branches missed.">  @Data</span>
+<span class="nc" id="L92">  @AllArgsConstructor</span>
+  public static class ErrorResponse {
+<span class="nc" id="L94">    private LocalDateTime timestamp;</span>
+<span class="nc" id="L95">    private int status;</span>
+<span class="nc" id="L96">    private String message;</span>
+<span class="nc" id="L97">    private String path;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

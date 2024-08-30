@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FoodItemOutDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Restaurants</a> &gt; <a href="index.source.html" class="el_package">com.restaurants.dto.outdto</a> &gt; <span class="el_source">FoodItemOutDto.java</span></div><h1>FoodItemOutDto.java</h1><pre class="source lang-java linenums">package com.restaurants.dto.outdto;
+
+import lombok.Data;
+
+import javax.persistence.Lob;
+import java.math.BigDecimal;
+
+/**
+ * Data transfer object for output data related to food items.
+ */
+<span class="pc bpc" id="L11" title="38 of 64 branches missed.">@Data</span>
+public class FoodItemOutDto {
+  /**
+   * The unique identifier of the food item.
+   */
+<span class="fc" id="L16">  private Integer id;</span>
+
+  /**
+   * The ID of the category to which the food item belongs.
+   */
+<span class="fc" id="L21">  private Integer categoryId;</span>
+
+  /**
+   * The ID of the restaurant that the food item belongs to.
+   */
+<span class="fc" id="L26">  private Integer restaurantId;</span>
+
+  /**
+   * The name of the food item.
+   */
+<span class="fc" id="L31">  private String itemName;</span>
+
+  /**
+   * A description of the food item.
+   */
+<span class="fc" id="L36">  private String description;</span>
+
+  /**
+   * Indicates whether the food item is vegetarian.
+   */
+<span class="fc" id="L41">  private Boolean isVeg;</span>
+
+  /**
+   * The price of the food item.
+   */
+<span class="fc" id="L46">  private BigDecimal price;</span>
+
+  /**
+   * The binary data of the image representing the food item.
+   * This field stores the image in byte array format.
+   */
+  @Lob
+<span class="fc" id="L53">  private byte[] imageData;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

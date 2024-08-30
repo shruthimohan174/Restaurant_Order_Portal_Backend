@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FoodCategoryServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Restaurants</a> &gt; <a href="index.source.html" class="el_package">com.restaurants.service.impl</a> &gt; <span class="el_source">FoodCategoryServiceImpl.java</span></div><h1>FoodCategoryServiceImpl.java</h1><pre class="source lang-java linenums">package com.restaurants.service.impl;
+
+import com.restaurants.constants.RestaurantConstants;
+import com.restaurants.dto.indto.FoodCategoryInDto;
+import com.restaurants.dto.outdto.FoodCategoryOutDto;
+import com.restaurants.dtoconversion.DtoConversion;
+import com.restaurants.entities.FoodCategory;
+import com.restaurants.entities.Restaurant;
+import com.restaurants.exception.CategoryNotFoundException;
+import com.restaurants.repositories.FoodCategoryRepository;
+import com.restaurants.service.FoodCategoryService;
+import com.restaurants.service.RestaurantService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Implementation of the {@link FoodCategoryService} interface.
+ * Provides methods to manage food categories.
+ */
+@Service
+<span class="fc" id="L26">public class FoodCategoryServiceImpl implements FoodCategoryService {</span>
+
+<span class="fc" id="L28">  private static final Logger logger = LoggerFactory.getLogger(FoodCategoryServiceImpl.class);</span>
+
+  @Autowired
+  private FoodCategoryRepository foodCategoryRepository;
+
+  @Autowired
+  private RestaurantService restaurantService;
+
+  /**
+   * Adds a new food category.
+   *
+   * @param request the food category data to be added
+   * @return the added food category
+   */
+  @Override
+  public FoodCategoryOutDto addCategory(FoodCategoryInDto request) {
+<span class="fc" id="L44">    logger.info(&quot;Adding category: {}&quot;, request);</span>
+<span class="fc" id="L45">    Restaurant restaurant = restaurantService.findRestaurantById(request.getRestaurantId());</span>
+<span class="fc" id="L46">    FoodCategory category = DtoConversion.convertCategoryRequestToCategory(request);</span>
+<span class="fc" id="L47">    FoodCategory savedCategory = foodCategoryRepository.save(category);</span>
+<span class="fc" id="L48">    logger.info(&quot;Category added successfully: {}&quot;, savedCategory);</span>
+<span class="fc" id="L49">    return DtoConversion.convertCategoryToResponse(savedCategory);</span>
+  }
+
+  /**
+   * Updates an existing food category.
+   *
+   * @param request the food category data to update
+   * @param id      the ID of the food category to update
+   * @return the updated food category
+   */
+  @Override
+  public FoodCategoryOutDto updateCategory(FoodCategoryInDto request, Integer id) {
+<span class="fc" id="L61">    logger.info(&quot;Updating category with ID: {}&quot;, id);</span>
+<span class="fc" id="L62">    FoodCategory existingCategory = findCategoryById(id);</span>
+<span class="fc" id="L63">    existingCategory.setCategoryName(request.getCategoryName());</span>
+<span class="fc" id="L64">    existingCategory.setRestaurantId(request.getRestaurantId());</span>
+<span class="fc" id="L65">    FoodCategory updatedCategory = foodCategoryRepository.save(existingCategory);</span>
+<span class="fc" id="L66">    logger.info(&quot;Category updated successfully: {}&quot;, updatedCategory);</span>
+<span class="fc" id="L67">    return DtoConversion.convertCategoryToResponse(updatedCategory);</span>
+  }
+
+  /**
+   * Retrieves all food categories.
+   *
+   * @return a list of all food categories
+   */
+  @Override
+  public List&lt;FoodCategoryOutDto&gt; viewAllCategory() {
+<span class="fc" id="L77">    logger.info(&quot;Retrieving all categories&quot;);</span>
+<span class="fc" id="L78">    List&lt;FoodCategory&gt; categoryList = foodCategoryRepository.findAll();</span>
+<span class="fc" id="L79">    List&lt;FoodCategoryOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">    for (FoodCategory category : categoryList)</span>
+<span class="fc" id="L81">      responseList.add(DtoConversion.convertCategoryToResponse(category));</span>
+<span class="fc" id="L82">    logger.info(&quot;Retrieved {} categories&quot;, responseList.size());</span>
+<span class="fc" id="L83">    return responseList;</span>
+  }
+
+  /**
+   * Retrieves food categories for a specific restaurant.
+   *
+   * @param restaurantId the ID of the restaurant
+   * @return a list of food categories for the given restaurant
+   */
+  @Override
+  public List&lt;FoodCategoryOutDto&gt; findCategoryByRestaurantId(Integer restaurantId) {
+<span class="fc" id="L94">    logger.info(&quot;Retrieving categories for restaurant ID: {}&quot;, restaurantId);</span>
+<span class="fc" id="L95">    List&lt;FoodCategory&gt; categoryList = foodCategoryRepository.findByRestaurantId(restaurantId);</span>
+<span class="fc" id="L96">    List&lt;FoodCategoryOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">    for (FoodCategory category : categoryList)</span>
+<span class="fc" id="L98">      responseList.add(DtoConversion.convertCategoryToResponse(category));</span>
+<span class="fc" id="L99">    logger.info(&quot;Retrieved {} categories for restaurant ID: {}&quot;, responseList.size(), restaurantId);</span>
+<span class="fc" id="L100">    return responseList;</span>
+  }
+
+  /**
+   * Finds a food category by its ID.
+   *
+   * @param id the ID of the food category
+   * @return the food category
+   * @throws CategoryNotFoundException if the food category is not found
+   */
+  @Override
+  public FoodCategory findCategoryById(Integer id) {
+<span class="fc" id="L112">    logger.info(&quot;Finding category by ID: {}&quot;, id);</span>
+<span class="fc" id="L113">    return foodCategoryRepository.findById(id).orElseThrow(() -&gt; {</span>
+<span class="fc" id="L114">      logger.error(&quot;Category not found for ID: {}&quot;, id);</span>
+<span class="fc" id="L115">      return new CategoryNotFoundException(RestaurantConstants.CATEGORY_NOT_FOUND);</span>
+    });
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
