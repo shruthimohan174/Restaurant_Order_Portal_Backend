@@ -14,7 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -87,7 +87,7 @@ public class FoodCategoryControllerTest {
 
   @Test
   void getAllCategoryTest() throws Exception {
-    List<FoodCategoryOutDto> categories = Arrays.asList(foodCategoryOutDto);
+    List<FoodCategoryOutDto> categories = Collections.singletonList(foodCategoryOutDto);
 
     when(foodCategoryService.viewAllCategory()).thenReturn(categories);
 
@@ -102,7 +102,7 @@ public class FoodCategoryControllerTest {
 
   @Test
   void getAllCategoryByRestaurantIdTest() throws Exception {
-    List<FoodCategoryOutDto> categories = Arrays.asList(foodCategoryOutDto);
+    List<FoodCategoryOutDto> categories = Collections.singletonList(foodCategoryOutDto);
 
     when(foodCategoryService.findCategoryByRestaurantId(anyInt())).thenReturn(categories);
 

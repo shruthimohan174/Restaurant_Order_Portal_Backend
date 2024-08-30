@@ -31,3 +31,21 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Additional files and directories to ignore
+.editorconfig
+.mvn/wrapper/
+report/jacoco/com.restaurants/
+report/jacoco/com.restaurants.config/
+report/jacoco/com.restaurants.constants/
+report/jacoco/com.restaurants.controller/
+report/jacoco/com.restaurants.dto.indto/
+report/jacoco/com.restaurants.dto.outdto/
+report/jacoco/com.restaurants.dtoconversion/
+report/jacoco/com.restaurants.entities/
+report/jacoco/com.restaurants.exception/
+report/jacoco/com.restaurants.service.impl/
+report/jacoco/jacoco-resources
+report/jacoco/jacoco-sessions.html
+report/jacoco/jacoco.csv
+report/jacoco/jacoco.xml

@@ -3,7 +3,8 @@ package com.restaurants.dto.indto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class RestaurantInDtoTest {
 
@@ -26,6 +27,7 @@ public class RestaurantInDtoTest {
     restaurantInDto2.setContactNumber("9876543210");
     restaurantInDto2.setOpeningHours("9 AM - 9 PM");
   }
+
   @Test
   void testGettersSetters() {
 
@@ -34,13 +36,15 @@ public class RestaurantInDtoTest {
     assertEquals("123 Food Street", restaurantInDto2.getAddress());
     assertEquals("9876543210", restaurantInDto2.getContactNumber());
     assertEquals("9 AM - 9 PM", restaurantInDto2.getOpeningHours());
-    assertEquals(null, restaurantInDto2.getImage());
+    assertNull(restaurantInDto2.getImage());
   }
 
 
   @Test
   void testToString() {
-    String expected = "RestaurantInDto(userId=1, restaurantName=Food Palace, address=123 Food Street, contactNumber=9876543210, openingHours=9 AM - 9 PM, image=null)";
+    String expected =
+      "RestaurantInDto(userId=1, restaurantName=Food Palace, address=123 Food Street, contactNumber=9876543210, " +
+        "openingHours=9 AM - 9 PM, image=null)";
     assertEquals(expected, restaurantInDto1.toString());
   }
 

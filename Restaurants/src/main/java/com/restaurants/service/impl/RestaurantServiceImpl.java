@@ -1,11 +1,10 @@
-package com.restaurants.service.serviceImpl;
+package com.restaurants.service.impl;
 
 import com.restaurants.constants.RestaurantConstants;
 import com.restaurants.dto.indto.RestaurantInDto;
 import com.restaurants.dto.outdto.RestaurantOutDto;
 import com.restaurants.dtoconversion.DtoConversion;
 import com.restaurants.entities.Restaurant;
-import com.restaurants.exception.ImageProcessingException;
 import com.restaurants.exception.RestaurantNotFoundException;
 import com.restaurants.repositories.RestaurantRepository;
 import com.restaurants.service.RestaurantService;
@@ -34,21 +33,24 @@ public class RestaurantServiceImpl implements RestaurantService {
   /**
    * Adds a new restaurant.
    *
-   * @param request the restaurant data to be added
-   * @return the added restaurant
+   * @param request the details of the restaurant to be added
+   * @param image   the image representing the restaurant
+   * @return the created restaurant
    */
   @Override
-  public RestaurantOutDto addRestaurant(RestaurantInDto request, MultipartFile image)  {
+  public RestaurantOutDto addRestaurant(RestaurantInDto request, MultipartFile image) {
     logger.info("Adding restaurant: {}", request);
-    Restaurant restaurant=DtoConversion.convertRestaurantRequestToRestaurant(request);
+    Restaurant restaurant = DtoConversion.convertRestaurantRequestToRestaurant(request);
+
     if (image != null && !image.isEmpty()) {
-      try{
-       restaurant.setImageData(request.getImage().getBytes());
-     }catch(IOException e){
-       throw new ImageProcessingException(RestaurantConstants.ERROR_PROCESSING_IMAGE);
-     }
+      try {
+        restaurant.setImageData(image.getBytes());
+      } catch (IOException e) {
+        logger.error("Error occurred while processing the image file for restaurant: {}", request.getRestaurantName(), e);
+      }
     }
-    Restaurant savedRestaurant=restaurantRepository.save(restaurant);
+
+    Restaurant savedRestaurant = restaurantRepository.save(restaurant);
     logger.info("Restaurant added successfully: {}", savedRestaurant);
     return DtoConversion.convertRestaurantToRestaurantResponse(savedRestaurant);
   }
@@ -61,9 +63,9 @@ public class RestaurantServiceImpl implements RestaurantService {
   @Override
   public List<RestaurantOutDto> getALlRestaurants() {
     logger.info("Retrieving all restaurants");
-    List<Restaurant> restaurants=restaurantRepository.findAll();
-    List<RestaurantOutDto> responseList=new ArrayList<>();
-    for(Restaurant restaurant:restaurants){
+    List<Restaurant> restaurants = restaurantRepository.findAll();
+    List<RestaurantOutDto> responseList = new ArrayList<>();
+    for (Restaurant restaurant : restaurants) {
       responseList.add(DtoConversion.convertRestaurantToRestaurantResponse(restaurant));
     }
     logger.info("Retrieved {} restaurants", responseList.size());
@@ -79,9 +81,9 @@ public class RestaurantServiceImpl implements RestaurantService {
   @Override
   public List<RestaurantOutDto> getALlRestaurantsByUserId(Integer userId) {
     logger.info("Retrieving restaurants for user ID: {}", userId);
-    List<Restaurant> restaurants=restaurantRepository.findByUserId(userId);
-    List<RestaurantOutDto> responseList=new ArrayList<>();
-    for(Restaurant restaurant:restaurants){
+    List<Restaurant> restaurants = restaurantRepository.findByUserId(userId);
+    List<RestaurantOutDto> responseList = new ArrayList<>();
+    for (Restaurant restaurant : restaurants) {
       responseList.add(DtoConversion.convertRestaurantToRestaurantResponse(restaurant));
     }
     logger.info("Retrieved {} restaurants for user ID: {}", responseList.size(), userId);
@@ -98,7 +100,7 @@ public class RestaurantServiceImpl implements RestaurantService {
   @Override
   public Restaurant findRestaurantById(Integer id) {
     logger.info("Finding restaurant by ID: {}", id);
-    return restaurantRepository.findById(id).orElseThrow(()->{
+    return restaurantRepository.findById(id).orElseThrow(() -> {
       logger.error("Restaurant not found for ID: {}", id);
 
       return new RestaurantNotFoundException(RestaurantConstants.RESTAURANT_NOT_FOUND);

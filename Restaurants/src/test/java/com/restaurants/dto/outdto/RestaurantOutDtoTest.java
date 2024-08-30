@@ -35,7 +35,9 @@ public class RestaurantOutDtoTest {
 
   @Test
   void testToString() {
-    String expected = "RestaurantOutDto(id=1, userId=1, restaurantName=Food Palace, address=123 Food Street, contactNumber=9876543210, openingHours=9 AM - 9 PM, imageData=null)";
+    String expected =
+      "RestaurantOutDto(id=1, userId=1, restaurantName=Food Palace, address=123 Food Street, contactNumber=9876543210," +
+        " openingHours=9 AM - 9 PM, imageData=null)";
     assertEquals(expected, dto1.toString());
   }
 

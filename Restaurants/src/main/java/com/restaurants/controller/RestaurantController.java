@@ -37,13 +37,14 @@ public class RestaurantController {
    * Creates a new restaurant.
    *
    * @param request the details of the restaurant to be added
+   * @param image   the image representing the restaurant
    * @return the created restaurant
    */
-  @PostMapping("/add")
+  @PostMapping("/restaurant/add")
   public ResponseEntity<RestaurantOutDto> addRestaurant(@Valid @ModelAttribute RestaurantInDto request,
-                                                            @RequestParam("image") MultipartFile image) {
+                                                        @RequestParam("image") MultipartFile image) {
     logger.info("Received request to add restaurant: {}", request);
-    RestaurantOutDto response = restaurantService.addRestaurant(request,image);
+    RestaurantOutDto response = restaurantService.addRestaurant(request, image);
     logger.info("Restaurant added successfully: {}", response);
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }

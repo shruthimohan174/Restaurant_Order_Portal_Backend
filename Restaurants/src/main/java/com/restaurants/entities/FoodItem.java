@@ -52,6 +52,10 @@ public class FoodItem {
    */
   private BigDecimal price;
 
+  /**
+   * The binary data of the image representing the food item.
+   * This field stores the image in byte array format.
+   */
   @Lob
   private byte[] imageData;
 

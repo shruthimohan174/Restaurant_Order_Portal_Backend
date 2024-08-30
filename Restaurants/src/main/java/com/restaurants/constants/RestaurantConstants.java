@@ -1,4 +1,5 @@
 package com.restaurants.constants;
+
 /**
  * Contains constant values used across the restaurant application.
  */

@@ -1,12 +1,12 @@
-package com.restaurants.service.serviceImpl;
+package com.restaurants.service.impl;
 
 import com.restaurants.constants.RestaurantConstants;
+import com.restaurants.dto.indto.FoodCategoryInDto;
+import com.restaurants.dto.outdto.FoodCategoryOutDto;
 import com.restaurants.dtoconversion.DtoConversion;
 import com.restaurants.entities.FoodCategory;
 import com.restaurants.entities.Restaurant;
 import com.restaurants.exception.CategoryNotFoundException;
-import com.restaurants.dto.indto.FoodCategoryInDto;
-import com.restaurants.dto.outdto.FoodCategoryOutDto;
 import com.restaurants.repositories.FoodCategoryRepository;
 import com.restaurants.service.FoodCategoryService;
 import com.restaurants.service.RestaurantService;
@@ -42,9 +42,9 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
   @Override
   public FoodCategoryOutDto addCategory(FoodCategoryInDto request) {
     logger.info("Adding category: {}", request);
-    Restaurant restaurant=restaurantService.findRestaurantById(request.getRestaurantId());
-    FoodCategory category=DtoConversion.convertCategoryRequestToCategory(request);
-    FoodCategory savedCategory=foodCategoryRepository.save(category);
+    Restaurant restaurant = restaurantService.findRestaurantById(request.getRestaurantId());
+    FoodCategory category = DtoConversion.convertCategoryRequestToCategory(request);
+    FoodCategory savedCategory = foodCategoryRepository.save(category);
     logger.info("Category added successfully: {}", savedCategory);
     return DtoConversion.convertCategoryToResponse(savedCategory);
   }
@@ -53,16 +53,16 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
    * Updates an existing food category.
    *
    * @param request the food category data to update
-   * @param id the ID of the food category to update
+   * @param id      the ID of the food category to update
    * @return the updated food category
    */
   @Override
   public FoodCategoryOutDto updateCategory(FoodCategoryInDto request, Integer id) {
     logger.info("Updating category with ID: {}", id);
-    FoodCategory existingCategory=findCategoryById(id);
+    FoodCategory existingCategory = findCategoryById(id);
     existingCategory.setCategoryName(request.getCategoryName());
     existingCategory.setRestaurantId(request.getRestaurantId());
-    FoodCategory updatedCategory=foodCategoryRepository.save(existingCategory);
+    FoodCategory updatedCategory = foodCategoryRepository.save(existingCategory);
     logger.info("Category updated successfully: {}", updatedCategory);
     return DtoConversion.convertCategoryToResponse(updatedCategory);
   }
@@ -75,9 +75,9 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
   @Override
   public List<FoodCategoryOutDto> viewAllCategory() {
     logger.info("Retrieving all categories");
-    List<FoodCategory> categoryList=foodCategoryRepository.findAll();
-    List<FoodCategoryOutDto> responseList=new ArrayList<>();
-    for(FoodCategory category:categoryList)
+    List<FoodCategory> categoryList = foodCategoryRepository.findAll();
+    List<FoodCategoryOutDto> responseList = new ArrayList<>();
+    for (FoodCategory category : categoryList)
       responseList.add(DtoConversion.convertCategoryToResponse(category));
     logger.info("Retrieved {} categories", responseList.size());
     return responseList;
@@ -92,9 +92,9 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
   @Override
   public List<FoodCategoryOutDto> findCategoryByRestaurantId(Integer restaurantId) {
     logger.info("Retrieving categories for restaurant ID: {}", restaurantId);
-    List<FoodCategory> categoryList=foodCategoryRepository.findByRestaurantId(restaurantId);
-    List<FoodCategoryOutDto> responseList=new ArrayList<>();
-    for(FoodCategory category:categoryList)
+    List<FoodCategory> categoryList = foodCategoryRepository.findByRestaurantId(restaurantId);
+    List<FoodCategoryOutDto> responseList = new ArrayList<>();
+    for (FoodCategory category : categoryList)
       responseList.add(DtoConversion.convertCategoryToResponse(category));
     logger.info("Retrieved {} categories for restaurant ID: {}", responseList.size(), restaurantId);
     return responseList;
@@ -110,7 +110,7 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
   @Override
   public FoodCategory findCategoryById(Integer id) {
     logger.info("Finding category by ID: {}", id);
-    return foodCategoryRepository.findById(id).orElseThrow(()->{
+    return foodCategoryRepository.findById(id).orElseThrow(() -> {
       logger.error("Category not found for ID: {}", id);
       return new CategoryNotFoundException(RestaurantConstants.CATEGORY_NOT_FOUND);
     });

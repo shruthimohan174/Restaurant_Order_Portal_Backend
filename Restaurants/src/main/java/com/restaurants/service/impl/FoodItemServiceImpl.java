@@ -1,4 +1,4 @@
-package com.restaurants.service.serviceImpl;
+package com.restaurants.service.impl;
 
 import com.restaurants.constants.RestaurantConstants;
 import com.restaurants.dto.indto.FoodItemInDto;
@@ -8,7 +8,6 @@ import com.restaurants.entities.FoodCategory;
 import com.restaurants.entities.FoodItem;
 import com.restaurants.entities.Restaurant;
 import com.restaurants.exception.FoodItemNotFoundException;
-import com.restaurants.exception.ImageProcessingException;
 import com.restaurants.repositories.FoodItemRepository;
 import com.restaurants.service.FoodCategoryService;
 import com.restaurants.service.FoodItemService;
@@ -33,7 +32,7 @@ public class FoodItemServiceImpl implements FoodItemService {
   private static final Logger logger = LoggerFactory.getLogger(FoodItemServiceImpl.class);
 
   @Autowired
- private  FoodItemRepository foodItemRepository;
+  private FoodItemRepository foodItemRepository;
 
   @Autowired
   private RestaurantService restaurantService;
@@ -43,41 +42,43 @@ public class FoodItemServiceImpl implements FoodItemService {
 
   /**
    * Adds a new food item.
-   *
-   * @param request the food item data to be added
-   * @return the added food item
+   * @param request the details of the food item to be added
+   * @param image   the image representing the food item
+   * @return the created food item
    */
   @Override
   public FoodItemOutDto addFoodItems(FoodItemInDto request, MultipartFile image) {
     logger.info("Adding food item: {}", request);
-    Restaurant restaurantResponse=restaurantService.findRestaurantById(request.getRestaurantId());
-    FoodCategory categoryResponse=foodCategoryService.findCategoryById(request.getCategoryId());
-    FoodItem foodItem= DtoConversion.convertFoodItemRequestToFoodItem(request);
+    Restaurant restaurant = restaurantService.findRestaurantById(request.getRestaurantId());
+    FoodCategory category = foodCategoryService.findCategoryById(request.getCategoryId());
+    FoodItem foodItem = DtoConversion.convertFoodItemRequestToFoodItem(request);
+
     if (image != null && !image.isEmpty()) {
-      try{
-        foodItem.setImageData(request.getImage().getBytes());
-      }catch(IOException e){
-        throw new ImageProcessingException(RestaurantConstants.ERROR_PROCESSING_IMAGE);
+      try {
+        foodItem.setImageData(image.getBytes());
+      } catch (IOException e) {
+        logger.error("Error occurred while processing the image file for food item: {}", request.getItemName(), e);
       }
     }
-    FoodItem saved=foodItemRepository.save(foodItem);
-    logger.info("Food item added successfully: {}", saved);
-    return  DtoConversion.convertFoodItemToFoodItemResponse(saved);
+
+    FoodItem savedFoodItem = foodItemRepository.save(foodItem);
+    logger.info("Food item added successfully: {}", savedFoodItem);
+    return DtoConversion.convertFoodItemToFoodItemResponse(savedFoodItem);
   }
 
   /**
    * Updates an existing food item.
    *
    * @param request the food item data to update
-   * @param id the ID of the food item to update
+   * @param id      the ID of the food item to update
    * @return the updated food item
    */
   @Override
   public FoodItemOutDto updateFoodItems(FoodItemInDto request, Integer id) {
     logger.info("Updating food item with ID: {}", id);
-    FoodItem existingItems=findFoodItemsById(id);
-    DtoConversion.updateFoodItemRequest(request,existingItems);
-    FoodItem updatedItems=foodItemRepository.save(existingItems);
+    FoodItem existingItems = findFoodItemsById(id);
+    DtoConversion.updateFoodItemRequest(request, existingItems);
+    FoodItem updatedItems = foodItemRepository.save(existingItems);
     logger.info("Food item updated successfully: {}", updatedItems);
     return DtoConversion.convertFoodItemToFoodItemResponse(updatedItems);
   }
@@ -92,7 +93,7 @@ public class FoodItemServiceImpl implements FoodItemService {
   @Override
   public FoodItem findFoodItemsById(Integer id) {
     logger.info("Finding food item by ID: {}", id);
-    return foodItemRepository.findById(id).orElseThrow(()->{
+    return foodItemRepository.findById(id).orElseThrow(() -> {
       logger.error("Food item not found for ID: {}", id);
       return new FoodItemNotFoundException(RestaurantConstants.FOOD_ITEM_NOT_FOUND);
     });
@@ -124,9 +125,9 @@ public class FoodItemServiceImpl implements FoodItemService {
   @Override
   public List<FoodItemOutDto> getAllByRestaurantId(Integer restaurantId) {
     logger.info("Retrieving food items for restaurant ID: {}", restaurantId);
-    List<FoodItem>foodItemList=foodItemRepository.findByRestaurantId(restaurantId);
-    List<FoodItemOutDto> responseList=new ArrayList<>();
-    for(FoodItem foodItem:foodItemList){
+    List<FoodItem> foodItemList = foodItemRepository.findByRestaurantId(restaurantId);
+    List<FoodItemOutDto> responseList = new ArrayList<>();
+    for (FoodItem foodItem : foodItemList) {
       responseList.add(DtoConversion.convertFoodItemToFoodItemResponse(foodItem));
     }
     logger.info("Retrieved {} food items for restaurant ID: {}", responseList.size(), restaurantId);
@@ -142,9 +143,9 @@ public class FoodItemServiceImpl implements FoodItemService {
   @Override
   public List<FoodItemOutDto> getAllByCategoryId(Integer categoryId) {
     logger.info("Retrieving food items for category ID: {}", categoryId);
-    List<FoodItem>foodItemList=foodItemRepository.findByCategoryId(categoryId);
-    List<FoodItemOutDto> responseList=new ArrayList<>();
-    for(FoodItem foodItem:foodItemList){
+    List<FoodItem> foodItemList = foodItemRepository.findByCategoryId(categoryId);
+    List<FoodItemOutDto> responseList = new ArrayList<>();
+    for (FoodItem foodItem : foodItemList) {
       responseList.add(DtoConversion.convertFoodItemToFoodItemResponse(foodItem));
     }
     logger.info("Retrieved {} food items for category ID: {}", responseList.size(), categoryId);

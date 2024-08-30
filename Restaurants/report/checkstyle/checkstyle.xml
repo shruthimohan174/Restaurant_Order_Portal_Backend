@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="9.3">
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\config\CorsConfig.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\constants\RestaurantConstants.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\controller\FoodCategoryController.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\controller\FoodItemController.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\controller\RestaurantController.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\indto\FoodCategoryInDto.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\indto\FoodItemInDto.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\indto\RestaurantInDto.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\outdto\FoodCategoryOutDto.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\outdto\FoodItemOutDto.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\outdto\RestaurantOutDto.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dtoconversion\DtoConversion.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\entities\FoodCategory.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\entities\FoodItem.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\entities\Restaurant.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\exception\CategoryNotFoundException.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\exception\FoodItemNotFoundException.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\exception\GlobalExceptionHandler.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\exception\RestaurantNotFoundException.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\repositories\FoodCategoryRepository.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\repositories\FoodItemRepository.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\repositories\RestaurantRepository.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\RestaurantsApplication.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\service\FoodCategoryService.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\service\FoodItemService.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\service\impl\FoodCategoryServiceImpl.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\service\impl\FoodItemServiceImpl.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\service\impl\RestaurantServiceImpl.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\service\RestaurantService.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\controller\FoodCategoryControllerTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\controller\FoodItemControllerTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\controller\RestaurantControllerTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\dto\indto\FoodCategoryInDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\dto\indto\FoodItemInDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\dto\indto\RestaurantInDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\dto\outdto\FoodCategoryOutDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\dto\outdto\FoodItemOutDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\dto\outdto\RestaurantOutDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\entities\FoodCategoryTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\entities\FoodItemTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\entities\RestaurantTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\RestaurantsApplicationTests.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\service\impl\FoodCategoryServiceImplTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\service\impl\FoodItemServiceImplTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\service\impl\RestaurantServiceImplTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\resources\application.properties">
+</file>
+</checkstyle>

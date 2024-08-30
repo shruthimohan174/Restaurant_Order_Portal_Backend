@@ -1,4 +1,4 @@
-package com.restaurants.serviceImpl;
+package com.restaurants.service.impl;
 
 import com.restaurants.dto.indto.FoodCategoryInDto;
 import com.restaurants.dto.outdto.FoodCategoryOutDto;
@@ -7,7 +7,6 @@ import com.restaurants.entities.Restaurant;
 import com.restaurants.exception.CategoryNotFoundException;
 import com.restaurants.repositories.FoodCategoryRepository;
 import com.restaurants.service.RestaurantService;
-import com.restaurants.service.serviceImpl.FoodCategoryServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -125,7 +125,7 @@ class FoodCategoryServiceImplTest {
     category1.setCategoryName("Fast Food");
     category1.setRestaurantId(1);
 
-    when(foodCategoryRepository.findByRestaurantId(1)).thenReturn(Arrays.asList(category1));
+    when(foodCategoryRepository.findByRestaurantId(1)).thenReturn(Collections.singletonList(category1));
 
     List<FoodCategoryOutDto> result = foodCategoryService.findCategoryByRestaurantId(1);
 

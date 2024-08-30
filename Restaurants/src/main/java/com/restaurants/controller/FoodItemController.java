@@ -37,13 +37,14 @@ public class FoodItemController {
    * Creates a new food item.
    *
    * @param request the details of the food item to be added
+   * @param image   the image representing the food item
    * @return the created food item
    */
-  @PostMapping("/add")
-  public ResponseEntity<FoodItemOutDto> addFoodItems(@Valid @ModelAttribute FoodItemInDto request,   @RequestParam("image")
-  MultipartFile image) {
+  @PostMapping("/food/add")
+  public ResponseEntity<FoodItemOutDto> addFoodItems(@Valid @ModelAttribute FoodItemInDto request,
+                                                     @RequestParam("image") MultipartFile image) {
     logger.info("Received request to add food item: {}", request);
-    FoodItemOutDto response = foodItemService.addFoodItems(request,image);
+    FoodItemOutDto response = foodItemService.addFoodItems(request, image);
     logger.info("Food item added successfully: {}", response);
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
@@ -51,7 +52,7 @@ public class FoodItemController {
   /**
    * Updates an existing food item.
    *
-   * @param id      the ID of the food item to be updated
+   * @param id the ID of the food item to be updated
    * @param request the updated details of the food item
    * @return the updated food item
    */

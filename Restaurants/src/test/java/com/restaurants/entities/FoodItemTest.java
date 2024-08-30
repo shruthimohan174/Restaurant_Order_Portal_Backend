@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FoodItemTest {
 
@@ -37,7 +39,9 @@ public class FoodItemTest {
 
   @Test
   void testToString() {
-    String expected = "FoodItem(id=1, categoryId=1, restaurantId=1, itemName=Pasta, description=Delicious pasta with cheese, isVeg=true, price=250.5, imageData=null)";
+    String expected =
+      "FoodItem(id=1, categoryId=1, restaurantId=1, itemName=Pasta, description=Delicious pasta with cheese, isVeg=true," +
+        " price=250.5, imageData=null)";
     assertEquals(expected, item1.toString());
   }
 
@@ -60,6 +64,6 @@ public class FoodItemTest {
     assertEquals("Delicious pasta with cheese", item1.getDescription());
     assertTrue(item1.getIsVeg());
     assertEquals(BigDecimal.valueOf(250.5), item1.getPrice());
-    assertEquals(null, item1.getImageData());
+    assertNull(item1.getImageData());
   }
 }

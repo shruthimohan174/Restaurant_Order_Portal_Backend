@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.List;
+
 /**
  * Controller for managing food categories.
  */
@@ -37,7 +38,7 @@ public class FoodCategoryController {
    * @return the created food category
    */
   @PostMapping("/add")
-  public ResponseEntity<FoodCategoryOutDto> addFoodCategory(@Valid @RequestBody FoodCategoryInDto request){
+  public ResponseEntity<FoodCategoryOutDto> addFoodCategory(@Valid @RequestBody FoodCategoryInDto request) {
     logger.info("Received request to add food category: {}", request);
     FoodCategoryOutDto response = foodCategoryService.addCategory(request);
     logger.info("Food category added successfully: {}", response);
@@ -47,12 +48,12 @@ public class FoodCategoryController {
   /**
    * Updates an existing food category.
    *
-   * @param id      the ID of the food category to be updated
+   * @param id the ID of the food category to be updated
    * @param request the updated details of the food category
    * @return the updated food category
    */
   @PutMapping("/update/{id}")
-  public ResponseEntity<FoodCategoryOutDto> addFoodCategory(@PathVariable Integer id, @Valid @RequestBody FoodCategoryInDto request){
+  public ResponseEntity<FoodCategoryOutDto> addFoodCategory(@PathVariable Integer id, @Valid @RequestBody FoodCategoryInDto request) {
     logger.info("Received request to update food category with ID: {}", id);
     FoodCategoryOutDto response = foodCategoryService.updateCategory(request, id);
     logger.info("Food category updated successfully: {}", response);
@@ -65,7 +66,7 @@ public class FoodCategoryController {
    * @return a list of all food categories
    */
   @GetMapping("")
-  public ResponseEntity<List<FoodCategoryOutDto>> getAllCategory(){
+  public ResponseEntity<List<FoodCategoryOutDto>> getAllCategory() {
     logger.info("Retrieving all food categories");
     List<FoodCategoryOutDto> response = foodCategoryService.viewAllCategory();
     logger.info("Retrieved {} food categories", response.size());

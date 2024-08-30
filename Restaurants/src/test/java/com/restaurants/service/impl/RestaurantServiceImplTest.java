@@ -1,11 +1,10 @@
-package com.restaurants.serviceImpl;
+package com.restaurants.service.impl;
 
 import com.restaurants.dto.indto.RestaurantInDto;
 import com.restaurants.dto.outdto.RestaurantOutDto;
 import com.restaurants.entities.Restaurant;
 import com.restaurants.exception.RestaurantNotFoundException;
 import com.restaurants.repositories.RestaurantRepository;
-import com.restaurants.service.serviceImpl.RestaurantServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -71,7 +70,7 @@ class RestaurantServiceImplTest {
   @Test
   void testAddRestaurant() throws IOException {
     when(restaurantRepository.save(any(Restaurant.class))).thenReturn(restaurant);
-    when(image.getBytes()).thenReturn(new byte[]{});
+    when(image.getBytes()).thenReturn(new byte[] {});
 
     RestaurantOutDto result = restaurantService.addRestaurant(restaurantInDto, null);
 

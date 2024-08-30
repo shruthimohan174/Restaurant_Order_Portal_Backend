@@ -1,12 +1,14 @@
-package com.restaurants.serviceImpl;
+package com.restaurants.service.impl;
 
+import com.restaurants.constants.RestaurantConstants;
 import com.restaurants.dto.indto.FoodItemInDto;
 import com.restaurants.dto.outdto.FoodItemOutDto;
 import com.restaurants.entities.FoodItem;
+import com.restaurants.exception.FoodItemNotFoundException;
 import com.restaurants.repositories.FoodItemRepository;
 import com.restaurants.service.FoodCategoryService;
 import com.restaurants.service.RestaurantService;
-import com.restaurants.service.serviceImpl.FoodItemServiceImpl;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,15 +16,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +46,8 @@ public class FoodItemServiceImplTest {
 
   @Mock
   private FoodCategoryService foodCategoryService;
+  @Mock
+  private MultipartFile image;
 
   private FoodItemInDto request;
   private FoodItem foodItem;
@@ -65,18 +74,19 @@ public class FoodItemServiceImplTest {
   }
 
   @Test
-  public void testAddFoodItems() {
-//    when(foodItemRepository.save(any(FoodItem.class))).thenAnswer(invocation -> {
-//      FoodItem savedFoodItem = invocation.getArgument(0);
-//      savedFoodItem.setId(1);  // Manually set the ID to simulate database behavior
-//      return savedFoodItem;
-//    });
-//
-//    FoodItemOutDto response = foodItemService.addFoodItems(request);
-//
-//    assertNotNull(response);
-//    assertEquals(1, response.getId());
-//    assertEquals("Pizza", response.getItemName());
+  public void testAddFoodItems() throws IOException {
+    when(foodItemRepository.save(any(FoodItem.class))).thenReturn(foodItem);
+
+    FoodItemOutDto result = foodItemService.addFoodItems(request, null);
+
+    assertNotNull(result);
+    assertEquals(1, result.getCategoryId());
+    assertEquals(1, result.getRestaurantId());
+    assertEquals("Pizza", result.getItemName());
+    assertEquals("Delicious cheese pizza", result.getDescription());
+    assertEquals(true, result.getIsVeg());
+    assertEquals(0, BigDecimal.valueOf(9.99).compareTo(result.getPrice()));
+    verify(foodItemRepository, times(1)).save(any(FoodItem.class));
   }
 
   @Test
@@ -84,7 +94,7 @@ public class FoodItemServiceImplTest {
     when(foodItemRepository.findById(1)).thenReturn(Optional.of(foodItem));
     when(foodItemRepository.save(any(FoodItem.class))).thenAnswer(invocation -> {
       FoodItem savedFoodItem = invocation.getArgument(0);
-      savedFoodItem.setId(1);  // Ensure the ID remains set after saving
+      savedFoodItem.setId(1);
       return savedFoodItem;
     });
 
@@ -94,6 +104,7 @@ public class FoodItemServiceImplTest {
     assertEquals(1, response.getId());
     assertEquals("Pizza", response.getItemName());
   }
+
   @Test
   public void testGetAllFoodItems() {
     FoodItem foodItem1 = new FoodItem();
@@ -114,14 +125,27 @@ public class FoodItemServiceImplTest {
     assertEquals(2, response.size());
     assertEquals("Pizza", response.get(0).getItemName());
   }
+  @Test
+  public void testFindFoodItemByIdThrowsException() {
+    Integer foodItemId = 99;
 
+    when(foodItemRepository.findById(foodItemId)).thenReturn(Optional.empty());
+
+    FoodItemNotFoundException exception = Assertions.assertThrows(
+      FoodItemNotFoundException.class,
+      () -> foodItemService.findFoodItemsById(foodItemId)
+    );
+
+    assertEquals(RestaurantConstants.FOOD_ITEM_NOT_FOUND, exception.getMessage());
+    verify(foodItemRepository).findById(foodItemId);
+  }
   @Test
   public void testGetAllByRestaurantId() {
     FoodItem foodItem = new FoodItem();
     foodItem.setId(1);
     foodItem.setItemName("Pizza");
 
-    List<FoodItem> foodItems = Arrays.asList(foodItem);
+    List<FoodItem> foodItems = Collections.singletonList(foodItem);
 
     when(foodItemRepository.findByRestaurantId(1)).thenReturn(foodItems);
 
@@ -138,7 +162,7 @@ public class FoodItemServiceImplTest {
     foodItem.setId(1);
     foodItem.setItemName("Pizza");
 
-    List<FoodItem> foodItems = Arrays.asList(foodItem);
+    List<FoodItem> foodItems = Collections.singletonList(foodItem);
 
     when(foodItemRepository.findByCategoryId(1)).thenReturn(foodItems);
 

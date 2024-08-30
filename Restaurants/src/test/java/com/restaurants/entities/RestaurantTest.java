@@ -3,7 +3,8 @@ package com.restaurants.entities;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RestaurantTest {
 
@@ -33,7 +34,9 @@ public class RestaurantTest {
 
   @Test
   void testToString() {
-    String expected = "Restaurant(id=1, userId=1, restaurantName=Food Palace, address=123 Food Street, contactNumber=9876543210, openingHours=9 AM - 9 PM, imageData=null)";
+    String expected =
+      "Restaurant(id=1, userId=1, restaurantName=Food Palace, address=123 Food Street, contactNumber=9876543210, " +
+        "openingHours=9 AM - 9 PM, imageData=null)";
     assertEquals(expected, entity1.toString());
   }
 

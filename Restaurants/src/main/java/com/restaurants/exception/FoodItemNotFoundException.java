@@ -10,7 +10,7 @@ public class FoodItemNotFoundException extends RuntimeException {
    *
    * @param message the detail message
    */
- public FoodItemNotFoundException(String message){
+  public FoodItemNotFoundException(String message) {
     super(message);
   }
 }

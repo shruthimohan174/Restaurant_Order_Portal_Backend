@@ -16,5 +16,6 @@ public interface FoodCategoryRepository extends JpaRepository<FoodCategory, Inte
    *
    * @param restaurantId the ID of the restaurant
    * @return a list of food categories for the given restaurant
-   */ List<FoodCategory> findByRestaurantId(Integer restaurantId);
+   */
+  List<FoodCategory> findByRestaurantId(Integer restaurantId);
 }

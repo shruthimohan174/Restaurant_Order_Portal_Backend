@@ -19,7 +19,7 @@ public class Restaurant {
    * The unique identifier for the restaurant.
    */
   @Id
-  @GeneratedValue(strategy= GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
   /**
@@ -47,6 +47,10 @@ public class Restaurant {
    */
   private String openingHours;
 
+  /**
+   * The binary data of the image representing the food item.
+   * This field stores the image in byte array format.
+   */
   @Lob
   private byte[] imageData;
 

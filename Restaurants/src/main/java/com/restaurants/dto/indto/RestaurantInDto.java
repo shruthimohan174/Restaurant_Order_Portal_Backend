@@ -17,21 +17,21 @@ public class RestaurantInDto {
    * The ID of the user who owns the restaurant.
    * Cannot be blank.
    */
-  @NotBlank(message="user ID cannot be blank")
+  @NotBlank(message = "user ID cannot be blank")
   private Integer userId;
 
   /**
    * The name of the restaurant.
    * Cannot be blank.
    */
-  @NotBlank(message="Restaurant name cannot be blank")
+  @NotBlank(message = "Restaurant name cannot be blank")
   private String restaurantName;
 
   /**
    * The address of the restaurant.
    * Cannot be blank.
    */
-  @NotBlank(message="Address cannot be blank")
+  @NotBlank(message = "Address cannot be blank")
   private String address;
 
   /**
@@ -50,6 +50,9 @@ public class RestaurantInDto {
    */
   private String openingHours;
 
+  /**
+   * The image representing the food item.
+   */
   private MultipartFile image;
 
 }

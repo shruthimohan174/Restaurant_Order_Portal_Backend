@@ -3,7 +3,7 @@ package com.restaurants.dto.indto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FoodCategoryInDtoTest {
 
@@ -20,6 +20,7 @@ public class FoodCategoryInDtoTest {
     foodCategoryInDto2.setRestaurantId(1);
     foodCategoryInDto2.setCategoryName("Appetizers");
   }
+
   @Test
   void testGettersSetters() {
     FoodCategoryInDto dto = new FoodCategoryInDto();
@@ -29,6 +30,7 @@ public class FoodCategoryInDtoTest {
     assertEquals(1, dto.getRestaurantId());
     assertEquals("Beverages", dto.getCategoryName());
   }
+
   @Test
   void testToString() {
     String expected = "FoodCategoryInDto(restaurantId=1, categoryName=Appetizers)";

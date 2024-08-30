@@ -1,13 +1,14 @@
 package com.restaurants.exception;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.validation.FieldError;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -23,7 +24,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles {@link CategoryNotFoundException} and returns a standardized error response.
    *
-   * @param ex the exception thrown
+   * @param ex      the exception thrown
    * @param request the HTTP request that caused the exception
    * @return the error response
    */
@@ -37,7 +38,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles {@link RestaurantNotFoundException} and returns a standardized error response.
    *
-   * @param ex the exception thrown
+   * @param ex      the exception thrown
    * @param request the HTTP request that caused the exception
    * @return the error response
    */
@@ -51,17 +52,10 @@ public class GlobalExceptionHandler {
   /**
    * Handles {@link FoodItemNotFoundException} and returns a standardized error response.
    *
-   * @param ex the exception thrown
+   * @param ex      the exception thrown
    * @param request the HTTP request that caused the exception
    * @return the error response
    */
-  @ExceptionHandler(ImageProcessingException.class)
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  @ResponseBody
-  public final ErrorResponse handleImageProcessingException(ImageProcessingException ex, HttpServletRequest request) {
-    return new ErrorResponse(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage(), request.getRequestURI());
-  }
-
   @ExceptionHandler(FoodItemNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ResponseBody
@@ -72,7 +66,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles {@link MethodArgumentNotValidException} and returns a standardized error response for validation errors.
    *
-   * @param ex the exception thrown
+   * @param ex      the exception thrown
    * @param request the HTTP request that caused the exception
    * @return the error response
    */

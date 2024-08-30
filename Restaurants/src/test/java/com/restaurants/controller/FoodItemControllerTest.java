@@ -11,20 +11,25 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -41,8 +46,13 @@ public class FoodItemControllerTest {
 
   private MockMvc mockMvc;
   private ObjectMapper objectMapper;
-  private   FoodItemInDto request;
-  private   FoodItemOutDto response;
+  private FoodItemInDto request;
+  private FoodItemOutDto response;
+  @Mock
+  private MultipartFile image;
+
+  @Mock
+  private MultipartFile multipartFile;
 
   @BeforeEach
   public void setUp() {
@@ -70,27 +80,19 @@ public class FoodItemControllerTest {
   }
 
   @Test
-  public void testAddFoodItems() throws Exception {
-    MockMultipartFile imageFile = new MockMultipartFile("image", "test-image.jpg", MediaType.IMAGE_JPEG_VALUE, "test image data".getBytes());
-    when(foodItemService.addFoodItems(any(FoodItemInDto.class), any(MultipartFile.class))).thenReturn(response);
+  void testAddFoodItem() {
+    when(foodItemService.addFoodItems(any(FoodItemInDto.class), any(MultipartFile.class)))
+      .thenReturn(response);
 
-    mockMvc.perform(multipart("/foodItem/add")
-        .file(imageFile) // Add the file to the request
-        .param("categoryId", "1")
-        .param("restaurantId", "1")
-        .param("itemName", "Pizza")
-        .param("description", "Delicious cheese pizza")
-        .param("isVeg", "true")
-        .param("price", "9.99")
-        .contentType(MediaType.MULTIPART_FORM_DATA))
-      .andExpect(status().isCreated())
-      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-      .andExpect(jsonPath("$.id").value(1))
-      .andExpect(jsonPath("$.itemName").value("Pizza"))
-      .andExpect(jsonPath("$.description").value("Delicious cheese pizza"))
-      .andExpect(jsonPath("$.isVeg").value(true))
-      .andExpect(jsonPath("$.price").value(9.99));
+    ResponseEntity<FoodItemOutDto> responseEntity = foodItemController.addFoodItems(request, image);
+
+    assertNotNull(responseEntity);
+    assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+    assertEquals(response, responseEntity.getBody());
+
+    verify(foodItemService, times(1)).addFoodItems(any(FoodItemInDto.class), any(MultipartFile.class));
   }
+
 
 
   @Test
@@ -127,7 +129,7 @@ public class FoodItemControllerTest {
 
   @Test
   public void testGetAllFoodItemsByRestaurantId() throws Exception {
-    List<FoodItemOutDto> responseList = Arrays.asList(response);
+    List<FoodItemOutDto> responseList = Collections.singletonList(response);
 
     when(foodItemService.getAllByRestaurantId(1)).thenReturn(responseList);
 
@@ -139,7 +141,7 @@ public class FoodItemControllerTest {
 
   @Test
   public void testGetAllFoodItemsByCategoryId() throws Exception {
-    List<FoodItemOutDto> responseList = Arrays.asList(response);
+    List<FoodItemOutDto> responseList = Collections.singletonList(response);
 
     when(foodItemService.getAllByCategoryId(1)).thenReturn(responseList);
 

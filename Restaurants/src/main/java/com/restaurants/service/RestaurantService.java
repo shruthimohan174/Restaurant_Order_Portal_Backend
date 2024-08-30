@@ -16,9 +16,10 @@ public interface RestaurantService {
    * Adds a new restaurant.
    *
    * @param request the details of the restaurant to be added
+   * @param image   the image representing the restaurant
    * @return the created restaurant
    */
-   RestaurantOutDto addRestaurant(RestaurantInDto request, MultipartFile image) ;
+  RestaurantOutDto addRestaurant(RestaurantInDto request, MultipartFile image);
 
   /**
    * Retrieves all restaurants.
@@ -41,6 +42,6 @@ public interface RestaurantService {
    * @param userId the ID of the user
    * @return a list of restaurants associated with the specified user
    */
-   List<RestaurantOutDto> getALlRestaurantsByUserId(Integer userId);
+  List<RestaurantOutDto> getALlRestaurantsByUserId(Integer userId);
 
-  }
+}
