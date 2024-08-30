@@ -1,6 +1,6 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 Users,com.users,UsersApplication,5,3,0,0,2,1,1,1,1,1
-Users,com.users.utils,Base64Utils,7,14,0,0,2,2,1,2,1,2
+Users,com.users.utils,PasswordEncodingDecodingUtils,7,14,0,0,2,2,1,2,1,2
 Users,com.users.dto.indto,AddressInDto,41,214,28,18,0,6,23,15,0,15
 Users,com.users.dto.indto,UpdateUserInDto,27,142,18,12,0,4,15,11,0,11
 Users,com.users.dto.indto,UserLoginInDto,20,115,13,9,0,5,11,10,0,10
@@ -19,9 +19,9 @@ Users,com.users.entities,Address,48,250,33,21,0,7,27,17,0,17
 Users,com.users.dtoconversion,DtoConversion,7,178,1,1,2,48,2,7,1,7
 Users,com.users.controller,AddressController,0,100,0,0,0,21,0,7,0,7
 Users,com.users.controller,UserController,0,134,0,0,0,28,0,9,0,9
-Users,com.users.serviceimpl,UserServiceImpl,0,237,1,9,0,52,1,14,0,10
-Users,com.users.serviceimpl,AddressServiceImpl,0,167,0,4,0,39,0,11,0,9
 Users,com.users.constants,UserConstants,7,0,0,0,2,0,1,0,1,0
 Users,com.users.dto.outdto,AddressOutDto,48,250,33,21,0,7,27,17,0,17
 Users,com.users.dto.outdto,UserOutDto,53,312,37,25,0,10,30,21,0,20
 Users,com.users.dto.outdto,UpdateUserOutDto,34,193,23,15,0,7,19,14,0,14
+Users,com.users.service.impl,AddressServiceImpl,0,167,0,4,0,39,0,11,0,9
+Users,com.users.service.impl,UserServiceImpl,0,237,1,9,0,52,1,14,0,10

@@ -6,7 +6,7 @@ import com.users.dto.outdto.AddressOutDto;
 import com.users.entities.Address;
 import com.users.exception.AddressNotFoundException;
 import com.users.repositories.AddressRepository;
-import com.users.serviceimpl.AddressServiceImpl;
+import com.users.service.impl.AddressServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

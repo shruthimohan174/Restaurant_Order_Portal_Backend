@@ -1,4 +1,4 @@
-package com.users.serviceimpl;
+package com.users.service.impl;
 
 import com.users.constants.UserConstants;
 import com.users.dto.indto.AddressInDto;

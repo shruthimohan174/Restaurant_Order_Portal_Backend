@@ -3,8 +3,8 @@ package com.users.utils;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public final class Base64Utils {
-  private Base64Utils() {
+public final class PasswordEncodingDecodingUtils {
+  private PasswordEncodingDecodingUtils() {
     throw new AssertionError("Cannot instantiate utility class");
   }
 

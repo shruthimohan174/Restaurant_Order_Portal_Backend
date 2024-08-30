@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Users</a> &gt; <a href="index.source.html" class="el_package">com.users.serviceimpl</a> &gt; <span class="el_source">UserServiceImpl.java</span></div><h1>UserServiceImpl.java</h1><pre class="source lang-java linenums">package com.users.serviceimpl;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Users</a> &gt; <a href="index.source.html" class="el_package">com.users.service.impl</a> &gt; <span class="el_source">UserServiceImpl.java</span></div><h1>UserServiceImpl.java</h1><pre class="source lang-java linenums">package com.users.service.impl;
 
 import com.users.constants.UserConstants;
 import com.users.dto.indto.UpdateUserInDto;
@@ -14,7 +14,7 @@ import com.users.exception.UserAlreadyExistsException;
 import com.users.exception.UserNotFoundException;
 import com.users.repositories.UserRepository;
 import com.users.service.UserService;
-import com.users.utils.Base64Utils;
+import com.users.utils.PasswordEncodingDecodingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +49,7 @@ import java.util.Optional;
 <span class="fc" id="L49">      throw new UserAlreadyExistsException(UserConstants.USER_ALREADY_EXISTS);</span>
     }
 <span class="fc" id="L51">    User user = DtoConversion.convertUserRequestToUser(userRequest);</span>
-<span class="fc" id="L52">    user.setPassword(Base64Utils.encodePassword(userRequest.getPassword()));</span>
+<span class="fc" id="L52">    user.setPassword(PasswordEncodingDecodingUtils.encodePassword(userRequest.getPassword()));</span>
 <span class="fc" id="L53">    User savedUser = userRepository.save(user);</span>
 <span class="fc" id="L54">    logger.info(&quot;User registered successfully with ID: {}&quot;, savedUser.getId());</span>
 <span class="fc" id="L55">    return DtoConversion.convertUserToUserResponse(savedUser);</span>
@@ -59,7 +59,7 @@ import java.util.Optional;
   public UserOutDto loginUser(UserLoginInDto userRequest) {
 <span class="fc" id="L60">    logger.info(&quot;Login for email: {}&quot;, userRequest.getEmail());</span>
 <span class="fc" id="L61">    Optional&lt;User&gt; user = userRepository.findByEmail(userRequest.getEmail());</span>
-<span class="pc bpc" id="L62" title="1 of 4 branches missed.">    if (!user.isPresent() || !Base64Utils.decodePassword(user.get().getPassword()).equals(userRequest.getPassword())) {</span>
+<span class="pc bpc" id="L62" title="1 of 4 branches missed.">    if (!user.isPresent() || !PasswordEncodingDecodingUtils.decodePassword(user.get().getPassword()).equals(userRequest.getPassword())) {</span>
 <span class="fc" id="L63">      logger.error(&quot;Invalid credentials for email: {}&quot;, userRequest.getEmail());</span>
 <span class="fc" id="L64">      throw new InvalidCredentialsException(UserConstants.INVALID_CREDENTIALS);</span>
     }

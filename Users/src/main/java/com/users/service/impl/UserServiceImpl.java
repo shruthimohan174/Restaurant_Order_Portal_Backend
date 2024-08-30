@@ -1,4 +1,4 @@
-package com.users.serviceimpl;
+package com.users.service.impl;
 
 import com.users.constants.UserConstants;
 import com.users.dto.indto.UpdateUserInDto;
@@ -14,7 +14,7 @@ import com.users.exception.UserAlreadyExistsException;
 import com.users.exception.UserNotFoundException;
 import com.users.repositories.UserRepository;
 import com.users.service.UserService;
-import com.users.utils.Base64Utils;
+import com.users.utils.PasswordEncodingDecodingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
       throw new UserAlreadyExistsException(UserConstants.USER_ALREADY_EXISTS);
     }
     User user = DtoConversion.convertUserRequestToUser(userRequest);
-    user.setPassword(Base64Utils.encodePassword(userRequest.getPassword()));
+    user.setPassword(PasswordEncodingDecodingUtils.encodePassword(userRequest.getPassword()));
     User savedUser = userRepository.save(user);
     logger.info("User registered successfully with ID: {}", savedUser.getId());
     return DtoConversion.convertUserToUserResponse(savedUser);
@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
   public UserOutDto loginUser(UserLoginInDto userRequest) {
     logger.info("Login for email: {}", userRequest.getEmail());
     Optional<User> user = userRepository.findByEmail(userRequest.getEmail());
-    if (!user.isPresent() || !Base64Utils.decodePassword(user.get().getPassword()).equals(userRequest.getPassword())) {
+    if (!user.isPresent() || !PasswordEncodingDecodingUtils.decodePassword(user.get().getPassword()).equals(userRequest.getPassword())) {
       logger.error("Invalid credentials for email: {}", userRequest.getEmail());
       throw new InvalidCredentialsException(UserConstants.INVALID_CREDENTIALS);
     }
