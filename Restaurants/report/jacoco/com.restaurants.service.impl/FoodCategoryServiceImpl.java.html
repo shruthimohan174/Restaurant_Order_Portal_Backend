@@ -61,10 +61,9 @@ import java.util.List;
 <span class="fc" id="L61">    logger.info(&quot;Updating category with ID: {}&quot;, id);</span>
 <span class="fc" id="L62">    FoodCategory existingCategory = findCategoryById(id);</span>
 <span class="fc" id="L63">    existingCategory.setCategoryName(request.getCategoryName());</span>
-<span class="fc" id="L64">    existingCategory.setRestaurantId(request.getRestaurantId());</span>
-<span class="fc" id="L65">    FoodCategory updatedCategory = foodCategoryRepository.save(existingCategory);</span>
-<span class="fc" id="L66">    logger.info(&quot;Category updated successfully: {}&quot;, updatedCategory);</span>
-<span class="fc" id="L67">    return DtoConversion.convertCategoryToResponse(updatedCategory);</span>
+<span class="fc" id="L64">    FoodCategory updatedCategory = foodCategoryRepository.save(existingCategory);</span>
+<span class="fc" id="L65">    logger.info(&quot;Category updated successfully: {}&quot;, updatedCategory);</span>
+<span class="fc" id="L66">    return DtoConversion.convertCategoryToResponse(updatedCategory);</span>
   }
 
   /**
@@ -74,13 +73,13 @@ import java.util.List;
    */
   @Override
   public List&lt;FoodCategoryOutDto&gt; viewAllCategory() {
-<span class="fc" id="L77">    logger.info(&quot;Retrieving all categories&quot;);</span>
-<span class="fc" id="L78">    List&lt;FoodCategory&gt; categoryList = foodCategoryRepository.findAll();</span>
-<span class="fc" id="L79">    List&lt;FoodCategoryOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L80" title="All 2 branches covered.">    for (FoodCategory category : categoryList)</span>
-<span class="fc" id="L81">      responseList.add(DtoConversion.convertCategoryToResponse(category));</span>
-<span class="fc" id="L82">    logger.info(&quot;Retrieved {} categories&quot;, responseList.size());</span>
-<span class="fc" id="L83">    return responseList;</span>
+<span class="fc" id="L76">    logger.info(&quot;Retrieving all categories&quot;);</span>
+<span class="fc" id="L77">    List&lt;FoodCategory&gt; categoryList = foodCategoryRepository.findAll();</span>
+<span class="fc" id="L78">    List&lt;FoodCategoryOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">    for (FoodCategory category : categoryList)</span>
+<span class="fc" id="L80">      responseList.add(DtoConversion.convertCategoryToResponse(category));</span>
+<span class="fc" id="L81">    logger.info(&quot;Retrieved {} categories&quot;, responseList.size());</span>
+<span class="fc" id="L82">    return responseList;</span>
   }
 
   /**
@@ -91,13 +90,13 @@ import java.util.List;
    */
   @Override
   public List&lt;FoodCategoryOutDto&gt; findCategoryByRestaurantId(Integer restaurantId) {
-<span class="fc" id="L94">    logger.info(&quot;Retrieving categories for restaurant ID: {}&quot;, restaurantId);</span>
-<span class="fc" id="L95">    List&lt;FoodCategory&gt; categoryList = foodCategoryRepository.findByRestaurantId(restaurantId);</span>
-<span class="fc" id="L96">    List&lt;FoodCategoryOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L97" title="All 2 branches covered.">    for (FoodCategory category : categoryList)</span>
-<span class="fc" id="L98">      responseList.add(DtoConversion.convertCategoryToResponse(category));</span>
-<span class="fc" id="L99">    logger.info(&quot;Retrieved {} categories for restaurant ID: {}&quot;, responseList.size(), restaurantId);</span>
-<span class="fc" id="L100">    return responseList;</span>
+<span class="fc" id="L93">    logger.info(&quot;Retrieving categories for restaurant ID: {}&quot;, restaurantId);</span>
+<span class="fc" id="L94">    List&lt;FoodCategory&gt; categoryList = foodCategoryRepository.findByRestaurantId(restaurantId);</span>
+<span class="fc" id="L95">    List&lt;FoodCategoryOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">    for (FoodCategory category : categoryList)</span>
+<span class="fc" id="L97">      responseList.add(DtoConversion.convertCategoryToResponse(category));</span>
+<span class="fc" id="L98">    logger.info(&quot;Retrieved {} categories for restaurant ID: {}&quot;, responseList.size(), restaurantId);</span>
+<span class="fc" id="L99">    return responseList;</span>
   }
 
   /**
@@ -109,10 +108,10 @@ import java.util.List;
    */
   @Override
   public FoodCategory findCategoryById(Integer id) {
-<span class="fc" id="L112">    logger.info(&quot;Finding category by ID: {}&quot;, id);</span>
-<span class="fc" id="L113">    return foodCategoryRepository.findById(id).orElseThrow(() -&gt; {</span>
-<span class="fc" id="L114">      logger.error(&quot;Category not found for ID: {}&quot;, id);</span>
-<span class="fc" id="L115">      return new CategoryNotFoundException(RestaurantConstants.CATEGORY_NOT_FOUND);</span>
+<span class="fc" id="L111">    logger.info(&quot;Finding category by ID: {}&quot;, id);</span>
+<span class="fc" id="L112">    return foodCategoryRepository.findById(id).orElseThrow(() -&gt; {</span>
+<span class="fc" id="L113">      logger.error(&quot;Category not found for ID: {}&quot;, id);</span>
+<span class="fc" id="L114">      return new CategoryNotFoundException(RestaurantConstants.CATEGORY_NOT_FOUND);</span>
     });
   }
 }

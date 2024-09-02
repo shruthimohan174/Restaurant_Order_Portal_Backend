@@ -43,5 +43,11 @@ public interface RestaurantService {
    * @return a list of restaurants associated with the specified user
    */
   List<RestaurantOutDto> getALlRestaurantsByUserId(Integer userId);
-
+  /**
+   * Retrieves the image data for a restaurant by its ID.
+   *
+   * @param id the ID of the restaurant
+   * @return the image data as a byte array
+   */
+  byte[] getRestaurantImage(Integer id);
 }

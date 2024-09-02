@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -27,8 +28,8 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(&quot;/foodItem&quot;)
-<span class="fc" id="L30">public class FoodItemController {</span>
-<span class="fc" id="L31">  private static final Logger logger = LoggerFactory.getLogger(FoodItemController.class);</span>
+<span class="fc" id="L31">public class FoodItemController {</span>
+<span class="fc" id="L32">  private static final Logger logger = LoggerFactory.getLogger(FoodItemController.class);</span>
 
   @Autowired
   private FoodItemService foodItemService;
@@ -43,10 +44,10 @@ import java.util.List;
   @PostMapping(&quot;/food/add&quot;)
   public ResponseEntity&lt;FoodItemOutDto&gt; addFoodItems(@Valid @ModelAttribute FoodItemInDto request,
                                                      @RequestParam(&quot;image&quot;) MultipartFile image) {
-<span class="fc" id="L46">    logger.info(&quot;Received request to add food item: {}&quot;, request);</span>
-<span class="fc" id="L47">    FoodItemOutDto response = foodItemService.addFoodItems(request, image);</span>
-<span class="fc" id="L48">    logger.info(&quot;Food item added successfully: {}&quot;, response);</span>
-<span class="fc" id="L49">    return new ResponseEntity&lt;&gt;(response, HttpStatus.CREATED);</span>
+<span class="fc" id="L47">    logger.info(&quot;Received request to add food item: {}&quot;, request);</span>
+<span class="fc" id="L48">    FoodItemOutDto response = foodItemService.addFoodItems(request, image);</span>
+<span class="fc" id="L49">    logger.info(&quot;Food item added successfully: {}&quot;, response);</span>
+<span class="fc" id="L50">    return new ResponseEntity&lt;&gt;(response, HttpStatus.CREATED);</span>
   }
 
   /**
@@ -58,10 +59,10 @@ import java.util.List;
    */
   @PutMapping(&quot;/update/{id}&quot;)
   public ResponseEntity&lt;FoodItemOutDto&gt; updateFoodItem(@Valid @RequestBody FoodItemInDto request, @PathVariable Integer id) {
-<span class="fc" id="L61">    logger.info(&quot;Received request to update food item with ID: {}&quot;, id);</span>
-<span class="fc" id="L62">    FoodItemOutDto response = foodItemService.updateFoodItems(request, id);</span>
-<span class="fc" id="L63">    logger.info(&quot;Food item updated successfully: {}&quot;, response);</span>
-<span class="fc" id="L64">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+<span class="fc" id="L62">    logger.info(&quot;Received request to update food item with ID: {}&quot;, id);</span>
+<span class="fc" id="L63">    FoodItemOutDto response = foodItemService.updateFoodItems(request, id);</span>
+<span class="fc" id="L64">    logger.info(&quot;Food item updated successfully: {}&quot;, response);</span>
+<span class="fc" id="L65">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
   }
 
   /**
@@ -71,10 +72,10 @@ import java.util.List;
    */
   @GetMapping(&quot;&quot;)
   public ResponseEntity&lt;List&lt;FoodItemOutDto&gt;&gt; getAllFoodItems() {
-<span class="fc" id="L74">    logger.info(&quot;Retrieving all food items&quot;);</span>
-<span class="fc" id="L75">    List&lt;FoodItemOutDto&gt; response = foodItemService.getAllFoodItems();</span>
-<span class="fc" id="L76">    logger.info(&quot;Retrieved {} food items&quot;, response.size());</span>
-<span class="fc" id="L77">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+<span class="fc" id="L75">    logger.info(&quot;Retrieving all food items&quot;);</span>
+<span class="fc" id="L76">    List&lt;FoodItemOutDto&gt; response = foodItemService.getAllFoodItems();</span>
+<span class="fc" id="L77">    logger.info(&quot;Retrieved {} food items&quot;, response.size());</span>
+<span class="fc" id="L78">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
   }
 
   /**
@@ -85,10 +86,10 @@ import java.util.List;
    */
   @GetMapping(&quot;/restaurant/{restaurantId}&quot;)
   public ResponseEntity&lt;List&lt;FoodItemOutDto&gt;&gt; getAllFoodItemsByRestaurantId(@PathVariable Integer restaurantId) {
-<span class="fc" id="L88">    logger.info(&quot;Retrieving food items for restaurant ID: {}&quot;, restaurantId);</span>
-<span class="fc" id="L89">    List&lt;FoodItemOutDto&gt; response = foodItemService.getAllByRestaurantId(restaurantId);</span>
-<span class="fc" id="L90">    logger.info(&quot;Retrieved {} food items for restaurant ID: {}&quot;, response.size(), restaurantId);</span>
-<span class="fc" id="L91">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+<span class="fc" id="L89">    logger.info(&quot;Retrieving food items for restaurant ID: {}&quot;, restaurantId);</span>
+<span class="fc" id="L90">    List&lt;FoodItemOutDto&gt; response = foodItemService.getAllByRestaurantId(restaurantId);</span>
+<span class="fc" id="L91">    logger.info(&quot;Retrieved {} food items for restaurant ID: {}&quot;, response.size(), restaurantId);</span>
+<span class="fc" id="L92">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
   }
 
   /**
@@ -99,10 +100,17 @@ import java.util.List;
    */
   @GetMapping(&quot;/category/{categoryId}&quot;)
   public ResponseEntity&lt;List&lt;FoodItemOutDto&gt;&gt; getAllFoodItemsByCategoryId(@PathVariable Integer categoryId) {
-<span class="fc" id="L102">    logger.info(&quot;Retrieving food items for category ID: {}&quot;, categoryId);</span>
-<span class="fc" id="L103">    List&lt;FoodItemOutDto&gt; response = foodItemService.getAllByCategoryId(categoryId);</span>
-<span class="fc" id="L104">    logger.info(&quot;Retrieved {} food items for category ID: {}&quot;, response.size(), categoryId);</span>
-<span class="fc" id="L105">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+<span class="fc" id="L103">    logger.info(&quot;Retrieving food items for category ID: {}&quot;, categoryId);</span>
+<span class="fc" id="L104">    List&lt;FoodItemOutDto&gt; response = foodItemService.getAllByCategoryId(categoryId);</span>
+<span class="fc" id="L105">    logger.info(&quot;Retrieved {} food items for category ID: {}&quot;, response.size(), categoryId);</span>
+<span class="fc" id="L106">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+  }
+
+  @GetMapping(&quot;/{id}/image&quot;)
+  public ResponseEntity&lt;byte[]&gt; getFoodItemImage(@PathVariable Integer id) {
+<span class="nc" id="L111">    logger.info(&quot;Retrieving image for Food Item with ID: {}&quot;, id);</span>
+<span class="nc" id="L112">    byte[] imageData = foodItemService.getFoodItemImage(id);</span>
+<span class="nc" id="L113">    return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageData);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

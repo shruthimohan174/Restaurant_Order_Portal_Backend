@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -38,6 +39,7 @@ public class RestaurantServiceImpl implements RestaurantService {
    * @return the created restaurant
    */
   @Override
+  @Transactional
   public RestaurantOutDto addRestaurant(RestaurantInDto request, MultipartFile image) {
     logger.info("Adding restaurant: {}", request);
     Restaurant restaurant = DtoConversion.convertRestaurantRequestToRestaurant(request);
@@ -79,6 +81,7 @@ public class RestaurantServiceImpl implements RestaurantService {
    * @return a list of restaurants for the given user
    */
   @Override
+  @Transactional(readOnly = true)
   public List<RestaurantOutDto> getALlRestaurantsByUserId(Integer userId) {
     logger.info("Retrieving restaurants for user ID: {}", userId);
     List<Restaurant> restaurants = restaurantRepository.findByUserId(userId);
@@ -88,6 +91,18 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
     logger.info("Retrieved {} restaurants for user ID: {}", responseList.size(), userId);
     return responseList;
+  }
+  /**
+   * Retrieves the image data for a restaurant by its ID.
+   *
+   * @param id the ID of the restaurant
+   * @return the image data as a byte array
+   */
+  @Override
+  public byte[] getRestaurantImage(Integer id) {
+    logger.info("Fetching image for restaurant with ID: {}", id);
+    Restaurant restaurant = findRestaurantById(id);
+    return restaurant.getImageData();
   }
 
   /**

@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -103,5 +104,17 @@ public class FoodItemController {
     List<FoodItemOutDto> response = foodItemService.getAllByCategoryId(categoryId);
     logger.info("Retrieved {} food items for category ID: {}", response.size(), categoryId);
     return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+  /**
+   * Retrieves the image data for a food item by its ID.
+   *
+   * @param id the ID of the food item
+   * @return the image data as a byte array
+   */
+  @GetMapping("/{id}/image")
+  public ResponseEntity<byte[]> getFoodItemImage(@PathVariable Integer id) {
+    logger.info("Retrieving image for Food Item with ID: {}", id);
+    byte[] imageData = foodItemService.getFoodItemImage(id);
+    return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageData);
   }
 }

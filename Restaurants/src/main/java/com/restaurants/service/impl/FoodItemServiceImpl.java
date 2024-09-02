@@ -151,4 +151,16 @@ public class FoodItemServiceImpl implements FoodItemService {
     logger.info("Retrieved {} food items for category ID: {}", responseList.size(), categoryId);
     return responseList;
   }
+  /**
+   * Retrieves the image data for a food item by its ID.
+   *
+   * @param id the ID of the food-item
+   * @return the image data as a byte array
+   */
+  @Override
+  public byte[] getFoodItemImage(Integer id) {
+    logger.info("Fetching image for Food Item with ID: {}", id);
+    FoodItem foodItem = findFoodItemsById(id);
+    return foodItem.getImageData();
+  }
 }

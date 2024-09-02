@@ -61,7 +61,6 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
     logger.info("Updating category with ID: {}", id);
     FoodCategory existingCategory = findCategoryById(id);
     existingCategory.setCategoryName(request.getCategoryName());
-    existingCategory.setRestaurantId(request.getRestaurantId());
     FoodCategory updatedCategory = foodCategoryRepository.save(existingCategory);
     logger.info("Category updated successfully: {}", updatedCategory);
     return DtoConversion.convertCategoryToResponse(updatedCategory);

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -26,9 +27,9 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(&quot;/restaurant&quot;)
-<span class="fc" id="L29">public class RestaurantController {</span>
+<span class="fc" id="L30">public class RestaurantController {</span>
 
-<span class="fc" id="L31">  private static final Logger logger = LoggerFactory.getLogger(RestaurantController.class);</span>
+<span class="fc" id="L32">  private static final Logger logger = LoggerFactory.getLogger(RestaurantController.class);</span>
 
   @Autowired
   private RestaurantService restaurantService;
@@ -40,13 +41,13 @@ import java.util.List;
    * @param image   the image representing the restaurant
    * @return the created restaurant
    */
-  @PostMapping(&quot;/restaurant/add&quot;)
+  @PostMapping(&quot;/add&quot;)
   public ResponseEntity&lt;RestaurantOutDto&gt; addRestaurant(@Valid @ModelAttribute RestaurantInDto request,
                                                         @RequestParam(&quot;image&quot;) MultipartFile image) {
-<span class="fc" id="L46">    logger.info(&quot;Received request to add restaurant: {}&quot;, request);</span>
-<span class="fc" id="L47">    RestaurantOutDto response = restaurantService.addRestaurant(request, image);</span>
-<span class="fc" id="L48">    logger.info(&quot;Restaurant added successfully: {}&quot;, response);</span>
-<span class="fc" id="L49">    return new ResponseEntity&lt;&gt;(response, HttpStatus.CREATED);</span>
+<span class="fc" id="L47">    logger.info(&quot;Received request to add restaurant: {}&quot;, request);</span>
+<span class="fc" id="L48">    RestaurantOutDto response = restaurantService.addRestaurant(request, image);</span>
+<span class="fc" id="L49">    logger.info(&quot;Restaurant added successfully: {}&quot;, response);</span>
+<span class="fc" id="L50">    return new ResponseEntity&lt;&gt;(response, HttpStatus.CREATED);</span>
   }
 
   /**
@@ -56,10 +57,10 @@ import java.util.List;
    */
   @GetMapping(&quot;&quot;)
   public ResponseEntity&lt;List&lt;RestaurantOutDto&gt;&gt; getAllRestaurants() {
-<span class="fc" id="L59">    logger.info(&quot;Retrieving all restaurants&quot;);</span>
-<span class="fc" id="L60">    List&lt;RestaurantOutDto&gt; response = restaurantService.getALlRestaurants();</span>
-<span class="fc" id="L61">    logger.info(&quot;Retrieved {} restaurants&quot;, response.size());</span>
-<span class="fc" id="L62">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+<span class="fc" id="L60">    logger.info(&quot;Retrieving all restaurants&quot;);</span>
+<span class="fc" id="L61">    List&lt;RestaurantOutDto&gt; response = restaurantService.getALlRestaurants();</span>
+<span class="fc" id="L62">    logger.info(&quot;Retrieved {} restaurants&quot;, response.size());</span>
+<span class="fc" id="L63">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
   }
 
   /**
@@ -70,10 +71,10 @@ import java.util.List;
    */
   @GetMapping(&quot;/{id}&quot;)
   public ResponseEntity&lt;Restaurant&gt; getRestaurantById(@PathVariable Integer id) {
-<span class="fc" id="L73">    logger.info(&quot;Retrieving restaurant with ID: {}&quot;, id);</span>
-<span class="fc" id="L74">    Restaurant response = restaurantService.findRestaurantById(id);</span>
-<span class="fc" id="L75">    logger.info(&quot;Retrieved restaurant: {}&quot;, response);</span>
-<span class="fc" id="L76">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+<span class="fc" id="L74">    logger.info(&quot;Retrieving restaurant with ID: {}&quot;, id);</span>
+<span class="fc" id="L75">    Restaurant response = restaurantService.findRestaurantById(id);</span>
+<span class="fc" id="L76">    logger.info(&quot;Retrieved restaurant: {}&quot;, response);</span>
+<span class="fc" id="L77">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
   }
 
   /**
@@ -84,10 +85,17 @@ import java.util.List;
    */
   @GetMapping(&quot;/user/{userId}&quot;)
   public ResponseEntity&lt;List&lt;RestaurantOutDto&gt;&gt; getAllRestaurantByUserId(@PathVariable Integer userId) {
-<span class="fc" id="L87">    logger.info(&quot;Retrieving restaurants for user ID: {}&quot;, userId);</span>
-<span class="fc" id="L88">    List&lt;RestaurantOutDto&gt; response = restaurantService.getALlRestaurantsByUserId(userId);</span>
-<span class="fc" id="L89">    logger.info(&quot;Retrieved {} restaurants for user ID: {}&quot;, response.size(), userId);</span>
-<span class="fc" id="L90">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+<span class="fc" id="L88">    logger.info(&quot;Retrieving restaurants for user ID: {}&quot;, userId);</span>
+<span class="fc" id="L89">    List&lt;RestaurantOutDto&gt; response = restaurantService.getALlRestaurantsByUserId(userId);</span>
+<span class="fc" id="L90">    logger.info(&quot;Retrieved {} restaurants for user ID: {}&quot;, response.size(), userId);</span>
+<span class="fc" id="L91">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+  }
+
+  @GetMapping(&quot;/{id}/image&quot;)
+  public ResponseEntity&lt;byte[]&gt; getRestaurantImage(@PathVariable Integer id) {
+<span class="nc" id="L96">    logger.info(&quot;Retrieving image for restaurant with ID: {}&quot;, id);</span>
+<span class="nc" id="L97">    byte[] imageData = restaurantService.getRestaurantImage(id);</span>
+<span class="nc" id="L98">    return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageData);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -26,4 +26,5 @@ public interface FoodItemRepository extends JpaRepository<FoodItem, Integer> {
    * @return a list of food items for the given category
    */
   List<FoodItem> findByCategoryId(Integer categoryId);
+
 }

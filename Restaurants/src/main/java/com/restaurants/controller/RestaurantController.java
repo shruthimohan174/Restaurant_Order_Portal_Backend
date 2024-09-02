@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -40,7 +41,7 @@ public class RestaurantController {
    * @param image   the image representing the restaurant
    * @return the created restaurant
    */
-  @PostMapping("/restaurant/add")
+  @PostMapping("/add")
   public ResponseEntity<RestaurantOutDto> addRestaurant(@Valid @ModelAttribute RestaurantInDto request,
                                                         @RequestParam("image") MultipartFile image) {
     logger.info("Received request to add restaurant: {}", request);
@@ -88,5 +89,17 @@ public class RestaurantController {
     List<RestaurantOutDto> response = restaurantService.getALlRestaurantsByUserId(userId);
     logger.info("Retrieved {} restaurants for user ID: {}", response.size(), userId);
     return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+  /**
+   * Retrieves the image data for a restaurant by its ID.
+   *
+   * @param id the ID of the restaurant
+   * @return the image data as a byte array
+   */
+  @GetMapping("/{id}/image")
+  public ResponseEntity<byte[]> getRestaurantImage(@PathVariable Integer id) {
+    logger.info("Retrieving image for restaurant with ID: {}", id);
+    byte[] imageData = restaurantService.getRestaurantImage(id);
+    return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageData);
   }
 }

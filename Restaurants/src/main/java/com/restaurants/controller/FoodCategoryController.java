@@ -32,7 +32,7 @@ public class FoodCategoryController {
   private FoodCategoryService foodCategoryService;
 
   /**
-   * Creates a new food cactegory.
+   * Creates a new food category.
    *
    * @param request the details of the food category to be added
    * @return the created food category

@@ -58,5 +58,11 @@ public interface FoodItemService {
    * @return a list of food items for the specified category
    */
   List<FoodItemOutDto> getAllByCategoryId(Integer categoryId);
-
+  /**
+   * Retrieves the image data for a food-item by its ID.
+   *
+   * @param id the ID of the food-item
+   * @return the image data as a byte array
+   */
+  byte[] getFoodItemImage(Integer id);
 }

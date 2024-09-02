@@ -128,7 +128,6 @@ public final class DtoConversion {
     existingItem.setDescription(request.getDescription());
     existingItem.setItemName(request.getItemName());
     existingItem.setPrice(request.getPrice());
-    existingItem.setIsVeg(request.getIsVeg());
     return existingItem;
   }
 }
