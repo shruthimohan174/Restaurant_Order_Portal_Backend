@@ -80,21 +80,48 @@ import java.util.stream.Collectors;
 <span class="nc" id="L80">      .map(FieldError::getDefaultMessage)</span>
 <span class="nc" id="L81">      .collect(Collectors.toList());</span>
 
-<span class="nc" id="L83">    String errorMessage = String.join(&quot;,&quot;, errors);</span>
+<span class="nc" id="L83">    String errorMessage = String.join(&quot;, &quot;, errors);</span>
 <span class="nc" id="L84">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), &quot;Validation failed: &quot; + errorMessage,</span>
 <span class="nc" id="L85">      request.getRequestURI());</span>
   }
 
+  @ExceptionHandler(CategoryAlreadyExistsException.class)
+  @ResponseStatus(HttpStatus.CONFLICT)
+  @ResponseBody
+  public final ErrorResponse handleCategoryAlreadyExistsException(CategoryAlreadyExistsException ex, HttpServletRequest request) {
+<span class="nc" id="L92">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  @ExceptionHandler(FoodItemAlreadyExistsException.class)
+  @ResponseStatus(HttpStatus.CONFLICT)
+  @ResponseBody
+  public final ErrorResponse handleFoodItemAlreadyExistsException(FoodItemAlreadyExistsException ex, HttpServletRequest request) {
+<span class="nc" id="L99">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  @ExceptionHandler(InvalidFileTypeException.class)
+  @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+  @ResponseBody
+  public final ErrorResponse handleInvalidFileTypeException(InvalidFileTypeException ex, HttpServletRequest request) {
+<span class="nc" id="L106">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  @ExceptionHandler(NotRestaurantOwnerException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  @ResponseBody
+  public final ErrorResponse handleNotRestaurantOwnerException(NotRestaurantOwnerException ex, HttpServletRequest request) {
+<span class="nc" id="L113">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.FORBIDDEN.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
   /**
    * Represents the error response returned by the exception handler.
    */
-<span class="nc bnc" id="L91" title="All 32 branches missed.">  @Data</span>
-<span class="nc" id="L92">  @AllArgsConstructor</span>
+<span class="nc bnc" id="L118" title="All 32 branches missed.">  @Data</span>
+<span class="nc" id="L119">  @AllArgsConstructor</span>
   public static class ErrorResponse {
-<span class="nc" id="L94">    private LocalDateTime timestamp;</span>
-<span class="nc" id="L95">    private int status;</span>
-<span class="nc" id="L96">    private String message;</span>
-<span class="nc" id="L97">    private String path;</span>
+<span class="nc" id="L121">    private LocalDateTime timestamp;</span>
+<span class="nc" id="L122">    private int status;</span>
+<span class="nc" id="L123">    private String message;</span>
+<span class="nc" id="L124">    private String path;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

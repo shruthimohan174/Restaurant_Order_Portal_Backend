@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class RestaurantInDtoTest {
 
@@ -36,7 +35,6 @@ public class RestaurantInDtoTest {
     assertEquals("123 Food Street", restaurantInDto2.getAddress());
     assertEquals("9876543210", restaurantInDto2.getContactNumber());
     assertEquals("9 AM - 9 PM", restaurantInDto2.getOpeningHours());
-    assertNull(restaurantInDto2.getImage());
   }
 
 
@@ -44,7 +42,7 @@ public class RestaurantInDtoTest {
   void testToString() {
     String expected =
       "RestaurantInDto(userId=1, restaurantName=Food Palace, address=123 Food Street, contactNumber=9876543210, " +
-        "openingHours=9 AM - 9 PM, image=null)";
+        "openingHours=9 AM - 9 PM)";
     assertEquals(expected, restaurantInDto1.toString());
   }
 

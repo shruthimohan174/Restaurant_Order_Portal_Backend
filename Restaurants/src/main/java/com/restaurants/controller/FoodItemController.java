@@ -1,6 +1,7 @@
 package com.restaurants.controller;
 
 import com.restaurants.dto.indto.FoodItemInDto;
+import com.restaurants.dto.indto.FoodItemUpdateInDto;
 import com.restaurants.dto.outdto.FoodItemOutDto;
 import com.restaurants.service.FoodItemService;
 import org.slf4j.Logger;
@@ -41,28 +42,23 @@ public class FoodItemController {
    * @param image   the image representing the food item
    * @return the created food item
    */
+
   @PostMapping("/food/add")
-  public ResponseEntity<FoodItemOutDto> addFoodItems(@Valid @ModelAttribute FoodItemInDto request,
-                                                     @RequestParam("image") MultipartFile image) {
+  public ResponseEntity<String> addFoodItems(@Valid @ModelAttribute FoodItemInDto request,
+                                             @RequestParam("image") MultipartFile image) {
     logger.info("Received request to add food item: {}", request);
-    FoodItemOutDto response = foodItemService.addFoodItems(request, image);
-    logger.info("Food item added successfully: {}", response);
-    return new ResponseEntity<>(response, HttpStatus.CREATED);
+    String message = foodItemService.addFoodItems(request, image);
+    logger.info(message);
+    return new ResponseEntity<>(message, HttpStatus.CREATED);
   }
 
-  /**
-   * Updates an existing food item.
-   *
-   * @param id the ID of the food item to be updated
-   * @param request the updated details of the food item
-   * @return the updated food item
-   */
   @PutMapping("/update/{id}")
-  public ResponseEntity<FoodItemOutDto> updateFoodItem(@Valid @RequestBody FoodItemInDto request, @PathVariable Integer id) {
+  public ResponseEntity<String> updateFoodItem(@Valid @RequestBody FoodItemUpdateInDto request,
+                                               @PathVariable Integer id) {
     logger.info("Received request to update food item with ID: {}", id);
-    FoodItemOutDto response = foodItemService.updateFoodItems(request, id);
-    logger.info("Food item updated successfully: {}", response);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+    String message = foodItemService.updateFoodItems(request, id);
+    logger.info(message);
+    return new ResponseEntity<>(message, HttpStatus.OK);
   }
 
   /**

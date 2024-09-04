@@ -42,12 +42,12 @@ public class RestaurantController {
    * @return the created restaurant
    */
   @PostMapping("/add")
-  public ResponseEntity<RestaurantOutDto> addRestaurant(@Valid @ModelAttribute RestaurantInDto request,
+  public ResponseEntity<String> addRestaurant(@Valid @ModelAttribute RestaurantInDto request,
                                                         @RequestParam("image") MultipartFile image) {
     logger.info("Received request to add restaurant: {}", request);
-    RestaurantOutDto response = restaurantService.addRestaurant(request, image);
-    logger.info("Restaurant added successfully: {}", response);
-    return new ResponseEntity<>(response, HttpStatus.CREATED);
+    String message = restaurantService.addRestaurant(request, image);
+    logger.info(message);
+    return new ResponseEntity<>(message, HttpStatus.CREATED);
   }
 
   /**
@@ -96,6 +96,7 @@ public class RestaurantController {
    * @param id the ID of the restaurant
    * @return the image data as a byte array
    */
+
   @GetMapping("/{id}/image")
   public ResponseEntity<byte[]> getRestaurantImage(@PathVariable Integer id) {
     logger.info("Retrieving image for restaurant with ID: {}", id);

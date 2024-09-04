@@ -38,26 +38,19 @@ public class FoodCategoryController {
    * @return the created food category
    */
   @PostMapping("/add")
-  public ResponseEntity<FoodCategoryOutDto> addFoodCategory(@Valid @RequestBody FoodCategoryInDto request) {
-    logger.info("Received request to add food category: {}", request);
-    FoodCategoryOutDto response = foodCategoryService.addCategory(request);
-    logger.info("Food category added successfully: {}", response);
-    return new ResponseEntity<>(response, HttpStatus.CREATED);
+  public ResponseEntity<String> addCategory(@Valid @RequestBody FoodCategoryInDto request) {
+    logger.info("Received request to add category: {}", request);
+    String message = foodCategoryService.addCategory(request);
+    logger.info(message);
+    return new ResponseEntity<>(message, HttpStatus.CREATED);
   }
 
-  /**
-   * Updates an existing food category.
-   *
-   * @param id the ID of the food category to be updated
-   * @param request the updated details of the food category
-   * @return the updated food category
-   */
   @PutMapping("/update/{id}")
-  public ResponseEntity<FoodCategoryOutDto> addFoodCategory(@PathVariable Integer id, @Valid @RequestBody FoodCategoryInDto request) {
-    logger.info("Received request to update food category with ID: {}", id);
-    FoodCategoryOutDto response = foodCategoryService.updateCategory(request, id);
-    logger.info("Food category updated successfully: {}", response);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+  public ResponseEntity<String> updateCategory(@Valid @RequestBody FoodCategoryInDto request, @PathVariable Integer id) {
+    logger.info("Received request to update category with ID: {}", id);
+    String message = foodCategoryService.updateCategory(request, id);
+    logger.info(message);
+    return new ResponseEntity<>(message, HttpStatus.OK);
   }
 
   /**

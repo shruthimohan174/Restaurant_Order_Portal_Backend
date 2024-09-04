@@ -1,6 +1,7 @@
 package com.restaurants.service;
 
 import com.restaurants.dto.indto.FoodItemInDto;
+import com.restaurants.dto.indto.FoodItemUpdateInDto;
 import com.restaurants.dto.outdto.FoodItemOutDto;
 import com.restaurants.entities.FoodItem;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +19,7 @@ public interface FoodItemService {
    * @param image   the image representing the food item
    * @return the created food item
    */
-  FoodItemOutDto addFoodItems(FoodItemInDto request, MultipartFile image);
+  String addFoodItems(FoodItemInDto request, MultipartFile image);
   /**
    * Updates an existing food item.
    *
@@ -26,7 +27,7 @@ public interface FoodItemService {
    * @param id      the ID of the food item to be updated
    * @return the updated food item
    */
-  FoodItemOutDto updateFoodItems(FoodItemInDto request, Integer id);
+  String updateFoodItems(FoodItemUpdateInDto request, Integer id);
 
   /**
    * Retrieves a food item by its ID.
@@ -65,4 +66,10 @@ public interface FoodItemService {
    * @return the image data as a byte array
    */
   byte[] getFoodItemImage(Integer id);
+
+  boolean itemExistsInRestaurant(Integer restaurantId, String itemName);
+
+  void validateImageFile(MultipartFile image);
+
+
 }

@@ -27,4 +27,7 @@ public interface FoodItemRepository extends JpaRepository<FoodItem, Integer> {
    */
   List<FoodItem> findByCategoryId(Integer categoryId);
 
+  boolean existsByRestaurantIdAndItemNameIgnoreCase(Integer restaurantId, String itemName);
+
+
 }

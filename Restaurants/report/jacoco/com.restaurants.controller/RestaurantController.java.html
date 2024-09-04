@@ -42,12 +42,12 @@ import java.util.List;
    * @return the created restaurant
    */
   @PostMapping(&quot;/add&quot;)
-  public ResponseEntity&lt;RestaurantOutDto&gt; addRestaurant(@Valid @ModelAttribute RestaurantInDto request,
+  public ResponseEntity&lt;String&gt; addRestaurant(@Valid @ModelAttribute RestaurantInDto request,
                                                         @RequestParam(&quot;image&quot;) MultipartFile image) {
 <span class="fc" id="L47">    logger.info(&quot;Received request to add restaurant: {}&quot;, request);</span>
-<span class="fc" id="L48">    RestaurantOutDto response = restaurantService.addRestaurant(request, image);</span>
-<span class="fc" id="L49">    logger.info(&quot;Restaurant added successfully: {}&quot;, response);</span>
-<span class="fc" id="L50">    return new ResponseEntity&lt;&gt;(response, HttpStatus.CREATED);</span>
+<span class="fc" id="L48">    String message = restaurantService.addRestaurant(request, image);</span>
+<span class="fc" id="L49">    logger.info(message);</span>
+<span class="fc" id="L50">    return new ResponseEntity&lt;&gt;(message, HttpStatus.CREATED);</span>
   }
 
   /**
@@ -90,12 +90,18 @@ import java.util.List;
 <span class="fc" id="L90">    logger.info(&quot;Retrieved {} restaurants for user ID: {}&quot;, response.size(), userId);</span>
 <span class="fc" id="L91">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
   }
+  /**
+   * Retrieves the image data for a restaurant by its ID.
+   *
+   * @param id the ID of the restaurant
+   * @return the image data as a byte array
+   */
 
   @GetMapping(&quot;/{id}/image&quot;)
   public ResponseEntity&lt;byte[]&gt; getRestaurantImage(@PathVariable Integer id) {
-<span class="nc" id="L96">    logger.info(&quot;Retrieving image for restaurant with ID: {}&quot;, id);</span>
-<span class="nc" id="L97">    byte[] imageData = restaurantService.getRestaurantImage(id);</span>
-<span class="nc" id="L98">    return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageData);</span>
+<span class="nc" id="L102">    logger.info(&quot;Retrieving image for restaurant with ID: {}&quot;, id);</span>
+<span class="nc" id="L103">    byte[] imageData = restaurantService.getRestaurantImage(id);</span>
+<span class="nc" id="L104">    return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageData);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -67,10 +67,9 @@ class FoodCategoryServiceImplTest {
     when(restaurantService.findRestaurantById(1)).thenReturn(restaurant);
     when(foodCategoryRepository.save(any(FoodCategory.class))).thenReturn(foodCategory);
 
-    FoodCategoryOutDto result = foodCategoryService.addCategory(categoryRequest);
+    String result = foodCategoryService.addCategory(categoryRequest);
 
     assertNotNull(result);
-    assertEquals("Fast Food", result.getCategoryName());
     verify(restaurantService, times(1)).findRestaurantById(1);
     verify(foodCategoryRepository, times(1)).save(any(FoodCategory.class));
   }
@@ -84,10 +83,9 @@ class FoodCategoryServiceImplTest {
     when(foodCategoryRepository.findById(1)).thenReturn(Optional.of(foodCategory));
     when(foodCategoryRepository.save(any(FoodCategory.class))).thenReturn(foodCategory);
 
-    FoodCategoryOutDto result = foodCategoryService.updateCategory(updateRequest, 1);
+    String result = foodCategoryService.updateCategory(updateRequest, 1);
 
     assertNotNull(result);
-    assertEquals("Updated Category", result.getCategoryName());
     verify(foodCategoryRepository, times(1)).findById(1);
     verify(foodCategoryRepository, times(1)).save(foodCategory);
   }

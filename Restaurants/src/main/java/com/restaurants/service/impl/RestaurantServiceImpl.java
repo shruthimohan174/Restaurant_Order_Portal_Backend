@@ -5,6 +5,7 @@ import com.restaurants.dto.indto.RestaurantInDto;
 import com.restaurants.dto.outdto.RestaurantOutDto;
 import com.restaurants.dtoconversion.DtoConversion;
 import com.restaurants.entities.Restaurant;
+import com.restaurants.exception.InvalidFileTypeException;
 import com.restaurants.exception.RestaurantNotFoundException;
 import com.restaurants.repositories.RestaurantRepository;
 import com.restaurants.service.RestaurantService;
@@ -31,6 +32,9 @@ public class RestaurantServiceImpl implements RestaurantService {
   @Autowired
   private RestaurantRepository restaurantRepository;
 
+//  @Autowired
+//  private UserFeignClient userFeignClient;
+
   /**
    * Adds a new restaurant.
    *
@@ -40,12 +44,18 @@ public class RestaurantServiceImpl implements RestaurantService {
    */
   @Override
   @Transactional
-  public RestaurantOutDto addRestaurant(RestaurantInDto request, MultipartFile image) {
+  public String addRestaurant(RestaurantInDto request, MultipartFile image) {
     logger.info("Adding restaurant: {}", request);
+//    UserOutDto user = userFeignClient.getUserById(request.getUserId());
+//    if (!"RESTAURANT_OWNER".equalsIgnoreCase(user.getUserRole())) {
+//      logger.error("User {} is not a restaurant owner", request.getUserId());
+//      throw new NotRestaurantOwnerException(RestaurantConstants.NOT_RESTAURANT_OWNER);
+//    }
     Restaurant restaurant = DtoConversion.convertRestaurantRequestToRestaurant(request);
 
     if (image != null && !image.isEmpty()) {
       try {
+        validateImageFile(image);
         restaurant.setImageData(image.getBytes());
       } catch (IOException e) {
         logger.error("Error occurred while processing the image file for restaurant: {}", request.getRestaurantName(), e);
@@ -54,7 +64,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     Restaurant savedRestaurant = restaurantRepository.save(restaurant);
     logger.info("Restaurant added successfully: {}", savedRestaurant);
-    return DtoConversion.convertRestaurantToRestaurantResponse(savedRestaurant);
+    return RestaurantConstants.RESTAURANT_ADDED_SUCCESSFULLY;
   }
 
   /**
@@ -92,6 +102,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     logger.info("Retrieved {} restaurants for user ID: {}", responseList.size(), userId);
     return responseList;
   }
+
   /**
    * Retrieves the image data for a restaurant by its ID.
    *
@@ -120,5 +131,13 @@ public class RestaurantServiceImpl implements RestaurantService {
 
       return new RestaurantNotFoundException(RestaurantConstants.RESTAURANT_NOT_FOUND);
     });
+  }
+
+  @Override
+  public void validateImageFile(MultipartFile image) {
+    String contentType = image.getContentType();
+    if (contentType == null || !contentType.equals("image/jpeg") && !contentType.equals("image/png")) {
+      throw new InvalidFileTypeException(RestaurantConstants.INVALID_FILE_TYPE);
+    }
   }
 }

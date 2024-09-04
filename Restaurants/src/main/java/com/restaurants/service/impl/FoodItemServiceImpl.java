@@ -2,12 +2,15 @@ package com.restaurants.service.impl;
 
 import com.restaurants.constants.RestaurantConstants;
 import com.restaurants.dto.indto.FoodItemInDto;
+import com.restaurants.dto.indto.FoodItemUpdateInDto;
 import com.restaurants.dto.outdto.FoodItemOutDto;
 import com.restaurants.dtoconversion.DtoConversion;
 import com.restaurants.entities.FoodCategory;
 import com.restaurants.entities.FoodItem;
 import com.restaurants.entities.Restaurant;
+import com.restaurants.exception.FoodItemAlreadyExistsException;
 import com.restaurants.exception.FoodItemNotFoundException;
+import com.restaurants.exception.InvalidFileTypeException;
 import com.restaurants.repositories.FoodItemRepository;
 import com.restaurants.service.FoodCategoryService;
 import com.restaurants.service.FoodItemService;
@@ -47,40 +50,46 @@ public class FoodItemServiceImpl implements FoodItemService {
    * @return the created food item
    */
   @Override
-  public FoodItemOutDto addFoodItems(FoodItemInDto request, MultipartFile image) {
+  public String addFoodItems(FoodItemInDto request, MultipartFile image) {
     logger.info("Adding food item: {}", request);
     Restaurant restaurant = restaurantService.findRestaurantById(request.getRestaurantId());
     FoodCategory category = foodCategoryService.findCategoryById(request.getCategoryId());
+    if (itemExistsInRestaurant(restaurant.getId(), request.getItemName())) {
+      throw new FoodItemAlreadyExistsException(RestaurantConstants.ITEM_ALREADY_EXISTS);
+    }
     FoodItem foodItem = DtoConversion.convertFoodItemRequestToFoodItem(request);
 
     if (image != null && !image.isEmpty()) {
       try {
+        validateImageFile(image);
         foodItem.setImageData(image.getBytes());
       } catch (IOException e) {
         logger.error("Error occurred while processing the image file for food item: {}", request.getItemName(), e);
       }
     }
 
-    FoodItem savedFoodItem = foodItemRepository.save(foodItem);
-    logger.info("Food item added successfully: {}", savedFoodItem);
-    return DtoConversion.convertFoodItemToFoodItemResponse(savedFoodItem);
+    foodItemRepository.save(foodItem);
+    logger.info("Food item added successfully: {}", request.getItemName());
+    return RestaurantConstants.FOOD_ITEM_ADDED_SUCCESSFULLY;
   }
 
-  /**
-   * Updates an existing food item.
-   *
-   * @param request the food item data to update
-   * @param id      the ID of the food item to update
-   * @return the updated food item
-   */
   @Override
-  public FoodItemOutDto updateFoodItems(FoodItemInDto request, Integer id) {
+  public String updateFoodItems(FoodItemUpdateInDto request, Integer id) {
     logger.info("Updating food item with ID: {}", id);
-    FoodItem existingItems = findFoodItemsById(id);
-    DtoConversion.updateFoodItemRequest(request, existingItems);
-    FoodItem updatedItems = foodItemRepository.save(existingItems);
-    logger.info("Food item updated successfully: {}", updatedItems);
-    return DtoConversion.convertFoodItemToFoodItemResponse(updatedItems);
+    FoodItem existingItem = findFoodItemsById(id);
+
+    if (!existingItem.getItemName().equals(request.getItemName()) &&
+      itemExistsInRestaurant(existingItem.getRestaurantId(), request.getItemName())) {
+      throw new FoodItemAlreadyExistsException(RestaurantConstants.ITEM_ALREADY_EXISTS);
+    }
+
+    existingItem.setItemName(request.getItemName());
+    existingItem.setDescription(request.getDescription());
+    existingItem.setPrice(request.getPrice());
+
+    foodItemRepository.save(existingItem);
+    logger.info("Food item updated successfully: {}", request.getItemName());
+    return RestaurantConstants.FOOD_ITEM_UPDATED_SUCCESSFULLY;
   }
 
   /**
@@ -162,5 +171,25 @@ public class FoodItemServiceImpl implements FoodItemService {
     logger.info("Fetching image for Food Item with ID: {}", id);
     FoodItem foodItem = findFoodItemsById(id);
     return foodItem.getImageData();
+  }
+
+  /**
+   * Checks if a food item with the same name exists in the same restaurant.
+   *
+   * @param restaurantId the ID of the restaurant
+   * @param itemName     the name of the food item
+   * @return true if the item exists, false otherwise
+   */
+  @Override
+  public boolean itemExistsInRestaurant(Integer restaurantId, String itemName) {
+    return foodItemRepository.existsByRestaurantIdAndItemNameIgnoreCase(restaurantId, itemName);
+  }
+
+  @Override
+  public void validateImageFile(MultipartFile image) {
+    String contentType = image.getContentType();
+    if (contentType == null || !contentType.equals("image/jpeg") && !contentType.equals("image/png")) {
+      throw new InvalidFileTypeException(RestaurantConstants.INVALID_FILE_TYPE);
+    }
   }
 }

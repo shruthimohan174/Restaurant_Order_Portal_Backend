@@ -2,9 +2,11 @@ package com.restaurants.dtoconversion;
 
 import com.restaurants.dto.indto.FoodCategoryInDto;
 import com.restaurants.dto.indto.FoodItemInDto;
+import com.restaurants.dto.indto.FoodItemUpdateInDto;
 import com.restaurants.dto.indto.RestaurantInDto;
 import com.restaurants.dto.outdto.FoodCategoryOutDto;
 import com.restaurants.dto.outdto.FoodItemOutDto;
+import com.restaurants.dto.outdto.FoodItemUpdateOutDto;
 import com.restaurants.dto.outdto.RestaurantOutDto;
 import com.restaurants.entities.FoodCategory;
 import com.restaurants.entities.FoodItem;
@@ -120,14 +122,15 @@ public final class DtoConversion {
   /**
    * Updates an existing {@link FoodItem} entity with data from a {@link FoodItemInDto}.
    *
-   * @param request      the {@link FoodItemInDto} containing updated food item details
-   * @param existingItem the existing {@link FoodItem} entity to be updated
+   * @param foodItem      the {@link FoodItemUpdateInDto} containing updated food item details
    * @return the updated {@link FoodItem} entity
    */
-  public static FoodItem updateFoodItemRequest(FoodItemInDto request, FoodItem existingItem) {
-    existingItem.setDescription(request.getDescription());
-    existingItem.setItemName(request.getItemName());
-    existingItem.setPrice(request.getPrice());
-    return existingItem;
+  public static FoodItemUpdateOutDto convertFoodItemToFoodItemUpdateResponse(FoodItem foodItem) {
+    FoodItemUpdateOutDto response = new FoodItemUpdateOutDto();
+    response.setId(foodItem.getId());
+    response.setItemName(foodItem.getItemName());
+    response.setDescription(foodItem.getDescription());
+    response.setPrice(foodItem.getPrice());
+    return response;
   }
 }

@@ -14,13 +14,19 @@
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\indto\FoodItemInDto.java">
 </file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\indto\FoodItemUpdateInDto.java">
+</file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\indto\RestaurantInDto.java">
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\outdto\FoodCategoryOutDto.java">
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\outdto\FoodItemOutDto.java">
 </file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\outdto\FoodItemUpdateOutDto.java">
+</file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\outdto\RestaurantOutDto.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\outdto\UserOutDto.java">
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dtoconversion\DtoConversion.java">
 </file>
@@ -30,11 +36,19 @@
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\entities\Restaurant.java">
 </file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\exception\CategoryAlreadyExistsException.java">
+</file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\exception\CategoryNotFoundException.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\exception\FoodItemAlreadyExistsException.java">
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\exception\FoodItemNotFoundException.java">
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\exception\GlobalExceptionHandler.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\exception\InvalidFileTypeException.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\exception\NotRestaurantOwnerException.java">
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\exception\RestaurantNotFoundException.java">
 </file>
@@ -57,6 +71,8 @@
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\service\impl\RestaurantServiceImpl.java">
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\service\RestaurantService.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\service\UserFeignClient.java">
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\controller\FoodCategoryControllerTest.java">
 </file>

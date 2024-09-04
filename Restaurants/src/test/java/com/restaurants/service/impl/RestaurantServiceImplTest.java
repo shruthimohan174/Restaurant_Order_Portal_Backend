@@ -72,14 +72,9 @@ class RestaurantServiceImplTest {
     when(restaurantRepository.save(any(Restaurant.class))).thenReturn(restaurant);
     when(image.getBytes()).thenReturn(new byte[] {});
 
-    RestaurantOutDto result = restaurantService.addRestaurant(restaurantInDto, null);
+    String result = restaurantService.addRestaurant(restaurantInDto, null);
 
     assertNotNull(result);
-    assertEquals(1, result.getId());
-    assertEquals("Test Restaurant", result.getRestaurantName());
-    assertEquals("123 Test Street", result.getAddress());
-    assertEquals("9876543210", result.getContactNumber());
-    assertEquals("9 AM - 9 PM", result.getOpeningHours());
     verify(restaurantRepository, times(1)).save(any(Restaurant.class));
   }
 

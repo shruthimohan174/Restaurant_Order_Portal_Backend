@@ -6,6 +6,7 @@ import com.restaurants.dto.outdto.FoodCategoryOutDto;
 import com.restaurants.dtoconversion.DtoConversion;
 import com.restaurants.entities.FoodCategory;
 import com.restaurants.entities.Restaurant;
+import com.restaurants.exception.CategoryAlreadyExistsException;
 import com.restaurants.exception.CategoryNotFoundException;
 import com.restaurants.repositories.FoodCategoryRepository;
 import com.restaurants.service.FoodCategoryService;
@@ -40,31 +41,32 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
    * @return the added food category
    */
   @Override
-  public FoodCategoryOutDto addCategory(FoodCategoryInDto request) {
+  public String addCategory(FoodCategoryInDto request) {
     logger.info("Adding category: {}", request);
     Restaurant restaurant = restaurantService.findRestaurantById(request.getRestaurantId());
+    if (categoryExistsRestaurant(restaurant.getId(), request.getCategoryName())) {
+      throw new CategoryAlreadyExistsException(RestaurantConstants.CATEGORY_ALREADY_EXISTS);
+    }
     FoodCategory category = DtoConversion.convertCategoryRequestToCategory(request);
-    FoodCategory savedCategory = foodCategoryRepository.save(category);
-    logger.info("Category added successfully: {}", savedCategory);
-    return DtoConversion.convertCategoryToResponse(savedCategory);
+    foodCategoryRepository.save(category);
+    logger.info("Category added successfully: {}", request.getCategoryName());
+    return RestaurantConstants.FOOD_CATEGORY_ADDED_SUCCESSFULLY;
   }
 
-  /**
-   * Updates an existing food category.
-   *
-   * @param request the food category data to update
-   * @param id      the ID of the food category to update
-   * @return the updated food category
-   */
   @Override
-  public FoodCategoryOutDto updateCategory(FoodCategoryInDto request, Integer id) {
+  public String updateCategory(FoodCategoryInDto request, Integer id) {
     logger.info("Updating category with ID: {}", id);
     FoodCategory existingCategory = findCategoryById(id);
+    if (!existingCategory.getCategoryName().equalsIgnoreCase(request.getCategoryName()) &&
+      categoryExistsRestaurant(request.getRestaurantId(), request.getCategoryName())) {
+      throw new CategoryAlreadyExistsException(RestaurantConstants.CATEGORY_ALREADY_EXISTS);
+    }
     existingCategory.setCategoryName(request.getCategoryName());
-    FoodCategory updatedCategory = foodCategoryRepository.save(existingCategory);
-    logger.info("Category updated successfully: {}", updatedCategory);
-    return DtoConversion.convertCategoryToResponse(updatedCategory);
+    foodCategoryRepository.save(existingCategory);
+    logger.info("Category updated successfully: {}", request.getCategoryName());
+    return RestaurantConstants.FOOD_CATEGORY_UPDATED_SUCCESSFULLY;
   }
+
 
   /**
    * Retrieves all food categories.
@@ -113,5 +115,9 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
       logger.error("Category not found for ID: {}", id);
       return new CategoryNotFoundException(RestaurantConstants.CATEGORY_NOT_FOUND);
     });
+  }
+
+  private boolean categoryExistsRestaurant(Integer restaurantId, String categoryName) {
+    return foodCategoryRepository.existsByRestaurantIdAndCategoryNameIgnoreCase(restaurantId, categoryName);
   }
 }

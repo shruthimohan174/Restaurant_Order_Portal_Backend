@@ -1,5 +1,6 @@
 package com.restaurants.controller;
 
+import com.restaurants.constants.RestaurantConstants;
 import com.restaurants.dto.indto.RestaurantInDto;
 import com.restaurants.dto.outdto.RestaurantOutDto;
 import com.restaurants.entities.Restaurant;
@@ -60,13 +61,13 @@ class RestaurantControllerTest {
   @Test
   void testAddRestaurant() {
     when(restaurantService.addRestaurant(any(RestaurantInDto.class), any(MultipartFile.class)))
-      .thenReturn(restaurantOutDto);
+      .thenReturn(RestaurantConstants.RESTAURANT_ADDED_SUCCESSFULLY);
 
-    ResponseEntity<RestaurantOutDto> response = restaurantController.addRestaurant(restaurantInDto, image);
+    ResponseEntity<String> response = restaurantController.addRestaurant(restaurantInDto, image);
 
     assertNotNull(response);
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    assertEquals(restaurantOutDto, response.getBody());
+    assertEquals(RestaurantConstants.RESTAURANT_ADDED_SUCCESSFULLY, response.getBody());
     verify(restaurantService, times(1)).addRestaurant(any(RestaurantInDto.class), any(MultipartFile.class));
   }
 

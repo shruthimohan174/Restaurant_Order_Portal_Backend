@@ -59,30 +59,28 @@ public class FoodCategoryControllerTest {
 
   @Test
   void addFoodCategoryTest() throws Exception {
-    when(foodCategoryService.addCategory(any(FoodCategoryInDto.class))).thenReturn(foodCategoryOutDto);
+    // Mocking the service method to return success message
+    when(foodCategoryService.addCategory(any(FoodCategoryInDto.class)))
+      .thenReturn("Food category added successfully");
 
     mockMvc.perform(post("/category/add")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(foodCategoryInDto)))
       .andExpect(status().isCreated())
-      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-      .andExpect(jsonPath("$.id").value(1))
-      .andExpect(jsonPath("$.restaurantId").value(1))
-      .andExpect(jsonPath("$.categoryName").value("Desserts"));
+      .andExpect(content().string("Food category added successfully"));
   }
 
   @Test
   void updateFoodCategoryTest() throws Exception {
-    when(foodCategoryService.updateCategory(any(FoodCategoryInDto.class), anyInt())).thenReturn(foodCategoryOutDto);
+    // Mocking the service method to return success message
+    when(foodCategoryService.updateCategory(any(FoodCategoryInDto.class), anyInt()))
+      .thenReturn("Food category updated successfully");
 
     mockMvc.perform(put("/category/update/1")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(foodCategoryInDto)))
       .andExpect(status().isOk())
-      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-      .andExpect(jsonPath("$.id").value(1))
-      .andExpect(jsonPath("$.restaurantId").value(1))
-      .andExpect(jsonPath("$.categoryName").value("Desserts"));
+      .andExpect(content().string("Food category updated successfully"));
   }
 
   @Test

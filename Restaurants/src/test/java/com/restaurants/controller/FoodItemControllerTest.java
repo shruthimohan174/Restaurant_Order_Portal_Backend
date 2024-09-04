@@ -1,8 +1,8 @@
 package com.restaurants.controller;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurants.dto.indto.FoodItemInDto;
+import com.restaurants.dto.indto.FoodItemUpdateInDto;
 import com.restaurants.dto.outdto.FoodItemOutDto;
 import com.restaurants.service.FoodItemService;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -48,11 +48,9 @@ public class FoodItemControllerTest {
   private ObjectMapper objectMapper;
   private FoodItemInDto request;
   private FoodItemOutDto response;
-  @Mock
-  private MultipartFile image;
 
   @Mock
-  private MultipartFile multipartFile;
+  private MultipartFile image;
 
   @BeforeEach
   public void setUp() {
@@ -80,41 +78,40 @@ public class FoodItemControllerTest {
   }
 
   @Test
-  void testAddFoodItem() {
+  void testAddFoodItem() throws Exception {
     when(foodItemService.addFoodItems(any(FoodItemInDto.class), any(MultipartFile.class)))
-      .thenReturn(response);
+      .thenReturn("Food item added successfully");
 
-    ResponseEntity<FoodItemOutDto> responseEntity = foodItemController.addFoodItems(request, image);
+    ResponseEntity<String> responseEntity = foodItemController.addFoodItems(request, image);
 
     assertNotNull(responseEntity);
     assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-    assertEquals(response, responseEntity.getBody());
-
     verify(foodItemService, times(1)).addFoodItems(any(FoodItemInDto.class), any(MultipartFile.class));
+
   }
-
-
 
   @Test
   public void testUpdateFoodItem() throws Exception {
-
-    when(foodItemService.updateFoodItems(any(FoodItemInDto.class), any(Integer.class))).thenReturn(response);
+    when(foodItemService.updateFoodItems(any(FoodItemUpdateInDto.class), any(Integer.class)))
+      .thenReturn("Food item updated successfully");
 
     mockMvc.perform(put("/foodItem/update/1")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)))
       .andExpect(status().isOk())
-      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-      .andExpect(jsonPath("$.id").value(1))
-      .andExpect(jsonPath("$.itemName").value("Pizza"));
+      .andExpect(content().string("Food item updated successfully"));
   }
 
   @Test
   public void testGetAllFoodItems() throws Exception {
-
     FoodItemOutDto response2 = new FoodItemOutDto();
     response2.setId(2);
+    response2.setCategoryId(1);
+    response2.setRestaurantId(1);
     response2.setItemName("Burger");
+    response2.setDescription("Delicious beef burger");
+    response2.setIsVeg(false);
+    response2.setPrice(BigDecimal.valueOf(5.99));
 
     List<FoodItemOutDto> responseList = Arrays.asList(response, response2);
 
@@ -124,7 +121,9 @@ public class FoodItemControllerTest {
       .andExpect(status().isOk())
       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(jsonPath("$[0].id").value(1))
-      .andExpect(jsonPath("$[1].id").value(2));
+      .andExpect(jsonPath("$[0].itemName").value("Pizza"))
+      .andExpect(jsonPath("$[1].id").value(2))
+      .andExpect(jsonPath("$[1].itemName").value("Burger"));
   }
 
   @Test
@@ -136,7 +135,8 @@ public class FoodItemControllerTest {
     mockMvc.perform(get("/foodItem/restaurant/1"))
       .andExpect(status().isOk())
       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-      .andExpect(jsonPath("$[0].id").value(1));
+      .andExpect(jsonPath("$[0].id").value(1))
+      .andExpect(jsonPath("$[0].itemName").value("Pizza"));
   }
 
   @Test
@@ -148,6 +148,33 @@ public class FoodItemControllerTest {
     mockMvc.perform(get("/foodItem/category/1"))
       .andExpect(status().isOk())
       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-      .andExpect(jsonPath("$[0].id").value(1));
+      .andExpect(jsonPath("$[0].id").value(1))
+      .andExpect(jsonPath("$[0].itemName").value("Pizza"));
+  }
+
+  @Test
+  public void testGetFoodItemImage() throws Exception {
+    byte[] imageData = new byte[] {1, 2, 3, 4, 5}; // Example byte array
+
+    when(foodItemService.getFoodItemImage(1)).thenReturn(imageData);
+
+    mockMvc.perform(get("/foodItem/1/image"))
+      .andExpect(status().isOk())
+      .andExpect(content().contentType(MediaType.IMAGE_JPEG))
+      .andExpect(content().bytes(imageData));
   }
 }
+
+//@Test
+//  void testAddFoodItem() {
+////    when(foodItemService.addFoodItems(any(FoodItemInDto.class), any(MultipartFile.class)))
+////      .thenReturn(response);
+//
+////    ResponseEntity<FoodItemOutDto> responseEntity = foodItemController.addFoodItems(request, image);
+//
+//    assertNotNull(responseEntity);
+//    assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+//    assertEquals(response, responseEntity.getBody());
+//
+//    verify(foodItemService, times(1)).addFoodItems(any(FoodItemInDto.class), any(MultipartFile.class));
+//  }

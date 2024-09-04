@@ -80,11 +80,38 @@ public class GlobalExceptionHandler {
       .map(FieldError::getDefaultMessage)
       .collect(Collectors.toList());
 
-    String errorMessage = String.join(",", errors);
+    String errorMessage = String.join(", ", errors);
     return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), "Validation failed: " + errorMessage,
       request.getRequestURI());
   }
 
+  @ExceptionHandler(CategoryAlreadyExistsException.class)
+  @ResponseStatus(HttpStatus.CONFLICT)
+  @ResponseBody
+  public final ErrorResponse handleCategoryAlreadyExistsException(CategoryAlreadyExistsException ex, HttpServletRequest request) {
+    return new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(FoodItemAlreadyExistsException.class)
+  @ResponseStatus(HttpStatus.CONFLICT)
+  @ResponseBody
+  public final ErrorResponse handleFoodItemAlreadyExistsException(FoodItemAlreadyExistsException ex, HttpServletRequest request) {
+    return new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(InvalidFileTypeException.class)
+  @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+  @ResponseBody
+  public final ErrorResponse handleInvalidFileTypeException(InvalidFileTypeException ex, HttpServletRequest request) {
+    return new ErrorResponse(LocalDateTime.now(), HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(), ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(NotRestaurantOwnerException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  @ResponseBody
+  public final ErrorResponse handleNotRestaurantOwnerException(NotRestaurantOwnerException ex, HttpServletRequest request) {
+    return new ErrorResponse(LocalDateTime.now(), HttpStatus.FORBIDDEN.value(), ex.getMessage(), request.getRequestURI());
+  }
   /**
    * Represents the error response returned by the exception handler.
    */

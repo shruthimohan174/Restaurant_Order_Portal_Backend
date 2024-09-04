@@ -2,8 +2,10 @@ package com.restaurants;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
+@EnableFeignClients
 @SuppressWarnings("PMD.UseUtilityClass")
 public class RestaurantsApplication {
 

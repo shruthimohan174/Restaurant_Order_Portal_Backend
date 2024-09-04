@@ -17,7 +17,7 @@ public interface FoodCategoryService {
    * @param request the details of the food category to be added
    * @return the created food category
    */
-  FoodCategoryOutDto addCategory(FoodCategoryInDto request);
+  String addCategory(FoodCategoryInDto request);
 
   /**
    * Updates an existing food category.
@@ -26,7 +26,7 @@ public interface FoodCategoryService {
    * @param id      the ID of the food category to be updated
    * @return the updated food category
    */
-  FoodCategoryOutDto updateCategory(FoodCategoryInDto request, Integer id);
+  String updateCategory(FoodCategoryInDto request, Integer id);
 
   /**
    * Retrieves all food categories.

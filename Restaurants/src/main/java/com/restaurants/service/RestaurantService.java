@@ -19,7 +19,7 @@ public interface RestaurantService {
    * @param image   the image representing the restaurant
    * @return the created restaurant
    */
-  RestaurantOutDto addRestaurant(RestaurantInDto request, MultipartFile image);
+  String addRestaurant(RestaurantInDto request, MultipartFile image);
 
   /**
    * Retrieves all restaurants.
@@ -50,4 +50,7 @@ public interface RestaurantService {
    * @return the image data as a byte array
    */
   byte[] getRestaurantImage(Integer id);
+
+  void validateImageFile(MultipartFile image);
+
 }

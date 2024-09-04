@@ -2,9 +2,11 @@
 
 import com.restaurants.dto.indto.FoodCategoryInDto;
 import com.restaurants.dto.indto.FoodItemInDto;
+import com.restaurants.dto.indto.FoodItemUpdateInDto;
 import com.restaurants.dto.indto.RestaurantInDto;
 import com.restaurants.dto.outdto.FoodCategoryOutDto;
 import com.restaurants.dto.outdto.FoodItemOutDto;
+import com.restaurants.dto.outdto.FoodItemUpdateOutDto;
 import com.restaurants.dto.outdto.RestaurantOutDto;
 import com.restaurants.entities.FoodCategory;
 import com.restaurants.entities.FoodItem;
@@ -15,8 +17,8 @@ import com.restaurants.entities.Restaurant;
  */
 public final class DtoConversion {
 
-<span class="nc" id="L18">  private DtoConversion() {</span>
-<span class="nc" id="L19">    throw new UnsupportedOperationException(&quot;Utility class&quot;);</span>
+<span class="nc" id="L20">  private DtoConversion() {</span>
+<span class="nc" id="L21">    throw new UnsupportedOperationException(&quot;Utility class&quot;);</span>
   }
 
   /**
@@ -26,13 +28,13 @@ public final class DtoConversion {
    * @return the corresponding {@link Restaurant} entity
    */
   public static Restaurant convertRestaurantRequestToRestaurant(RestaurantInDto request) {
-<span class="fc" id="L29">    Restaurant restaurant = new Restaurant();</span>
-<span class="fc" id="L30">    restaurant.setRestaurantName(request.getRestaurantName());</span>
-<span class="fc" id="L31">    restaurant.setAddress(request.getAddress());</span>
-<span class="fc" id="L32">    restaurant.setUserId(request.getUserId());</span>
-<span class="fc" id="L33">    restaurant.setOpeningHours(request.getOpeningHours());</span>
-<span class="fc" id="L34">    restaurant.setContactNumber(request.getContactNumber());</span>
-<span class="fc" id="L35">    return restaurant;</span>
+<span class="fc" id="L31">    Restaurant restaurant = new Restaurant();</span>
+<span class="fc" id="L32">    restaurant.setRestaurantName(request.getRestaurantName());</span>
+<span class="fc" id="L33">    restaurant.setAddress(request.getAddress());</span>
+<span class="fc" id="L34">    restaurant.setUserId(request.getUserId());</span>
+<span class="fc" id="L35">    restaurant.setOpeningHours(request.getOpeningHours());</span>
+<span class="fc" id="L36">    restaurant.setContactNumber(request.getContactNumber());</span>
+<span class="fc" id="L37">    return restaurant;</span>
   }
 
   /**
@@ -42,15 +44,15 @@ public final class DtoConversion {
    * @return the corresponding {@link RestaurantOutDto}
    */
   public static RestaurantOutDto convertRestaurantToRestaurantResponse(Restaurant restaurant) {
-<span class="fc" id="L45">    RestaurantOutDto response = new RestaurantOutDto();</span>
-<span class="fc" id="L46">    response.setId(restaurant.getId());</span>
-<span class="fc" id="L47">    response.setAddress(restaurant.getAddress());</span>
-<span class="fc" id="L48">    response.setContactNumber(restaurant.getContactNumber());</span>
-<span class="fc" id="L49">    response.setRestaurantName(restaurant.getRestaurantName());</span>
-<span class="fc" id="L50">    response.setOpeningHours(restaurant.getOpeningHours());</span>
-<span class="fc" id="L51">    response.setImageData(restaurant.getImageData());</span>
-<span class="fc" id="L52">    response.setUserId(restaurant.getUserId());</span>
-<span class="fc" id="L53">    return response;</span>
+<span class="fc" id="L47">    RestaurantOutDto response = new RestaurantOutDto();</span>
+<span class="fc" id="L48">    response.setId(restaurant.getId());</span>
+<span class="fc" id="L49">    response.setAddress(restaurant.getAddress());</span>
+<span class="fc" id="L50">    response.setContactNumber(restaurant.getContactNumber());</span>
+<span class="fc" id="L51">    response.setRestaurantName(restaurant.getRestaurantName());</span>
+<span class="fc" id="L52">    response.setOpeningHours(restaurant.getOpeningHours());</span>
+<span class="fc" id="L53">    response.setImageData(restaurant.getImageData());</span>
+<span class="fc" id="L54">    response.setUserId(restaurant.getUserId());</span>
+<span class="fc" id="L55">    return response;</span>
   }
 
   /**
@@ -60,10 +62,10 @@ public final class DtoConversion {
    * @return the corresponding {@link FoodCategory} entity
    */
   public static FoodCategory convertCategoryRequestToCategory(FoodCategoryInDto request) {
-<span class="fc" id="L63">    FoodCategory category = new FoodCategory();</span>
-<span class="fc" id="L64">    category.setCategoryName(request.getCategoryName());</span>
-<span class="fc" id="L65">    category.setRestaurantId(request.getRestaurantId());</span>
-<span class="fc" id="L66">    return category;</span>
+<span class="fc" id="L65">    FoodCategory category = new FoodCategory();</span>
+<span class="fc" id="L66">    category.setCategoryName(request.getCategoryName());</span>
+<span class="fc" id="L67">    category.setRestaurantId(request.getRestaurantId());</span>
+<span class="fc" id="L68">    return category;</span>
   }
 
   /**
@@ -73,11 +75,11 @@ public final class DtoConversion {
    * @return the corresponding {@link FoodCategoryOutDto}
    */
   public static FoodCategoryOutDto convertCategoryToResponse(FoodCategory category) {
-<span class="fc" id="L76">    FoodCategoryOutDto response = new FoodCategoryOutDto();</span>
-<span class="fc" id="L77">    response.setId(category.getId());</span>
-<span class="fc" id="L78">    response.setCategoryName(category.getCategoryName());</span>
-<span class="fc" id="L79">    response.setRestaurantId(category.getRestaurantId());</span>
-<span class="fc" id="L80">    return response;</span>
+<span class="fc" id="L78">    FoodCategoryOutDto response = new FoodCategoryOutDto();</span>
+<span class="fc" id="L79">    response.setId(category.getId());</span>
+<span class="fc" id="L80">    response.setCategoryName(category.getCategoryName());</span>
+<span class="fc" id="L81">    response.setRestaurantId(category.getRestaurantId());</span>
+<span class="fc" id="L82">    return response;</span>
   }
 
   /**
@@ -87,14 +89,14 @@ public final class DtoConversion {
    * @return the corresponding {@link FoodItem} entity
    */
   public static FoodItem convertFoodItemRequestToFoodItem(FoodItemInDto request) {
-<span class="fc" id="L90">    FoodItem items = new FoodItem();</span>
-<span class="fc" id="L91">    items.setCategoryId(request.getCategoryId());</span>
-<span class="fc" id="L92">    items.setDescription(request.getDescription());</span>
-<span class="fc" id="L93">    items.setPrice(request.getPrice());</span>
-<span class="fc" id="L94">    items.setIsVeg(request.getIsVeg());</span>
-<span class="fc" id="L95">    items.setItemName(request.getItemName());</span>
-<span class="fc" id="L96">    items.setRestaurantId(request.getRestaurantId());</span>
-<span class="fc" id="L97">    return items;</span>
+<span class="nc" id="L92">    FoodItem items = new FoodItem();</span>
+<span class="nc" id="L93">    items.setCategoryId(request.getCategoryId());</span>
+<span class="nc" id="L94">    items.setDescription(request.getDescription());</span>
+<span class="nc" id="L95">    items.setPrice(request.getPrice());</span>
+<span class="nc" id="L96">    items.setIsVeg(request.getIsVeg());</span>
+<span class="nc" id="L97">    items.setItemName(request.getItemName());</span>
+<span class="nc" id="L98">    items.setRestaurantId(request.getRestaurantId());</span>
+<span class="nc" id="L99">    return items;</span>
   }
 
   /**
@@ -104,31 +106,32 @@ public final class DtoConversion {
    * @return the corresponding {@link FoodItemOutDto}
    */
   public static FoodItemOutDto convertFoodItemToFoodItemResponse(FoodItem items) {
-<span class="fc" id="L107">    FoodItemOutDto response = new FoodItemOutDto();</span>
-<span class="fc" id="L108">    response.setId(items.getId());</span>
-<span class="fc" id="L109">    response.setCategoryId(items.getCategoryId());</span>
-<span class="fc" id="L110">    response.setDescription(items.getDescription());</span>
-<span class="fc" id="L111">    response.setPrice(items.getPrice());</span>
-<span class="fc" id="L112">    response.setIsVeg(items.getIsVeg());</span>
-<span class="fc" id="L113">    response.setImageData(items.getImageData());</span>
-<span class="fc" id="L114">    response.setItemName(items.getItemName());</span>
-<span class="fc" id="L115">    response.setRestaurantId(items.getRestaurantId());</span>
+<span class="fc" id="L109">    FoodItemOutDto response = new FoodItemOutDto();</span>
+<span class="fc" id="L110">    response.setId(items.getId());</span>
+<span class="fc" id="L111">    response.setCategoryId(items.getCategoryId());</span>
+<span class="fc" id="L112">    response.setDescription(items.getDescription());</span>
+<span class="fc" id="L113">    response.setPrice(items.getPrice());</span>
+<span class="fc" id="L114">    response.setIsVeg(items.getIsVeg());</span>
+<span class="fc" id="L115">    response.setImageData(items.getImageData());</span>
+<span class="fc" id="L116">    response.setItemName(items.getItemName());</span>
+<span class="fc" id="L117">    response.setRestaurantId(items.getRestaurantId());</span>
 
-<span class="fc" id="L117">    return response;</span>
+<span class="fc" id="L119">    return response;</span>
   }
 
   /**
    * Updates an existing {@link FoodItem} entity with data from a {@link FoodItemInDto}.
    *
-   * @param request      the {@link FoodItemInDto} containing updated food item details
-   * @param existingItem the existing {@link FoodItem} entity to be updated
+   * @param foodItem      the {@link FoodItemUpdateInDto} containing updated food item details
    * @return the updated {@link FoodItem} entity
    */
-  public static FoodItem updateFoodItemRequest(FoodItemInDto request, FoodItem existingItem) {
-<span class="fc" id="L128">    existingItem.setDescription(request.getDescription());</span>
-<span class="fc" id="L129">    existingItem.setItemName(request.getItemName());</span>
-<span class="fc" id="L130">    existingItem.setPrice(request.getPrice());</span>
-<span class="fc" id="L131">    return existingItem;</span>
+  public static FoodItemUpdateOutDto convertFoodItemToFoodItemUpdateResponse(FoodItem foodItem) {
+<span class="nc" id="L129">    FoodItemUpdateOutDto response = new FoodItemUpdateOutDto();</span>
+<span class="nc" id="L130">    response.setId(foodItem.getId());</span>
+<span class="nc" id="L131">    response.setItemName(foodItem.getItemName());</span>
+<span class="nc" id="L132">    response.setDescription(foodItem.getDescription());</span>
+<span class="nc" id="L133">    response.setPrice(foodItem.getPrice());</span>
+<span class="nc" id="L134">    return response;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
