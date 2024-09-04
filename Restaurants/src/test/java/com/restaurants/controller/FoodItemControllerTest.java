@@ -1,9 +1,9 @@
 package com.restaurants.controller;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurants.dto.indto.FoodItemInDto;
 import com.restaurants.dto.indto.FoodItemUpdateInDto;
 import com.restaurants.dto.outdto.FoodItemOutDto;
+import com.restaurants.dto.outdto.MessageOutDto;
 import com.restaurants.service.FoodItemService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +48,7 @@ public class FoodItemControllerTest {
   private ObjectMapper objectMapper;
   private FoodItemInDto request;
   private FoodItemOutDto response;
+  private MessageOutDto messageOutDto;
 
   @Mock
   private MultipartFile image;
@@ -75,32 +76,39 @@ public class FoodItemControllerTest {
     response.setDescription("Delicious cheese pizza");
     response.setIsVeg(true);
     response.setPrice(BigDecimal.valueOf(9.99));
-  }
 
+    messageOutDto = new MessageOutDto();
+
+  }
   @Test
   void testAddFoodItem() throws Exception {
+    messageOutDto.setMessage("Food item added successfully");
     when(foodItemService.addFoodItems(any(FoodItemInDto.class), any(MultipartFile.class)))
-      .thenReturn("Food item added successfully");
+      .thenReturn(messageOutDto);
 
-    ResponseEntity<String> responseEntity = foodItemController.addFoodItems(request, image);
+    ResponseEntity<MessageOutDto> responseEntity = foodItemController.addFoodItems(request, image);
 
     assertNotNull(responseEntity);
     assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-    verify(foodItemService, times(1)).addFoodItems(any(FoodItemInDto.class), any(MultipartFile.class));
+    assertEquals("Food item added successfully", responseEntity.getBody().getMessage());
 
+    verify(foodItemService, times(1)).addFoodItems(any(FoodItemInDto.class), any(MultipartFile.class));
   }
 
   @Test
   public void testUpdateFoodItem() throws Exception {
+    messageOutDto.setMessage("Food item updated successfully");
+
     when(foodItemService.updateFoodItems(any(FoodItemUpdateInDto.class), any(Integer.class)))
-      .thenReturn("Food item updated successfully");
+      .thenReturn(messageOutDto);
 
     mockMvc.perform(put("/foodItem/update/1")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)))
       .andExpect(status().isOk())
-      .andExpect(content().string("Food item updated successfully"));
+      .andExpect(content().json(objectMapper.writeValueAsString(messageOutDto)));
   }
+
 
   @Test
   public void testGetAllFoodItems() throws Exception {
@@ -164,17 +172,3 @@ public class FoodItemControllerTest {
       .andExpect(content().bytes(imageData));
   }
 }
-
-//@Test
-//  void testAddFoodItem() {
-////    when(foodItemService.addFoodItems(any(FoodItemInDto.class), any(MultipartFile.class)))
-////      .thenReturn(response);
-//
-////    ResponseEntity<FoodItemOutDto> responseEntity = foodItemController.addFoodItems(request, image);
-//
-//    assertNotNull(responseEntity);
-//    assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-//    assertEquals(response, responseEntity.getBody());
-//
-//    verify(foodItemService, times(1)).addFoodItems(any(FoodItemInDto.class), any(MultipartFile.class));
-//  }

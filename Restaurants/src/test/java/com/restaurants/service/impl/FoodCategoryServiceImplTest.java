@@ -2,8 +2,10 @@ package com.restaurants.service.impl;
 
 import com.restaurants.dto.indto.FoodCategoryInDto;
 import com.restaurants.dto.outdto.FoodCategoryOutDto;
+import com.restaurants.dto.outdto.MessageOutDto;
 import com.restaurants.entities.FoodCategory;
 import com.restaurants.entities.Restaurant;
+import com.restaurants.exception.CategoryAlreadyExistsException;
 import com.restaurants.exception.CategoryNotFoundException;
 import com.restaurants.repositories.FoodCategoryRepository;
 import com.restaurants.service.RestaurantService;
@@ -43,6 +45,7 @@ class FoodCategoryServiceImplTest {
   private Restaurant restaurant;
   private FoodCategory foodCategory;
   private FoodCategoryOutDto categoryResponse;
+  private MessageOutDto messageOutDto;
 
   @BeforeEach
   void setUp() {
@@ -60,6 +63,7 @@ class FoodCategoryServiceImplTest {
 
     categoryResponse = new FoodCategoryOutDto();
     categoryResponse.setCategoryName("Fast Food");
+
   }
 
   @Test
@@ -67,7 +71,7 @@ class FoodCategoryServiceImplTest {
     when(restaurantService.findRestaurantById(1)).thenReturn(restaurant);
     when(foodCategoryRepository.save(any(FoodCategory.class))).thenReturn(foodCategory);
 
-    String result = foodCategoryService.addCategory(categoryRequest);
+    MessageOutDto result = foodCategoryService.addCategory(categoryRequest);
 
     assertNotNull(result);
     verify(restaurantService, times(1)).findRestaurantById(1);
@@ -83,11 +87,20 @@ class FoodCategoryServiceImplTest {
     when(foodCategoryRepository.findById(1)).thenReturn(Optional.of(foodCategory));
     when(foodCategoryRepository.save(any(FoodCategory.class))).thenReturn(foodCategory);
 
-    String result = foodCategoryService.updateCategory(updateRequest, 1);
+    MessageOutDto result = foodCategoryService.updateCategory(updateRequest, 1);
 
     assertNotNull(result);
     verify(foodCategoryRepository, times(1)).findById(1);
     verify(foodCategoryRepository, times(1)).save(foodCategory);
+  }
+
+  @Test
+  void addCategory_CategoryAlreadyExistsTest() {
+    when(restaurantService.findRestaurantById(1)).thenReturn(restaurant);
+    when(foodCategoryRepository.existsByRestaurantIdAndCategoryNameIgnoreCase(1, "Fast Food")).thenReturn(true);
+
+    assertThrows(CategoryAlreadyExistsException.class, () -> foodCategoryService.addCategory(categoryRequest));
+    verify(restaurantService, times(1)).findRestaurantById(1);
   }
 
   @Test

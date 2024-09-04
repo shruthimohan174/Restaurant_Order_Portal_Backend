@@ -53,7 +53,7 @@ public class FoodItemInDto {
 
   /**
    * The price of the food item.
-   * Cannot be blank.
+   * Cannot be blank and price must be greater than 0.
    */
   @NotBlank(message = "Price cannot be blank")
   @DecimalMin(value = "0.01", inclusive = true, message = "Price must be greater than 0")

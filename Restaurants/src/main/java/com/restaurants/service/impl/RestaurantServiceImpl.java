@@ -2,13 +2,18 @@ package com.restaurants.service.impl;
 
 import com.restaurants.constants.RestaurantConstants;
 import com.restaurants.dto.indto.RestaurantInDto;
+import com.restaurants.dto.outdto.MessageOutDto;
 import com.restaurants.dto.outdto.RestaurantOutDto;
+import com.restaurants.dto.outdto.UserOutDto;
 import com.restaurants.dtoconversion.DtoConversion;
 import com.restaurants.entities.Restaurant;
 import com.restaurants.exception.InvalidFileTypeException;
+import com.restaurants.exception.NotRestaurantOwnerException;
 import com.restaurants.exception.RestaurantNotFoundException;
 import com.restaurants.repositories.RestaurantRepository;
 import com.restaurants.service.RestaurantService;
+import com.restaurants.service.UserFeignClient;
+import com.restaurants.utils.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +37,8 @@ public class RestaurantServiceImpl implements RestaurantService {
   @Autowired
   private RestaurantRepository restaurantRepository;
 
-//  @Autowired
-//  private UserFeignClient userFeignClient;
+  @Autowired
+  private UserFeignClient userFeignClient;
 
   /**
    * Adds a new restaurant.
@@ -44,13 +49,13 @@ public class RestaurantServiceImpl implements RestaurantService {
    */
   @Override
   @Transactional
-  public String addRestaurant(RestaurantInDto request, MultipartFile image) {
+  public MessageOutDto addRestaurant(RestaurantInDto request, MultipartFile image) {
     logger.info("Adding restaurant: {}", request);
-//    UserOutDto user = userFeignClient.getUserById(request.getUserId());
-//    if (!"RESTAURANT_OWNER".equalsIgnoreCase(user.getUserRole())) {
-//      logger.error("User {} is not a restaurant owner", request.getUserId());
-//      throw new NotRestaurantOwnerException(RestaurantConstants.NOT_RESTAURANT_OWNER);
-//    }
+    UserOutDto user = userFeignClient.getUserById(request.getUserId());
+    if (user.getUserRole() != UserRole.RESTAURANT_OWNER) {
+      logger.error("User {} is not a restaurant owner", request.getUserId());
+      throw new NotRestaurantOwnerException(RestaurantConstants.NOT_RESTAURANT_OWNER);
+    }
     Restaurant restaurant = DtoConversion.convertRestaurantRequestToRestaurant(request);
 
     if (image != null && !image.isEmpty()) {
@@ -59,15 +64,17 @@ public class RestaurantServiceImpl implements RestaurantService {
         restaurant.setImageData(image.getBytes());
       } catch (IOException e) {
         logger.error("Error occurred while processing the image file for restaurant: {}", request.getRestaurantName(), e);
+        throw new NotRestaurantOwnerException(RestaurantConstants.ERROR_PROCESSING_IMAGE);
       }
     }
 
     Restaurant savedRestaurant = restaurantRepository.save(restaurant);
     logger.info("Restaurant added successfully: {}", savedRestaurant);
-    return RestaurantConstants.RESTAURANT_ADDED_SUCCESSFULLY;
+
+    return new MessageOutDto(RestaurantConstants.RESTAURANT_ADDED_SUCCESSFULLY);
   }
 
-  /**
+  /**.
    * Retrieves all restaurants.
    *
    * @return a list of all restaurants

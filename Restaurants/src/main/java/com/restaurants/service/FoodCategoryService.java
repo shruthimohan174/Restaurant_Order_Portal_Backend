@@ -2,6 +2,7 @@ package com.restaurants.service;
 
 import com.restaurants.dto.indto.FoodCategoryInDto;
 import com.restaurants.dto.outdto.FoodCategoryOutDto;
+import com.restaurants.dto.outdto.MessageOutDto;
 import com.restaurants.entities.FoodCategory;
 
 import java.util.List;
@@ -15,31 +16,31 @@ public interface FoodCategoryService {
    * Adds a new food category.
    *
    * @param request the details of the food category to be added
-   * @return the created food category
+   * @return a {@link MessageOutDto} containing the success message
    */
-  String addCategory(FoodCategoryInDto request);
+  MessageOutDto addCategory(FoodCategoryInDto request);
 
   /**
    * Updates an existing food category.
    *
    * @param request the updated details of the food category
    * @param id      the ID of the food category to be updated
-   * @return the updated food category
+   * @return a {@link MessageOutDto} containing the success message
    */
-  String updateCategory(FoodCategoryInDto request, Integer id);
+  MessageOutDto updateCategory(FoodCategoryInDto request, Integer id);
 
   /**
    * Retrieves all food categories.
    *
-   * @return a list of all food categories
+   * @return a list of {@link FoodCategoryOutDto} representing all food categories
    */
   List<FoodCategoryOutDto> viewAllCategory();
 
   /**
-   * Retrieves food categories by restaurant ID.
+   * Retrieves food categories associated with a specific restaurant.
    *
    * @param restaurantId the ID of the restaurant
-   * @return a list of food categories for the specified restaurant
+   * @return a list of {@link FoodCategoryOutDto} representing food categories for the specified restaurant
    */
   List<FoodCategoryOutDto> findCategoryByRestaurantId(Integer restaurantId);
 
@@ -47,8 +48,7 @@ public interface FoodCategoryService {
    * Retrieves a food category by its ID.
    *
    * @param id the ID of the food category
-   * @return the food category with the specified ID
+   * @return the {@link FoodCategory} with the specified ID
    */
   FoodCategory findCategoryById(Integer id);
-
 }

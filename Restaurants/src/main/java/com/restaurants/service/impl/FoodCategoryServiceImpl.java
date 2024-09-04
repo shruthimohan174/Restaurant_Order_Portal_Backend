@@ -3,6 +3,7 @@ package com.restaurants.service.impl;
 import com.restaurants.constants.RestaurantConstants;
 import com.restaurants.dto.indto.FoodCategoryInDto;
 import com.restaurants.dto.outdto.FoodCategoryOutDto;
+import com.restaurants.dto.outdto.MessageOutDto;
 import com.restaurants.dtoconversion.DtoConversion;
 import com.restaurants.entities.FoodCategory;
 import com.restaurants.entities.Restaurant;
@@ -38,10 +39,10 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
    * Adds a new food category.
    *
    * @param request the food category data to be added
-   * @return the added food category
+   * @return the response message indicating success or failure
    */
   @Override
-  public String addCategory(FoodCategoryInDto request) {
+  public MessageOutDto addCategory(FoodCategoryInDto request) {
     logger.info("Adding category: {}", request);
     Restaurant restaurant = restaurantService.findRestaurantById(request.getRestaurantId());
     if (categoryExistsRestaurant(restaurant.getId(), request.getCategoryName())) {
@@ -50,11 +51,18 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
     FoodCategory category = DtoConversion.convertCategoryRequestToCategory(request);
     foodCategoryRepository.save(category);
     logger.info("Category added successfully: {}", request.getCategoryName());
-    return RestaurantConstants.FOOD_CATEGORY_ADDED_SUCCESSFULLY;
+    return new MessageOutDto(RestaurantConstants.FOOD_CATEGORY_ADDED_SUCCESSFULLY);
   }
 
+  /**
+   * Updates an existing food category.
+   *
+   * @param request the updated food category data
+   * @param id      the ID of the food category to be updated
+   * @return the response message indicating success or failure
+   */
   @Override
-  public String updateCategory(FoodCategoryInDto request, Integer id) {
+  public MessageOutDto updateCategory(FoodCategoryInDto request, Integer id) {
     logger.info("Updating category with ID: {}", id);
     FoodCategory existingCategory = findCategoryById(id);
     if (!existingCategory.getCategoryName().equalsIgnoreCase(request.getCategoryName()) &&
@@ -64,9 +72,8 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
     existingCategory.setCategoryName(request.getCategoryName());
     foodCategoryRepository.save(existingCategory);
     logger.info("Category updated successfully: {}", request.getCategoryName());
-    return RestaurantConstants.FOOD_CATEGORY_UPDATED_SUCCESSFULLY;
+    return new MessageOutDto(RestaurantConstants.FOOD_CATEGORY_UPDATED_SUCCESSFULLY);
   }
-
 
   /**
    * Retrieves all food categories.
@@ -117,6 +124,13 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
     });
   }
 
+  /**
+   * Checks if a food category with the given name exists for a specific restaurant.
+   *
+   * @param restaurantId the ID of the restaurant
+   * @param categoryName the name of the food category
+   * @return true if the category exists, false otherwise
+   */
   private boolean categoryExistsRestaurant(Integer restaurantId, String categoryName) {
     return foodCategoryRepository.existsByRestaurantIdAndCategoryNameIgnoreCase(restaurantId, categoryName);
   }

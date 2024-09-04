@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RestaurantController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Restaurants</a> &gt; <a href="index.source.html" class="el_package">com.restaurants.controller</a> &gt; <span class="el_source">RestaurantController.java</span></div><h1>RestaurantController.java</h1><pre class="source lang-java linenums">package com.restaurants.controller;
 
 import com.restaurants.dto.indto.RestaurantInDto;
+import com.restaurants.dto.outdto.MessageOutDto;
 import com.restaurants.dto.outdto.RestaurantOutDto;
 import com.restaurants.entities.Restaurant;
 import com.restaurants.service.RestaurantService;
@@ -23,85 +24,86 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
- * Controller for managing restaurants.
+ * Controller for managing restaurant-related operations.
  */
 @RestController
 @RequestMapping(&quot;/restaurant&quot;)
-<span class="fc" id="L30">public class RestaurantController {</span>
+<span class="fc" id="L31">public class RestaurantController {</span>
 
-<span class="fc" id="L32">  private static final Logger logger = LoggerFactory.getLogger(RestaurantController.class);</span>
+<span class="fc" id="L33">  private static final Logger logger = LoggerFactory.getLogger(RestaurantController.class);</span>
 
   @Autowired
   private RestaurantService restaurantService;
 
   /**
-   * Creates a new restaurant.
+   * Creates a new restaurant with the provided details and image.
    *
    * @param request the details of the restaurant to be added
    * @param image   the image representing the restaurant
-   * @return the created restaurant
+   * @return a {@link ResponseEntity} containing a {@link MessageOutDto} with the result of the operation
    */
   @PostMapping(&quot;/add&quot;)
-  public ResponseEntity&lt;String&gt; addRestaurant(@Valid @ModelAttribute RestaurantInDto request,
-                                                        @RequestParam(&quot;image&quot;) MultipartFile image) {
-<span class="fc" id="L47">    logger.info(&quot;Received request to add restaurant: {}&quot;, request);</span>
-<span class="fc" id="L48">    String message = restaurantService.addRestaurant(request, image);</span>
-<span class="fc" id="L49">    logger.info(message);</span>
-<span class="fc" id="L50">    return new ResponseEntity&lt;&gt;(message, HttpStatus.CREATED);</span>
+  public ResponseEntity&lt;MessageOutDto&gt; addRestaurant(@Valid @ModelAttribute RestaurantInDto request,
+                                                     @RequestParam(&quot;image&quot;) MultipartFile image) {
+<span class="fc" id="L48">    logger.info(&quot;Received request to add restaurant: {}&quot;, request);</span>
+<span class="fc" id="L49">    MessageOutDto message = restaurantService.addRestaurant(request, image);</span>
+<span class="fc" id="L50">    logger.info(String.valueOf(message));</span>
+
+<span class="fc" id="L52">    return new ResponseEntity&lt;&gt;(message, HttpStatus.CREATED);</span>
   }
 
   /**
    * Retrieves all restaurants.
    *
-   * @return a list of all restaurants
+   * @return a {@link ResponseEntity} containing a list of {@link RestaurantOutDto} with all restaurants
    */
   @GetMapping(&quot;&quot;)
   public ResponseEntity&lt;List&lt;RestaurantOutDto&gt;&gt; getAllRestaurants() {
-<span class="fc" id="L60">    logger.info(&quot;Retrieving all restaurants&quot;);</span>
-<span class="fc" id="L61">    List&lt;RestaurantOutDto&gt; response = restaurantService.getALlRestaurants();</span>
-<span class="fc" id="L62">    logger.info(&quot;Retrieved {} restaurants&quot;, response.size());</span>
-<span class="fc" id="L63">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+<span class="fc" id="L62">    logger.info(&quot;Retrieving all restaurants&quot;);</span>
+<span class="fc" id="L63">    List&lt;RestaurantOutDto&gt; response = restaurantService.getALlRestaurants();</span>
+<span class="fc" id="L64">    logger.info(&quot;Retrieved {} restaurants&quot;, response.size());</span>
+<span class="fc" id="L65">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
   }
 
   /**
    * Retrieves a restaurant by its ID.
    *
-   * @param id the ID of the restaurant
-   * @return the restaurant with the specified ID
+   * @param id the ID of the restaurant to retrieve
+   * @return a {@link ResponseEntity} containing the {@link Restaurant} with the specified ID
    */
   @GetMapping(&quot;/{id}&quot;)
   public ResponseEntity&lt;Restaurant&gt; getRestaurantById(@PathVariable Integer id) {
-<span class="fc" id="L74">    logger.info(&quot;Retrieving restaurant with ID: {}&quot;, id);</span>
-<span class="fc" id="L75">    Restaurant response = restaurantService.findRestaurantById(id);</span>
-<span class="fc" id="L76">    logger.info(&quot;Retrieved restaurant: {}&quot;, response);</span>
-<span class="fc" id="L77">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+<span class="fc" id="L76">    logger.info(&quot;Retrieving restaurant with ID: {}&quot;, id);</span>
+<span class="fc" id="L77">    Restaurant response = restaurantService.findRestaurantById(id);</span>
+<span class="fc" id="L78">    logger.info(&quot;Retrieved restaurant: {}&quot;, response);</span>
+<span class="fc" id="L79">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
   }
 
   /**
    * Retrieves all restaurants associated with a specific user.
    *
-   * @param userId the ID of the user
-   * @return a list of restaurants associated with the specified user
+   * @param userId the ID of the user whose restaurants to retrieve
+   * @return a {@link ResponseEntity} containing a list of {@link RestaurantOutDto} associated with the specified user
    */
   @GetMapping(&quot;/user/{userId}&quot;)
   public ResponseEntity&lt;List&lt;RestaurantOutDto&gt;&gt; getAllRestaurantByUserId(@PathVariable Integer userId) {
-<span class="fc" id="L88">    logger.info(&quot;Retrieving restaurants for user ID: {}&quot;, userId);</span>
-<span class="fc" id="L89">    List&lt;RestaurantOutDto&gt; response = restaurantService.getALlRestaurantsByUserId(userId);</span>
-<span class="fc" id="L90">    logger.info(&quot;Retrieved {} restaurants for user ID: {}&quot;, response.size(), userId);</span>
-<span class="fc" id="L91">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+<span class="fc" id="L90">    logger.info(&quot;Retrieving restaurants for user ID: {}&quot;, userId);</span>
+<span class="fc" id="L91">    List&lt;RestaurantOutDto&gt; response = restaurantService.getALlRestaurantsByUserId(userId);</span>
+<span class="fc" id="L92">    logger.info(&quot;Retrieved {} restaurants for user ID: {}&quot;, response.size(), userId);</span>
+<span class="fc" id="L93">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
   }
+
   /**
    * Retrieves the image data for a restaurant by its ID.
    *
    * @param id the ID of the restaurant
-   * @return the image data as a byte array
+   * @return a {@link ResponseEntity} containing the image data as a byte array
    */
-
   @GetMapping(&quot;/{id}/image&quot;)
   public ResponseEntity&lt;byte[]&gt; getRestaurantImage(@PathVariable Integer id) {
-<span class="nc" id="L102">    logger.info(&quot;Retrieving image for restaurant with ID: {}&quot;, id);</span>
-<span class="nc" id="L103">    byte[] imageData = restaurantService.getRestaurantImage(id);</span>
-<span class="nc" id="L104">    return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageData);</span>
+<span class="fc" id="L104">    logger.info(&quot;Retrieving image for restaurant with ID: {}&quot;, id);</span>
+<span class="fc" id="L105">    byte[] imageData = restaurantService.getRestaurantImage(id);</span>
+<span class="fc" id="L106">    return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageData);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

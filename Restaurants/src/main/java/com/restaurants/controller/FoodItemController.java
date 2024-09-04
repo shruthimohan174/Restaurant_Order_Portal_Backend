@@ -3,6 +3,7 @@ package com.restaurants.controller;
 import com.restaurants.dto.indto.FoodItemInDto;
 import com.restaurants.dto.indto.FoodItemUpdateInDto;
 import com.restaurants.dto.outdto.FoodItemOutDto;
+import com.restaurants.dto.outdto.MessageOutDto;
 import com.restaurants.service.FoodItemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,32 +40,38 @@ public class FoodItemController {
    * Creates a new food item.
    *
    * @param request the details of the food item to be added
-   * @param image   the image representing the food item
-   * @return the created food item
+   * @param image the image representing the food item
+   * @return a response entity containing a message indicating the result of the operation
    */
-
   @PostMapping("/food/add")
-  public ResponseEntity<String> addFoodItems(@Valid @ModelAttribute FoodItemInDto request,
-                                             @RequestParam("image") MultipartFile image) {
+  public ResponseEntity<MessageOutDto> addFoodItems(@Valid @ModelAttribute FoodItemInDto request,
+                                                    @RequestParam("image") MultipartFile image) {
     logger.info("Received request to add food item: {}", request);
-    String message = foodItemService.addFoodItems(request, image);
-    logger.info(message);
+    MessageOutDto message = foodItemService.addFoodItems(request, image);
+    logger.info(String.valueOf(message));
     return new ResponseEntity<>(message, HttpStatus.CREATED);
   }
 
+  /**
+   * Updates an existing food item.
+   *
+   * @param request the details of the food item to be updated
+   * @param id      the ID of the food item to be updated
+   * @return a response entity containing a message indicating the result of the operation
+   */
   @PutMapping("/update/{id}")
-  public ResponseEntity<String> updateFoodItem(@Valid @RequestBody FoodItemUpdateInDto request,
-                                               @PathVariable Integer id) {
+  public ResponseEntity<MessageOutDto> updateFoodItem(@Valid @RequestBody FoodItemUpdateInDto request,
+                                                      @PathVariable Integer id) {
     logger.info("Received request to update food item with ID: {}", id);
-    String message = foodItemService.updateFoodItems(request, id);
-    logger.info(message);
+    MessageOutDto message = foodItemService.updateFoodItems(request, id);
+    logger.info(String.valueOf(message));
     return new ResponseEntity<>(message, HttpStatus.OK);
   }
 
   /**
    * Retrieves all food items.
    *
-   * @return a list of all food items
+   * @return a response entity containing a list of all food items
    */
   @GetMapping("")
   public ResponseEntity<List<FoodItemOutDto>> getAllFoodItems() {
@@ -78,7 +85,7 @@ public class FoodItemController {
    * Retrieves food items by restaurant ID.
    *
    * @param restaurantId the ID of the restaurant
-   * @return a list of food items for the specified restaurant
+   * @return a response entity containing a list of food items for the specified restaurant
    */
   @GetMapping("/restaurant/{restaurantId}")
   public ResponseEntity<List<FoodItemOutDto>> getAllFoodItemsByRestaurantId(@PathVariable Integer restaurantId) {
@@ -92,7 +99,7 @@ public class FoodItemController {
    * Retrieves food items by category ID.
    *
    * @param categoryId the ID of the food category
-   * @return a list of food items for the specified category
+   * @return a response entity containing a list of food items for the specified category
    */
   @GetMapping("/category/{categoryId}")
   public ResponseEntity<List<FoodItemOutDto>> getAllFoodItemsByCategoryId(@PathVariable Integer categoryId) {
@@ -101,11 +108,12 @@ public class FoodItemController {
     logger.info("Retrieved {} food items for category ID: {}", response.size(), categoryId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
+
   /**
    * Retrieves the image data for a food item by its ID.
    *
    * @param id the ID of the food item
-   * @return the image data as a byte array
+   * @return a response entity containing the image data as a byte array
    */
   @GetMapping("/{id}/image")
   public ResponseEntity<byte[]> getFoodItemImage(@PathVariable Integer id) {

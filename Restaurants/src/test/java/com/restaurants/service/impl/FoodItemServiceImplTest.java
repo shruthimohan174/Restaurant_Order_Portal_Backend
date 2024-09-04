@@ -4,12 +4,15 @@ import com.restaurants.constants.RestaurantConstants;
 import com.restaurants.dto.indto.FoodItemInDto;
 import com.restaurants.dto.indto.FoodItemUpdateInDto;
 import com.restaurants.dto.outdto.FoodItemOutDto;
+import com.restaurants.dto.outdto.MessageOutDto;
 import com.restaurants.entities.FoodItem;
+import com.restaurants.entities.Restaurant;
+import com.restaurants.exception.FoodItemAlreadyExistsException;
 import com.restaurants.exception.FoodItemNotFoundException;
+import com.restaurants.exception.InvalidFileTypeException;
 import com.restaurants.repositories.FoodItemRepository;
 import com.restaurants.service.FoodCategoryService;
 import com.restaurants.service.RestaurantService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +30,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,21 +80,75 @@ public class FoodItemServiceImplTest {
 
 //  @Test
 //  public void testAddFoodItems() throws IOException {
-//
-//
-//    // Mock the repository save method
 //    when(foodItemRepository.save(any(FoodItem.class))).thenReturn(foodItem);
 //
-//    // Call the addFoodItems method
-//    String result = foodItemService.addFoodItems(request, null);
+//    MessageOutDto result = foodItemService.addFoodItems(request, null);
 //
-//    // Assertions
-//    assertEquals(RestaurantConstants.FOOD_ITEM_ADDED_SUCCESSFULLY, result);
+//    assertEquals(RestaurantConstants.FOOD_ITEM_ADDED_SUCCESSFULLY, result.getMessage());
 //    verify(foodItemRepository, times(1)).save(any(FoodItem.class));
 //  }
 
+
   @Test
-  public void testUpdateFoodItems() {
+  void testAddFoodItems_FoodItemAlreadyExistsException() {
+    FoodItemInDto request = new FoodItemInDto();
+    request.setRestaurantId(1);
+    request.setCategoryId(1);
+    request.setItemName("Pizza");
+
+    Restaurant restaurant = new Restaurant();
+    when(restaurantService.findRestaurantById(request.getRestaurantId())).thenReturn(restaurant);
+    when(foodItemService.itemExistsInRestaurant(restaurant.getId(), request.getItemName())).thenReturn(true);
+
+    FoodItemAlreadyExistsException exception = assertThrows(
+      FoodItemAlreadyExistsException.class,
+      () -> foodItemService.addFoodItems(request, null)
+    );
+
+    assertEquals(RestaurantConstants.ITEM_ALREADY_EXISTS, exception.getMessage());
+    verify(foodItemRepository, never()).save(any(FoodItem.class));
+  }
+
+  @Test
+  void testValidateImageFile_InvalidFileTypeException() {
+    when(image.getContentType()).thenReturn("application/pdf");
+
+    InvalidFileTypeException exception = assertThrows(
+      InvalidFileTypeException.class,
+      () -> foodItemService.validateImageFile(image)
+    );
+
+    assertEquals(RestaurantConstants.INVALID_FILE_TYPE, exception.getMessage());
+  }
+
+  @Test
+  void testGetFoodItemImage_Success() {
+    int foodItemId = 1;
+    FoodItem foodItem = new FoodItem();
+    byte[] imageData = "imageData".getBytes();
+    foodItem.setImageData(imageData);
+
+    when(foodItemRepository.findById(foodItemId)).thenReturn(Optional.of(foodItem));
+    byte[] result = foodItemService.getFoodItemImage(foodItemId);
+
+    assertEquals(imageData, result);
+  }
+
+  @Test
+  void testGetFoodItemImage_FoodItemNotFoundException() {
+    int foodItemId = 1;
+    when(foodItemRepository.findById(foodItemId)).thenReturn(Optional.empty());
+
+    FoodItemNotFoundException exception = assertThrows(
+      FoodItemNotFoundException.class,
+      () -> foodItemService.getFoodItemImage(foodItemId)
+    );
+
+    assertEquals(RestaurantConstants.FOOD_ITEM_NOT_FOUND, exception.getMessage());
+  }
+
+  @Test
+  void testUpdateFoodItems() {
     FoodItemUpdateInDto foodItemUpdateInDto = new FoodItemUpdateInDto();
     foodItemUpdateInDto.setItemName("Pizza");
     foodItemUpdateInDto.setDescription("Delicious cheese pizza");
@@ -102,21 +161,16 @@ public class FoodItemServiceImplTest {
     existingFoodItem.setPrice(BigDecimal.valueOf(8.99));
 
     when(foodItemRepository.findById(1)).thenReturn(Optional.of(existingFoodItem));
-    when(foodItemRepository.save(any(FoodItem.class))).thenAnswer(invocation -> {
-      FoodItem savedFoodItem = invocation.getArgument(0);
-      savedFoodItem.setId(1);
-      return savedFoodItem;
-    });
+    when(foodItemRepository.save(any(FoodItem.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    String response = foodItemService.updateFoodItems(foodItemUpdateInDto, 1);
+    MessageOutDto response = foodItemService.updateFoodItems(foodItemUpdateInDto, 1);
 
     assertNotNull(response);
-    assertEquals(RestaurantConstants.FOOD_ITEM_UPDATED_SUCCESSFULLY, response);
+    assertEquals(RestaurantConstants.FOOD_ITEM_UPDATED_SUCCESSFULLY, response.getMessage());
 
     verify(foodItemRepository, times(1)).findById(1);
     verify(foodItemRepository, times(1)).save(any(FoodItem.class));
   }
-
 
   @Test
   public void testGetAllFoodItems() {
@@ -144,7 +198,7 @@ public class FoodItemServiceImplTest {
 
     when(foodItemRepository.findById(foodItemId)).thenReturn(Optional.empty());
 
-    FoodItemNotFoundException exception = Assertions.assertThrows(
+    FoodItemNotFoundException exception = assertThrows(
       FoodItemNotFoundException.class,
       () -> foodItemService.findFoodItemsById(foodItemId)
     );

@@ -7,7 +7,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Pattern;
 import java.math.BigDecimal;
 
-<span class="pc bnc" id="L10" title="All 30 branches missed.">@Data</span>
+<span class="pc bpc" id="L10" title="18 of 30 branches missed.">@Data</span>
 public class FoodItemUpdateInDto {
 
 
@@ -30,7 +30,7 @@ public class FoodItemUpdateInDto {
    * The price of the food item.
    * Cannot be blank.
    */
-  @NotBlank(message = &quot;Price cannot be blank&quot;)
+  @NotBlank(message = &quot;Price cannot be blank and it must be greater than 0&quot;)
   @DecimalMin(value = &quot;0.01&quot;, inclusive = true, message = &quot;Price must be greater than 0&quot;)
 <span class="fc" id="L35">  private BigDecimal price;</span>
 }

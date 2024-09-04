@@ -3,7 +3,8 @@
 /**
  * Contains constant values used across the restaurant application.
  */
-<span class="nc" id="L6">public final class RestaurantConstants {</span>
+public final class RestaurantConstants {
+
   /**
    * Error message indicating that a restaurant was not found with the given ID.
    */
@@ -20,22 +21,58 @@
   public static final String FOOD_ITEM_NOT_FOUND = &quot;No Food items found with this id&quot;;
 
   /**
-   * Error message indicating that an image is not found.
+   * Error message indicating that there was an error processing the image.
    */
   public static final String ERROR_PROCESSING_IMAGE = &quot;Failed to process the image&quot;;
 
+  /**
+   * Error message indicating that a food category already exists for the given restaurant.
+   */
   public static final String CATEGORY_ALREADY_EXISTS = &quot;Category already exists for this restaurant&quot;;
+
+  /**
+   * Error message indicating that a food item already exists for the given restaurant.
+   */
   public static final String ITEM_ALREADY_EXISTS = &quot;Food item already exists for this restaurant&quot;;
+
+  /**
+   * Error message indicating that the uploaded file type is invalid.
+   */
   public static final String INVALID_FILE_TYPE = &quot;Only JPEG and PNG files are allowed.&quot;;
+
+  /**
+   * Error message indicating that the user is not authorized to add a restaurant.
+   */
   public static final String NOT_RESTAURANT_OWNER = &quot;User is not authorized to add a restaurant&quot;;
 
+  /**
+   * Success message indicating that a food item was added successfully.
+   */
   public static final String FOOD_ITEM_ADDED_SUCCESSFULLY = &quot;Food item added successfully&quot;;
+
+  /**
+   * Success message indicating that a food item was updated successfully.
+   */
   public static final String FOOD_ITEM_UPDATED_SUCCESSFULLY = &quot;Food item updated successfully&quot;;
 
-  public static final String FOOD_CATEGORY_ADDED_SUCCESSFULLY = &quot;Food item added successfully&quot;;
-  public static final String FOOD_CATEGORY_UPDATED_SUCCESSFULLY = &quot;Food item updated successfully&quot;;
+  /**
+   * Success message indicating that a food category was added successfully.
+   */
+  public static final String FOOD_CATEGORY_ADDED_SUCCESSFULLY = &quot;Food category added successfully&quot;;
 
+  /**
+   * Success message indicating that a food category was updated successfully.
+   */
+  public static final String FOOD_CATEGORY_UPDATED_SUCCESSFULLY = &quot;Food category updated successfully&quot;;
+
+  /**
+   * Success message indicating that a restaurant was added successfully.
+   */
   public static final String RESTAURANT_ADDED_SUCCESSFULLY = &quot;Restaurant added successfully&quot;;
 
+  // Private constructor to prevent instantiation
+<span class="nc" id="L74">  private RestaurantConstants() {</span>
+<span class="nc" id="L75">    throw new UnsupportedOperationException(&quot;This is a utility class and cannot be instantiated&quot;);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

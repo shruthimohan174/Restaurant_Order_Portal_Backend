@@ -1,6 +1,7 @@
 package com.restaurants.controller;
 
 import com.restaurants.dto.indto.RestaurantInDto;
+import com.restaurants.dto.outdto.MessageOutDto;
 import com.restaurants.dto.outdto.RestaurantOutDto;
 import com.restaurants.entities.Restaurant;
 import com.restaurants.service.RestaurantService;
@@ -23,7 +24,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
- * Controller for managing restaurants.
+ * Controller for managing restaurant-related operations.
  */
 @RestController
 @RequestMapping("/restaurant")
@@ -35,25 +36,26 @@ public class RestaurantController {
   private RestaurantService restaurantService;
 
   /**
-   * Creates a new restaurant.
+   * Creates a new restaurant with the provided details and image.
    *
    * @param request the details of the restaurant to be added
    * @param image   the image representing the restaurant
-   * @return the created restaurant
+   * @return a {@link ResponseEntity} containing a {@link MessageOutDto} with the result of the operation
    */
   @PostMapping("/add")
-  public ResponseEntity<String> addRestaurant(@Valid @ModelAttribute RestaurantInDto request,
-                                                        @RequestParam("image") MultipartFile image) {
+  public ResponseEntity<MessageOutDto> addRestaurant(@Valid @ModelAttribute RestaurantInDto request,
+                                                     @RequestParam("image") MultipartFile image) {
     logger.info("Received request to add restaurant: {}", request);
-    String message = restaurantService.addRestaurant(request, image);
-    logger.info(message);
+    MessageOutDto message = restaurantService.addRestaurant(request, image);
+    logger.info(String.valueOf(message));
+
     return new ResponseEntity<>(message, HttpStatus.CREATED);
   }
 
   /**
    * Retrieves all restaurants.
    *
-   * @return a list of all restaurants
+   * @return a {@link ResponseEntity} containing a list of {@link RestaurantOutDto} with all restaurants
    */
   @GetMapping("")
   public ResponseEntity<List<RestaurantOutDto>> getAllRestaurants() {
@@ -66,8 +68,8 @@ public class RestaurantController {
   /**
    * Retrieves a restaurant by its ID.
    *
-   * @param id the ID of the restaurant
-   * @return the restaurant with the specified ID
+   * @param id the ID of the restaurant to retrieve
+   * @return a {@link ResponseEntity} containing the {@link Restaurant} with the specified ID
    */
   @GetMapping("/{id}")
   public ResponseEntity<Restaurant> getRestaurantById(@PathVariable Integer id) {
@@ -80,8 +82,8 @@ public class RestaurantController {
   /**
    * Retrieves all restaurants associated with a specific user.
    *
-   * @param userId the ID of the user
-   * @return a list of restaurants associated with the specified user
+   * @param userId the ID of the user whose restaurants to retrieve
+   * @return a {@link ResponseEntity} containing a list of {@link RestaurantOutDto} associated with the specified user
    */
   @GetMapping("/user/{userId}")
   public ResponseEntity<List<RestaurantOutDto>> getAllRestaurantByUserId(@PathVariable Integer userId) {
@@ -90,13 +92,13 @@ public class RestaurantController {
     logger.info("Retrieved {} restaurants for user ID: {}", response.size(), userId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
+
   /**
    * Retrieves the image data for a restaurant by its ID.
    *
    * @param id the ID of the restaurant
-   * @return the image data as a byte array
+   * @return a {@link ResponseEntity} containing the image data as a byte array
    */
-
   @GetMapping("/{id}/image")
   public ResponseEntity<byte[]> getRestaurantImage(@PathVariable Integer id) {
     logger.info("Retrieving image for restaurant with ID: {}", id);

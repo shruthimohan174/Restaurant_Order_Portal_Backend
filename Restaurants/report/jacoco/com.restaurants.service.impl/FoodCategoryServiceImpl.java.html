@@ -3,6 +3,7 @@
 import com.restaurants.constants.RestaurantConstants;
 import com.restaurants.dto.indto.FoodCategoryInDto;
 import com.restaurants.dto.outdto.FoodCategoryOutDto;
+import com.restaurants.dto.outdto.MessageOutDto;
 import com.restaurants.dtoconversion.DtoConversion;
 import com.restaurants.entities.FoodCategory;
 import com.restaurants.entities.Restaurant;
@@ -24,9 +25,9 @@ import java.util.List;
  * Provides methods to manage food categories.
  */
 @Service
-<span class="fc" id="L27">public class FoodCategoryServiceImpl implements FoodCategoryService {</span>
+<span class="fc" id="L28">public class FoodCategoryServiceImpl implements FoodCategoryService {</span>
 
-<span class="fc" id="L29">  private static final Logger logger = LoggerFactory.getLogger(FoodCategoryServiceImpl.class);</span>
+<span class="fc" id="L30">  private static final Logger logger = LoggerFactory.getLogger(FoodCategoryServiceImpl.class);</span>
 
   @Autowired
   private FoodCategoryRepository foodCategoryRepository;
@@ -38,35 +39,41 @@ import java.util.List;
    * Adds a new food category.
    *
    * @param request the food category data to be added
-   * @return the added food category
+   * @return the response message indicating success or failure
    */
   @Override
-  public String addCategory(FoodCategoryInDto request) {
-<span class="fc" id="L45">    logger.info(&quot;Adding category: {}&quot;, request);</span>
-<span class="fc" id="L46">    Restaurant restaurant = restaurantService.findRestaurantById(request.getRestaurantId());</span>
-<span class="pc bpc" id="L47" title="1 of 2 branches missed.">    if (categoryExistsRestaurant(restaurant.getId(), request.getCategoryName())) {</span>
-<span class="nc" id="L48">      throw new CategoryAlreadyExistsException(RestaurantConstants.CATEGORY_ALREADY_EXISTS);</span>
+  public MessageOutDto addCategory(FoodCategoryInDto request) {
+<span class="fc" id="L46">    logger.info(&quot;Adding category: {}&quot;, request);</span>
+<span class="fc" id="L47">    Restaurant restaurant = restaurantService.findRestaurantById(request.getRestaurantId());</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">    if (categoryExistsRestaurant(restaurant.getId(), request.getCategoryName())) {</span>
+<span class="fc" id="L49">      throw new CategoryAlreadyExistsException(RestaurantConstants.CATEGORY_ALREADY_EXISTS);</span>
     }
-<span class="fc" id="L50">    FoodCategory category = DtoConversion.convertCategoryRequestToCategory(request);</span>
-<span class="fc" id="L51">    foodCategoryRepository.save(category);</span>
-<span class="fc" id="L52">    logger.info(&quot;Category added successfully: {}&quot;, request.getCategoryName());</span>
-<span class="fc" id="L53">    return RestaurantConstants.FOOD_CATEGORY_ADDED_SUCCESSFULLY;</span>
+<span class="fc" id="L51">    FoodCategory category = DtoConversion.convertCategoryRequestToCategory(request);</span>
+<span class="fc" id="L52">    foodCategoryRepository.save(category);</span>
+<span class="fc" id="L53">    logger.info(&quot;Category added successfully: {}&quot;, request.getCategoryName());</span>
+<span class="fc" id="L54">    return new MessageOutDto(RestaurantConstants.FOOD_CATEGORY_ADDED_SUCCESSFULLY);</span>
   }
 
+  /**
+   * Updates an existing food category.
+   *
+   * @param request the updated food category data
+   * @param id      the ID of the food category to be updated
+   * @return the response message indicating success or failure
+   */
   @Override
-  public String updateCategory(FoodCategoryInDto request, Integer id) {
-<span class="fc" id="L58">    logger.info(&quot;Updating category with ID: {}&quot;, id);</span>
-<span class="fc" id="L59">    FoodCategory existingCategory = findCategoryById(id);</span>
-<span class="pc bpc" id="L60" title="1 of 2 branches missed.">    if (!existingCategory.getCategoryName().equalsIgnoreCase(request.getCategoryName()) &amp;&amp;</span>
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">      categoryExistsRestaurant(request.getRestaurantId(), request.getCategoryName())) {</span>
-<span class="nc" id="L62">      throw new CategoryAlreadyExistsException(RestaurantConstants.CATEGORY_ALREADY_EXISTS);</span>
+  public MessageOutDto updateCategory(FoodCategoryInDto request, Integer id) {
+<span class="fc" id="L66">    logger.info(&quot;Updating category with ID: {}&quot;, id);</span>
+<span class="fc" id="L67">    FoodCategory existingCategory = findCategoryById(id);</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">    if (!existingCategory.getCategoryName().equalsIgnoreCase(request.getCategoryName()) &amp;&amp;</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">      categoryExistsRestaurant(request.getRestaurantId(), request.getCategoryName())) {</span>
+<span class="nc" id="L70">      throw new CategoryAlreadyExistsException(RestaurantConstants.CATEGORY_ALREADY_EXISTS);</span>
     }
-<span class="fc" id="L64">    existingCategory.setCategoryName(request.getCategoryName());</span>
-<span class="fc" id="L65">    foodCategoryRepository.save(existingCategory);</span>
-<span class="fc" id="L66">    logger.info(&quot;Category updated successfully: {}&quot;, request.getCategoryName());</span>
-<span class="fc" id="L67">    return RestaurantConstants.FOOD_CATEGORY_UPDATED_SUCCESSFULLY;</span>
+<span class="fc" id="L72">    existingCategory.setCategoryName(request.getCategoryName());</span>
+<span class="fc" id="L73">    foodCategoryRepository.save(existingCategory);</span>
+<span class="fc" id="L74">    logger.info(&quot;Category updated successfully: {}&quot;, request.getCategoryName());</span>
+<span class="fc" id="L75">    return new MessageOutDto(RestaurantConstants.FOOD_CATEGORY_UPDATED_SUCCESSFULLY);</span>
   }
-
 
   /**
    * Retrieves all food categories.
@@ -75,13 +82,13 @@ import java.util.List;
    */
   @Override
   public List&lt;FoodCategoryOutDto&gt; viewAllCategory() {
-<span class="fc" id="L78">    logger.info(&quot;Retrieving all categories&quot;);</span>
-<span class="fc" id="L79">    List&lt;FoodCategory&gt; categoryList = foodCategoryRepository.findAll();</span>
-<span class="fc" id="L80">    List&lt;FoodCategoryOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L81" title="All 2 branches covered.">    for (FoodCategory category : categoryList)</span>
-<span class="fc" id="L82">      responseList.add(DtoConversion.convertCategoryToResponse(category));</span>
-<span class="fc" id="L83">    logger.info(&quot;Retrieved {} categories&quot;, responseList.size());</span>
-<span class="fc" id="L84">    return responseList;</span>
+<span class="fc" id="L85">    logger.info(&quot;Retrieving all categories&quot;);</span>
+<span class="fc" id="L86">    List&lt;FoodCategory&gt; categoryList = foodCategoryRepository.findAll();</span>
+<span class="fc" id="L87">    List&lt;FoodCategoryOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">    for (FoodCategory category : categoryList)</span>
+<span class="fc" id="L89">      responseList.add(DtoConversion.convertCategoryToResponse(category));</span>
+<span class="fc" id="L90">    logger.info(&quot;Retrieved {} categories&quot;, responseList.size());</span>
+<span class="fc" id="L91">    return responseList;</span>
   }
 
   /**
@@ -92,13 +99,13 @@ import java.util.List;
    */
   @Override
   public List&lt;FoodCategoryOutDto&gt; findCategoryByRestaurantId(Integer restaurantId) {
-<span class="fc" id="L95">    logger.info(&quot;Retrieving categories for restaurant ID: {}&quot;, restaurantId);</span>
-<span class="fc" id="L96">    List&lt;FoodCategory&gt; categoryList = foodCategoryRepository.findByRestaurantId(restaurantId);</span>
-<span class="fc" id="L97">    List&lt;FoodCategoryOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L98" title="All 2 branches covered.">    for (FoodCategory category : categoryList)</span>
-<span class="fc" id="L99">      responseList.add(DtoConversion.convertCategoryToResponse(category));</span>
-<span class="fc" id="L100">    logger.info(&quot;Retrieved {} categories for restaurant ID: {}&quot;, responseList.size(), restaurantId);</span>
-<span class="fc" id="L101">    return responseList;</span>
+<span class="fc" id="L102">    logger.info(&quot;Retrieving categories for restaurant ID: {}&quot;, restaurantId);</span>
+<span class="fc" id="L103">    List&lt;FoodCategory&gt; categoryList = foodCategoryRepository.findByRestaurantId(restaurantId);</span>
+<span class="fc" id="L104">    List&lt;FoodCategoryOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">    for (FoodCategory category : categoryList)</span>
+<span class="fc" id="L106">      responseList.add(DtoConversion.convertCategoryToResponse(category));</span>
+<span class="fc" id="L107">    logger.info(&quot;Retrieved {} categories for restaurant ID: {}&quot;, responseList.size(), restaurantId);</span>
+<span class="fc" id="L108">    return responseList;</span>
   }
 
   /**
@@ -110,15 +117,22 @@ import java.util.List;
    */
   @Override
   public FoodCategory findCategoryById(Integer id) {
-<span class="fc" id="L113">    logger.info(&quot;Finding category by ID: {}&quot;, id);</span>
-<span class="fc" id="L114">    return foodCategoryRepository.findById(id).orElseThrow(() -&gt; {</span>
-<span class="fc" id="L115">      logger.error(&quot;Category not found for ID: {}&quot;, id);</span>
-<span class="fc" id="L116">      return new CategoryNotFoundException(RestaurantConstants.CATEGORY_NOT_FOUND);</span>
+<span class="fc" id="L120">    logger.info(&quot;Finding category by ID: {}&quot;, id);</span>
+<span class="fc" id="L121">    return foodCategoryRepository.findById(id).orElseThrow(() -&gt; {</span>
+<span class="fc" id="L122">      logger.error(&quot;Category not found for ID: {}&quot;, id);</span>
+<span class="fc" id="L123">      return new CategoryNotFoundException(RestaurantConstants.CATEGORY_NOT_FOUND);</span>
     });
   }
 
+  /**
+   * Checks if a food category with the given name exists for a specific restaurant.
+   *
+   * @param restaurantId the ID of the restaurant
+   * @param categoryName the name of the food category
+   * @return true if the category exists, false otherwise
+   */
   private boolean categoryExistsRestaurant(Integer restaurantId, String categoryName) {
-<span class="fc" id="L121">    return foodCategoryRepository.existsByRestaurantIdAndCategoryNameIgnoreCase(restaurantId, categoryName);</span>
+<span class="fc" id="L135">    return foodCategoryRepository.existsByRestaurantIdAndCategoryNameIgnoreCase(restaurantId, categoryName);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

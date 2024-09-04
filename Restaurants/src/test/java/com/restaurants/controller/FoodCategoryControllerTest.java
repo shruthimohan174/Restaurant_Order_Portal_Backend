@@ -3,6 +3,7 @@ package com.restaurants.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurants.dto.indto.FoodCategoryInDto;
 import com.restaurants.dto.outdto.FoodCategoryOutDto;
+import com.restaurants.dto.outdto.MessageOutDto;
 import com.restaurants.service.FoodCategoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,8 @@ public class FoodCategoryControllerTest {
 
   private FoodCategoryInDto foodCategoryInDto;
   private FoodCategoryOutDto foodCategoryOutDto;
+  private MessageOutDto messageOutDto;
+
 
   @BeforeEach
   void setUp() {
@@ -55,33 +58,39 @@ public class FoodCategoryControllerTest {
     foodCategoryOutDto.setId(1);
     foodCategoryOutDto.setRestaurantId(1);
     foodCategoryOutDto.setCategoryName("Desserts");
+
+    messageOutDto = new MessageOutDto();
   }
 
   @Test
   void addFoodCategoryTest() throws Exception {
-    // Mocking the service method to return success message
+    messageOutDto.setMessage("Food category added successfully");
+
     when(foodCategoryService.addCategory(any(FoodCategoryInDto.class)))
-      .thenReturn("Food category added successfully");
+      .thenReturn(messageOutDto);
 
     mockMvc.perform(post("/category/add")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(foodCategoryInDto)))
       .andExpect(status().isCreated())
-      .andExpect(content().string("Food category added successfully"));
+      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+      .andExpect(jsonPath("$.message").value("Food category added successfully"));
   }
 
   @Test
   void updateFoodCategoryTest() throws Exception {
-    // Mocking the service method to return success message
+    messageOutDto.setMessage("Food category updated successfully");
     when(foodCategoryService.updateCategory(any(FoodCategoryInDto.class), anyInt()))
-      .thenReturn("Food category updated successfully");
+      .thenReturn(messageOutDto);
 
     mockMvc.perform(put("/category/update/1")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(foodCategoryInDto)))
       .andExpect(status().isOk())
-      .andExpect(content().string("Food category updated successfully"));
+      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+      .andExpect(jsonPath("$.message").value("Food category updated successfully"));
   }
+
 
   @Test
   void getAllCategoryTest() throws Exception {

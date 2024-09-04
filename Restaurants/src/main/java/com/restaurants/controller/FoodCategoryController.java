@@ -2,6 +2,7 @@ package com.restaurants.controller;
 
 import com.restaurants.dto.indto.FoodCategoryInDto;
 import com.restaurants.dto.outdto.FoodCategoryOutDto;
+import com.restaurants.dto.outdto.MessageOutDto;
 import com.restaurants.service.FoodCategoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,28 +36,35 @@ public class FoodCategoryController {
    * Creates a new food category.
    *
    * @param request the details of the food category to be added
-   * @return the created food category
+   * @return a response entity containing a message indicating the result of the operation
    */
   @PostMapping("/add")
-  public ResponseEntity<String> addCategory(@Valid @RequestBody FoodCategoryInDto request) {
+  public ResponseEntity<MessageOutDto> addCategory(@Valid @RequestBody FoodCategoryInDto request) {
     logger.info("Received request to add category: {}", request);
-    String message = foodCategoryService.addCategory(request);
-    logger.info(message);
+    MessageOutDto message = foodCategoryService.addCategory(request);
+    logger.info(String.valueOf(message));
     return new ResponseEntity<>(message, HttpStatus.CREATED);
   }
 
+  /**
+   * Updates an existing food category.
+   *
+   * @param request the details of the food category to be updated
+   * @param id      the ID of the food category to be updated
+   * @return a response entity containing a message indicating the result of the operation
+   */
   @PutMapping("/update/{id}")
-  public ResponseEntity<String> updateCategory(@Valid @RequestBody FoodCategoryInDto request, @PathVariable Integer id) {
+  public ResponseEntity<MessageOutDto> updateCategory(@Valid @RequestBody FoodCategoryInDto request, @PathVariable Integer id) {
     logger.info("Received request to update category with ID: {}", id);
-    String message = foodCategoryService.updateCategory(request, id);
-    logger.info(message);
+    MessageOutDto message = foodCategoryService.updateCategory(request, id);
+    logger.info(String.valueOf(message));
     return new ResponseEntity<>(message, HttpStatus.OK);
   }
 
   /**
    * Retrieves all food categories.
    *
-   * @return a list of all food categories
+   * @return a response entity containing a list of all food categories
    */
   @GetMapping("")
   public ResponseEntity<List<FoodCategoryOutDto>> getAllCategory() {
@@ -70,7 +78,7 @@ public class FoodCategoryController {
    * Retrieves food categories by restaurant ID.
    *
    * @param restaurantId the ID of the restaurant
-   * @return a list of food categories for the specified restaurant
+   * @return a response entity containing a list of food categories for the specified restaurant
    */
   @GetMapping("/restaurant/{restaurantId}")
   public ResponseEntity<List<FoodCategoryOutDto>> getAllCategoryByRestaurantId(@PathVariable Integer restaurantId) {
@@ -80,4 +88,3 @@ public class FoodCategoryController {
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }
-

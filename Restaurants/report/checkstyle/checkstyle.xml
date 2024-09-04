@@ -22,7 +22,7 @@
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\outdto\FoodItemOutDto.java">
 </file>
-<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\outdto\FoodItemUpdateOutDto.java">
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\outdto\MessageOutDto.java">
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\dto\outdto\RestaurantOutDto.java">
 </file>
@@ -74,6 +74,8 @@
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\service\UserFeignClient.java">
 </file>
+<file name="D:\Capstone\backend\Restaurants\src\main\java\com\restaurants\utils\UserRole.java">
+</file>
 <file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\controller\FoodCategoryControllerTest.java">
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\controller\FoodItemControllerTest.java">
@@ -84,13 +86,19 @@
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\dto\indto\FoodItemInDtoTest.java">
 </file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\dto\indto\FoodItemUpdateInDtoTest.java">
+</file>
 <file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\dto\indto\RestaurantInDtoTest.java">
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\dto\outdto\FoodCategoryOutDtoTest.java">
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\dto\outdto\FoodItemOutDtoTest.java">
 </file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\dto\outdto\MessageOutDtoTest.java">
+</file>
 <file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\dto\outdto\RestaurantOutDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\dto\outdto\UserOutDtoTest.java">
 </file>
 <file name="D:\Capstone\backend\Restaurants\src\test\java\com\restaurants\entities\FoodCategoryTest.java">
 </file>

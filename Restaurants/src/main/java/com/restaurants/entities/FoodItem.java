@@ -58,6 +58,4 @@ public class FoodItem {
    */
   @Lob
   private byte[] imageData;
-
-
 }

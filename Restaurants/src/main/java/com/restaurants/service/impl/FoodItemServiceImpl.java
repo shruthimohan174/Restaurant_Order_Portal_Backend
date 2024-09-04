@@ -4,6 +4,7 @@ import com.restaurants.constants.RestaurantConstants;
 import com.restaurants.dto.indto.FoodItemInDto;
 import com.restaurants.dto.indto.FoodItemUpdateInDto;
 import com.restaurants.dto.outdto.FoodItemOutDto;
+import com.restaurants.dto.outdto.MessageOutDto;
 import com.restaurants.dtoconversion.DtoConversion;
 import com.restaurants.entities.FoodCategory;
 import com.restaurants.entities.FoodItem;
@@ -45,18 +46,21 @@ public class FoodItemServiceImpl implements FoodItemService {
 
   /**
    * Adds a new food item.
+   *
    * @param request the details of the food item to be added
    * @param image   the image representing the food item
-   * @return the created food item
+   * @return the success message wrapped in {@link MessageOutDto}
    */
   @Override
-  public String addFoodItems(FoodItemInDto request, MultipartFile image) {
+  public MessageOutDto addFoodItems(FoodItemInDto request, MultipartFile image) {
     logger.info("Adding food item: {}", request);
     Restaurant restaurant = restaurantService.findRestaurantById(request.getRestaurantId());
     FoodCategory category = foodCategoryService.findCategoryById(request.getCategoryId());
+
     if (itemExistsInRestaurant(restaurant.getId(), request.getItemName())) {
       throw new FoodItemAlreadyExistsException(RestaurantConstants.ITEM_ALREADY_EXISTS);
     }
+
     FoodItem foodItem = DtoConversion.convertFoodItemRequestToFoodItem(request);
 
     if (image != null && !image.isEmpty()) {
@@ -70,11 +74,18 @@ public class FoodItemServiceImpl implements FoodItemService {
 
     foodItemRepository.save(foodItem);
     logger.info("Food item added successfully: {}", request.getItemName());
-    return RestaurantConstants.FOOD_ITEM_ADDED_SUCCESSFULLY;
+    return new MessageOutDto(RestaurantConstants.FOOD_ITEM_ADDED_SUCCESSFULLY);
   }
 
+  /**
+   * Updates an existing food item.
+   *
+   * @param request the updated details of the food item
+   * @param id      the ID of the food item to be updated
+   * @return the success message wrapped in {@link MessageOutDto}
+   */
   @Override
-  public String updateFoodItems(FoodItemUpdateInDto request, Integer id) {
+  public MessageOutDto updateFoodItems(FoodItemUpdateInDto request, Integer id) {
     logger.info("Updating food item with ID: {}", id);
     FoodItem existingItem = findFoodItemsById(id);
 
@@ -89,7 +100,7 @@ public class FoodItemServiceImpl implements FoodItemService {
 
     foodItemRepository.save(existingItem);
     logger.info("Food item updated successfully: {}", request.getItemName());
-    return RestaurantConstants.FOOD_ITEM_UPDATED_SUCCESSFULLY;
+    return new MessageOutDto(RestaurantConstants.FOOD_ITEM_UPDATED_SUCCESSFULLY);
   }
 
   /**
@@ -160,10 +171,11 @@ public class FoodItemServiceImpl implements FoodItemService {
     logger.info("Retrieved {} food items for category ID: {}", responseList.size(), categoryId);
     return responseList;
   }
+
   /**
    * Retrieves the image data for a food item by its ID.
    *
-   * @param id the ID of the food-item
+   * @param id the ID of the food item
    * @return the image data as a byte array
    */
   @Override
@@ -185,6 +197,12 @@ public class FoodItemServiceImpl implements FoodItemService {
     return foodItemRepository.existsByRestaurantIdAndItemNameIgnoreCase(restaurantId, itemName);
   }
 
+  /**
+   * Validates the image file to ensure it is of a valid type (JPEG or PNG).
+   *
+   * @param image the image file to validate
+   * @throws InvalidFileTypeException if the file type is not valid
+   */
   @Override
   public void validateImageFile(MultipartFile image) {
     String contentType = image.getContentType();
