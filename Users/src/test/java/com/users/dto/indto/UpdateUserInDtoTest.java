@@ -32,7 +32,7 @@ public class UpdateUserInDtoTest {
     updateUserInDto.setPhoneNumber("8434972888");
 
     String actualString = updateUserInDto.toString();
-    String expectedString = "UpdateUserInDto(firstName=Shruthi, lastName=Mohan, phoneNumber=8434972888)";
+    String expectedString = "UpdateUserInDto(firstName=Shruthi, lastName=Mohan, phoneNumber=8434972888, password=null)";
     assertThat(actualString).isEqualTo(expectedString);
   }
 

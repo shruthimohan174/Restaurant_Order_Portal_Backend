@@ -93,10 +93,13 @@ public class UserServiceImpl implements UserService {
     logger.info("Updating user with ID: {}", id);
     User existingUser = findUserById(id);
     DtoConversion.convertUpdateUserRequestToUser(existingUser, request);
+    existingUser.setPassword(PasswordEncodingDecodingUtils.encodePassword(request.getPassword()));
+
     User updatedUser = userRepository.save(existingUser);
     logger.info("User updated successfully with ID: {}", updatedUser.getId());
     return DtoConversion.convertUserToUpdateUserResponse(updatedUser);
   }
+
 
   @Override
   public void deleteUser(Integer id) {

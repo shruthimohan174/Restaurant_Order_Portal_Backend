@@ -32,4 +32,5 @@ public class UpdateUserOutDto {
    * Phone number of the user.
    */
   private String phoneNumber;
+
 }
