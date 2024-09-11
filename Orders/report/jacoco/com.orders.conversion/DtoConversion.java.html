@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DtoConversion.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Orders</a> &gt; <a href="index.source.html" class="el_package">com.orders.conversion</a> &gt; <span class="el_source">DtoConversion.java</span></div><h1>DtoConversion.java</h1><pre class="source lang-java linenums">package com.orders.conversion;
+
+import com.orders.dto.CartInDto;
+import com.orders.dto.OrderInDto;
+import com.orders.dto.OrderOutDto;
+import com.orders.entities.Cart;
+import com.orders.entities.Order;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+
+/**
+ * Utility class for converting between DTOs and entity objects.
+ */
+public final class DtoConversion {
+
+<span class="fc" id="L18">  private static final Logger logger = LoggerFactory.getLogger(DtoConversion.class);</span>
+
+<span class="nc" id="L20">  private DtoConversion() {</span>
+<span class="nc" id="L21">    throw new UnsupportedOperationException(&quot;Utility class&quot;);</span>
+  }
+
+  /**
+   * Converts a CartInDto to a Cart entity.
+   *
+   * @param cartInDto DTO containing cart item details.
+   * @return The Cart entity.
+   */
+  public static Cart convertCartInDtoToCart(CartInDto cartInDto) {
+<span class="nc" id="L31">    Cart cartItem = new Cart();</span>
+<span class="nc" id="L32">    cartItem.setFoodItemId(cartInDto.getFoodItemId());</span>
+//    cartItem.setQuantity(cartInDto.getQuantity());
+<span class="nc" id="L34">    cartItem.setPrice(cartInDto.getPrice());</span>
+<span class="nc" id="L35">    cartItem.setRestaurantId(cartInDto.getRestaurantId());</span>
+<span class="nc" id="L36">    cartItem.setUserId(cartInDto.getUserId());</span>
+<span class="nc" id="L37">    return cartItem;</span>
+  }
+
+//  public static CartOutDto convertCartToCartOutDto(Cart cart){
+//    CartOutDto cartOutDto = new CartOutDto();
+//    cartOutDto.setId(cart.getId());
+//    cartOutDto.setFoodItemId(cart.getFoodItemId());
+//    cartOutDto.setQuantity(cart.getQuantity());
+//    cartOutDto.setPrice(cart.getPrice());
+//    cartOutDto.setRestaurantId(cart.getRestaurantId());
+//    cartOutDto.setUserId(cart.getUserId());
+//    return cartOutDto;
+//  }
+
+  /**
+   * Converts an OrderInDto to an Order entity.
+   *
+   * @param orderInDto DTO containing order details.
+   * @return The Order entity.
+   */
+  public static Order convertOrderInDtoToOrder(OrderInDto orderInDto) {
+<span class="fc" id="L58">    Order order = new Order();</span>
+<span class="fc" id="L59">    order.setUserId(orderInDto.getUserId());</span>
+<span class="fc" id="L60">    order.setDeliveryAddressId(orderInDto.getDeliveryAddressId());</span>
+<span class="fc" id="L61">    order.setRestaurantId(orderInDto.getRestaurantId());</span>
+<span class="fc" id="L62">    return order;</span>
+  }
+
+  /**
+   * Converts an Order entity to an OrderOutDto.
+   *
+   * @param order The Order entity.
+   * @return The OrderOutDto containing order details.
+   */
+  public static OrderOutDto convertOrderToOrderOutDto(Order order) {
+<span class="fc" id="L72">    OrderOutDto dto = new OrderOutDto();</span>
+<span class="fc" id="L73">    dto.setId(order.getId());</span>
+<span class="fc" id="L74">    dto.setDeliveryAddressId(order.getDeliveryAddressId());</span>
+<span class="fc" id="L75">    dto.setUserId(order.getUserId());</span>
+<span class="fc" id="L76">    dto.setRestaurantId(order.getRestaurantId());</span>
+<span class="fc" id="L77">    dto.setTotalPrice(order.getTotalPrice());</span>
+<span class="fc" id="L78">    dto.setOrderStatus(order.getOrderStatus());</span>
+<span class="fc" id="L79">    dto.setOrderTime(order.getOrderTime());</span>
+    try {
+<span class="nc" id="L81">      dto.setCartItems(order.getCartItemsAsList());</span>
+<span class="fc" id="L82">    } catch (Exception e) {</span>
+<span class="fc" id="L83">      logger.error(&quot;Error converting order to OrderOutDto: {}&quot;, e.getMessage(), e);</span>
+<span class="fc" id="L84">      dto.setCartItems(Collections.emptyList());</span>
+<span class="pc" id="L85">    }    return dto;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CartServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Orders</a> &gt; <a href="index.source.html" class="el_package">com.orders.service.impl</a> &gt; <span class="el_source">CartServiceImpl.java</span></div><h1>CartServiceImpl.java</h1><pre class="source lang-java linenums">package com.orders.service.impl;
+
+import com.orders.constants.OrderConstants;
+import com.orders.dto.CartInDto;
+import com.orders.dto.FoodItemOutDto;
+import com.orders.dto.MessageOutDto;
+import com.orders.dto.UserOutDto;
+import com.orders.entities.Cart;
+import com.orders.exception.CartNotFoundException;
+import com.orders.exception.CustomerNotFoundException;
+import com.orders.exception.PriceMismatchException;
+import com.orders.repositories.CartRepository;
+import com.orders.service.CartService;
+import com.orders.service.FoodItemFeignClient;
+import com.orders.service.RestaurantFeignClient;
+import com.orders.service.UserFeignClient;
+import com.orders.utils.UserRole;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+<span class="fc" id="L26">public class CartServiceImpl implements CartService {</span>
+
+  @Autowired
+  private UserFeignClient userClient;
+
+  @Autowired
+  private CartRepository cartRepository;
+
+  @Autowired
+  private RestaurantFeignClient restaurantClient;
+
+  @Autowired
+  private FoodItemFeignClient foodItemClient;
+
+  @Override
+  public MessageOutDto addItemToCart(CartInDto cartInDto) {
+//    UserOutDto user = userClient.getUserById(cartInDto.getUserId());
+//    if (user.getUserRole() != UserRole.CUSTOMER) {
+//      throw new CustomerNotFoundException(OrderConstants.CUSTOMER_NOT_FOUND);
+//    }
+//
+//    FoodItemOutDto restaurant = restaurantClient.getRestaurantById(cartInDto.getRestaurantId());
+//    if (restaurant == null) {
+//      throw new RestaurantNotFoundException(OrderConstants.RESTAURANT_NOT_FOUND);
+//    }
+//    FoodItemOutDto foodItem = foodItemClient.getFoodItemById(cartInDto.getFoodItemId());
+//    if (foodItem == null) {
+//      throw new FoodItemNotFoundException(OrderConstants.FOOD_ITEM_NOT_FOUND);
+//    }
+<span class="fc" id="L55">    UserOutDto user = userClient.getUserById(cartInDto.getUserId());</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">    if (user.getUserRole() != UserRole.CUSTOMER) {</span>
+<span class="fc" id="L57">      throw new CustomerNotFoundException(OrderConstants.CUSTOMER_NOT_FOUND);</span>
+    }
+<span class="fc" id="L59">    restaurantClient.getRestaurantById(cartInDto.getRestaurantId());</span>
+<span class="fc" id="L60">    FoodItemOutDto foodItem = foodItemClient.getFoodItemById(cartInDto.getFoodItemId());</span>
+
+<span class="fc bfc" id="L62" title="All 2 branches covered.">    if (foodItem.getPrice().compareTo(cartInDto.getPrice()) != 0) {</span>
+<span class="fc" id="L63">      throw new PriceMismatchException(OrderConstants.PRICE_MISMATCH);</span>
+    }
+
+<span class="fc" id="L66">    Optional&lt;Cart&gt; existingCart = cartRepository.findByUserIdAndFoodItemIdAndRestaurantId(</span>
+<span class="fc" id="L67">      cartInDto.getUserId(),</span>
+<span class="fc" id="L68">      cartInDto.getFoodItemId(),</span>
+<span class="fc" id="L69">      cartInDto.getRestaurantId()</span>
+    );
+
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">    if (existingCart.isPresent()) {</span>
+<span class="nc" id="L73">      return updateCartItemQuantity(existingCart.get().getId(), 1);</span>
+    } else {
+<span class="fc" id="L75">      return addNewCartItem(cartInDto);</span>
+    }
+  }
+
+  private MessageOutDto addNewCartItem(CartInDto cartInDto) {
+<span class="fc" id="L80">    Cart newCart = new Cart();</span>
+<span class="fc" id="L81">    newCart.setUserId(cartInDto.getUserId());</span>
+<span class="fc" id="L82">    newCart.setFoodItemId(cartInDto.getFoodItemId());</span>
+<span class="fc" id="L83">    newCart.setRestaurantId(cartInDto.getRestaurantId());</span>
+<span class="fc" id="L84">    newCart.setQuantity(1);</span>
+<span class="fc" id="L85">    newCart.setPrice(cartInDto.getPrice());</span>
+
+<span class="fc" id="L87">    cartRepository.save(newCart);</span>
+<span class="fc" id="L88">    return new MessageOutDto(OrderConstants.CART_ADDED_SUCCESSFULLY);</span>
+  }
+
+  @Override
+  public MessageOutDto updateCartItemQuantity(Integer cartId, int quantityChange) {
+<span class="fc" id="L93">    Cart cart = getCartById(cartId);</span>
+<span class="fc" id="L94">    BigDecimal unitPrice = cart.getPrice().divide(BigDecimal.valueOf(cart.getQuantity()), BigDecimal.ROUND_HALF_EVEN);</span>
+
+<span class="fc" id="L96">    int newQuantity = Math.max(0, cart.getQuantity() + quantityChange);</span>
+
+<span class="fc bfc" id="L98" title="All 2 branches covered.">    if (newQuantity == 0) {</span>
+<span class="fc" id="L99">      cartRepository.deleteById(cartId);</span>
+<span class="fc" id="L100">      return new MessageOutDto(OrderConstants.ITEM_REMOVED_SUCCESSFULLY);</span>
+    }
+
+<span class="fc" id="L103">    BigDecimal newPrice = unitPrice.multiply(BigDecimal.valueOf(newQuantity));</span>
+
+<span class="fc" id="L105">    cart.setQuantity(newQuantity);</span>
+<span class="fc" id="L106">    cart.setPrice(newPrice);</span>
+<span class="fc" id="L107">    cartRepository.save(cart);</span>
+<span class="fc" id="L108">    return new MessageOutDto(OrderConstants.CART_UPDATED_SUCCESSFULLY);</span>
+  }
+
+  @Override
+  public MessageOutDto removeItemFromCart(Integer cartId) {
+<span class="fc" id="L113">    Cart cart = getCartById(cartId);</span>
+<span class="fc" id="L114">    cartRepository.deleteById(cartId);</span>
+<span class="fc" id="L115">    return new MessageOutDto(OrderConstants.ITEM_REMOVED_SUCCESSFULLY);</span>
+  }
+
+  @Override
+  public MessageOutDto clearCartAfterOrderPlaced(Integer userId, Integer restaurantId) {
+<span class="fc" id="L120">    UserOutDto user = userClient.getUserById(userId);</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">    if (user.getUserRole() != UserRole.CUSTOMER) {</span>
+<span class="fc" id="L122">      throw new CustomerNotFoundException(OrderConstants.CUSTOMER_NOT_FOUND);</span>
+    }
+
+<span class="fc" id="L125">    FoodItemOutDto restaurant = restaurantClient.getRestaurantById(restaurantId);</span>
+
+
+//    FoodItemOutDto restaurant = restaurantClient.getRestaurantById(restaurantId);
+//    if (restaurant == null) {
+//      throw new RestaurantNotFoundException(OrderConstants.RESTAURANT_NOT_FOUND);
+//    }
+
+<span class="fc" id="L133">    List&lt;Cart&gt; cartItems = cartRepository.findByUserIdAndRestaurantId(userId, restaurantId);</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">    if (!cartItems.isEmpty()) {</span>
+<span class="fc" id="L135">      cartRepository.deleteAll(cartItems);</span>
+<span class="fc" id="L136">      return new MessageOutDto(OrderConstants.CART_DELETED_SUCCESSFULLY);</span>
+    } else {
+<span class="fc" id="L138">      return new MessageOutDto(OrderConstants.CART_ALREADY_EMPTY);</span>
+    }
+  }
+
+  @Override
+  public List&lt;Cart&gt; getCartItemsByUserIdAndRestaurantId(Integer userId, Integer restaurantId) {
+<span class="nc" id="L144">    UserOutDto user = userClient.getUserById(userId);</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">    if (user.getUserRole() != UserRole.CUSTOMER) {</span>
+<span class="nc" id="L146">      throw new CustomerNotFoundException(OrderConstants.CUSTOMER_NOT_FOUND);</span>
+    }
+
+<span class="nc" id="L149">    FoodItemOutDto restaurant = restaurantClient.getRestaurantById(restaurantId);</span>
+//    if (restaurant == null) {
+//      throw new RestaurantNotFoundException(OrderConstants.RESTAURANT_NOT_FOUND);
+//    }
+<span class="nc" id="L153">    return cartRepository.findByUserIdAndRestaurantId(userId, restaurantId);</span>
+  }
+
+  @Override
+  public List&lt;Cart&gt; getCartByUserId(Integer userId) {
+<span class="nc" id="L158">    UserOutDto user = userClient.getUserById(userId);</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">    if (user.getUserRole() != UserRole.CUSTOMER) {</span>
+<span class="nc" id="L160">      throw new CustomerNotFoundException(OrderConstants.CUSTOMER_NOT_FOUND);</span>
+    }
+<span class="nc" id="L162">    return cartRepository.findByUserId(userId);</span>
+  }
+
+  @Override
+  public Cart getCartById(Integer cartId) {
+<span class="fc" id="L167">    return cartRepository.findById(cartId)</span>
+<span class="fc" id="L168">      .orElseThrow(() -&gt; {</span>
+<span class="fc" id="L169">        return new CartNotFoundException(OrderConstants.CART_NOT_FOUND);</span>
+      });
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

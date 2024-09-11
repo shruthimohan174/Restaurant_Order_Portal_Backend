@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Orders</a> &gt; <a href="index.source.html" class="el_package">com.orders.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.orders.exception;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@ControllerAdvice
+<span class="fc" id="L23">public class GlobalExceptionHandler {</span>
+
+  @ExceptionHandler(AddressNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public final ErrorResponse handleAddressNotFoundException(AddressNotFoundException ex, HttpServletRequest request) {
+<span class="nc" id="L29">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  @ExceptionHandler(CartNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public final ErrorResponse handleCartNotFoundException(CartNotFoundException ex, HttpServletRequest request) {
+<span class="nc" id="L36">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  @ExceptionHandler(PriceMismatchException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public final ErrorResponse handlePriceMismatchException(PriceMismatchException ex, HttpServletRequest request) {
+<span class="nc" id="L43">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  @ExceptionHandler(InsufficientBalanceException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public final ErrorResponse handleInsufficientBalanceException(InsufficientBalanceException ex, HttpServletRequest request) {
+<span class="nc" id="L50">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  @ExceptionHandler(CustomerNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public final ErrorResponse handleCustomerNotFoundException(CustomerNotFoundException ex, HttpServletRequest request) {
+<span class="nc" id="L57">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  @ExceptionHandler(OrderNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public final ErrorResponse handleOrderNotFoundException(OrderNotFoundException ex, HttpServletRequest request) {
+<span class="nc" id="L64">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  @ExceptionHandler(OrderUpdateException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public final ErrorResponse handleOrderUpdateException(OrderUpdateException ex, HttpServletRequest request) {
+<span class="nc" id="L71">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link MethodArgumentNotValidException} and returns a standardized error response for validation errors.
+   *
+   * @param ex      the exception thrown
+   * @param request the HTTP request that caused the exception
+   * @return the error response
+   */
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorResponse handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+<span class="nc" id="L85">    List&lt;String&gt; errors = ex.getBindingResult()</span>
+<span class="nc" id="L86">      .getFieldErrors()</span>
+<span class="nc" id="L87">      .stream()</span>
+<span class="nc" id="L88">      .map(FieldError::getDefaultMessage)</span>
+<span class="nc" id="L89">      .collect(Collectors.toList());</span>
+
+<span class="nc" id="L91">    String errorMessage = String.join(&quot;, &quot;, errors);</span>
+<span class="nc" id="L92">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), &quot;Validation failed: &quot; + errorMessage,</span>
+<span class="nc" id="L93">      request.getRequestURI());</span>
+  }
+
+  @ExceptionHandler(FeignException.class)
+  public ResponseEntity&lt;ErrorResponse&gt; handleFeignException(FeignException ex, HttpServletRequest request) {
+<span class="nc" id="L98">    HttpStatus status = HttpStatus.valueOf(ex.status());</span>
+<span class="nc" id="L99">    String message = &quot;An error occurred while processing your request&quot;;</span>
+
+    // Extract the error message from the Feign client response body
+<span class="nc" id="L102">    String feignResponseBody = ex.contentUTF8();</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">    if (feignResponseBody != null) {</span>
+      try {
+<span class="nc" id="L105">        ObjectMapper objectMapper = new ObjectMapper();</span>
+<span class="nc" id="L106">        JsonNode jsonNode = objectMapper.readTree(feignResponseBody);</span>
+<span class="nc" id="L107">        message = jsonNode.get(&quot;message&quot;).asText();</span>
+<span class="nc" id="L108">      } catch (Exception e) {</span>
+<span class="nc" id="L109">        message = ex.getMessage();</span>
+<span class="nc" id="L110">      }</span>
+    }
+
+<span class="nc" id="L113">    ErrorResponse errorResponse = new ErrorResponse(</span>
+<span class="nc" id="L114">      LocalDateTime.now(),</span>
+<span class="nc" id="L115">      status.value(),</span>
+      message,
+<span class="nc" id="L117">      request.getRequestURI()</span>
+    );
+
+<span class="nc" id="L120">    return new ResponseEntity&lt;&gt;(errorResponse, status);</span>
+  }
+
+
+<span class="nc bnc" id="L124" title="All 32 branches missed.">  @Data</span>
+<span class="nc" id="L125">  @AllArgsConstructor</span>
+  public static class ErrorResponse {
+<span class="nc" id="L127">    private LocalDateTime timestamp;</span>
+<span class="nc" id="L128">    private int status;</span>
+<span class="nc" id="L129">    private String message;</span>
+<span class="nc" id="L130">    private String path;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

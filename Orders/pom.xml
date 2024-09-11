@@ -47,7 +47,6 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
             <version>3.1.6</version>
-            <!--  Use a version compatible with Java 8 and Spring Cloud 2021.x  -->
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
