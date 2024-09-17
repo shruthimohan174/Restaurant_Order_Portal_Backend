@@ -1,12 +1,12 @@
 package com.restaurants.service.impl;
 
-import com.restaurants.dto.indto.FoodCategoryInDto;
-import com.restaurants.dto.outdto.FoodCategoryOutDto;
-import com.restaurants.dto.outdto.MessageOutDto;
+import com.restaurants.dto.FoodCategoryInDto;
+import com.restaurants.dto.FoodCategoryOutDto;
+import com.restaurants.dto.MessageOutDto;
 import com.restaurants.entities.FoodCategory;
 import com.restaurants.entities.Restaurant;
-import com.restaurants.exception.CategoryAlreadyExistsException;
-import com.restaurants.exception.CategoryNotFoundException;
+import com.restaurants.exception.ResourceConflictException;
+import com.restaurants.exception.ResourceNotFoundException;
 import com.restaurants.repositories.FoodCategoryRepository;
 import com.restaurants.service.RestaurantService;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,28 +29,70 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Unit tests for the {@link FoodCategoryServiceImpl} class.
+ * This class tests the methods and functionality of the {@link FoodCategoryServiceImpl} service class,
+ * including its interaction with the {@link FoodCategoryRepository} and {@link RestaurantService}.
+ */
 @ExtendWith(MockitoExtension.class)
 class FoodCategoryServiceImplTest {
 
+  /**
+   * Mocked instance of {@link FoodCategoryRepository}.
+   * Used to simulate interactions with the food category data source.
+   */
   @Mock
   private FoodCategoryRepository foodCategoryRepository;
 
+  /**
+   * Mocked instance of {@link RestaurantService}.
+   * Used to simulate interactions with restaurant-related operations.
+   */
   @Mock
   private RestaurantService restaurantService;
 
+  /**
+   * Instance of {@link FoodCategoryServiceImpl} under test.
+   * This service class will be tested for its methods and functionality.
+   */
   @InjectMocks
   private FoodCategoryServiceImpl foodCategoryService;
 
+  /**
+   * Data transfer object (DTO) for inputting food category data.
+   */
   private FoodCategoryInDto categoryRequest;
+
+  /**
+   * Mocked instance of {@link Restaurant}.
+   * Represents a restaurant used in the tests to validate interactions.
+   */
   private Restaurant restaurant;
+
+  /**
+   * Mocked instance of {@link FoodCategory}.
+   * Represents a food category used in the tests to validate interactions.
+   */
   private FoodCategory foodCategory;
+
+  /**
+   * Data transfer object (DTO) for outputting food category data.
+   */
   private FoodCategoryOutDto categoryResponse;
+
+  /**
+   * Data transfer object (DTO) for messages related to operations.
+   */
   private MessageOutDto messageOutDto;
 
+  /**
+   * Sets up the test environment by initializing the objects required for the tests.
+   * This method is called before each test to ensure a fresh state.
+   */
   @BeforeEach
   void setUp() {
     categoryRequest = new FoodCategoryInDto();
-    categoryRequest.setCategoryName("Fast Food");
+    categoryRequest.setCategoryName("category");
     categoryRequest.setRestaurantId(1);
 
     restaurant = new Restaurant();
@@ -58,11 +100,11 @@ class FoodCategoryServiceImplTest {
 
     foodCategory = new FoodCategory();
     foodCategory.setId(1);
-    foodCategory.setCategoryName("Fast Food");
+    foodCategory.setCategoryName("category");
     foodCategory.setRestaurantId(1);
 
     categoryResponse = new FoodCategoryOutDto();
-    categoryResponse.setCategoryName("Fast Food");
+    categoryResponse.setCategoryName("category");
 
   }
 
@@ -95,11 +137,11 @@ class FoodCategoryServiceImplTest {
   }
 
   @Test
-  void addCategory_CategoryAlreadyExistsTest() {
+  void addCategoryCategoryAlreadyExistsTest() {
     when(restaurantService.findRestaurantById(1)).thenReturn(restaurant);
-    when(foodCategoryRepository.existsByRestaurantIdAndCategoryNameIgnoreCase(1, "Fast Food")).thenReturn(true);
+    when(foodCategoryRepository.existsByRestaurantIdAndCategoryNameIgnoreCase(1, "category")).thenReturn(true);
 
-    assertThrows(CategoryAlreadyExistsException.class, () -> foodCategoryService.addCategory(categoryRequest));
+    assertThrows(ResourceConflictException.class, () -> foodCategoryService.addCategory(categoryRequest));
     verify(restaurantService, times(1)).findRestaurantById(1);
   }
 
@@ -107,7 +149,7 @@ class FoodCategoryServiceImplTest {
   void findCategoryByIdNotFoundTest() {
     when(foodCategoryRepository.findById(1)).thenReturn(Optional.empty());
 
-    assertThrows(CategoryNotFoundException.class, () -> foodCategoryService.findCategoryById(1));
+    assertThrows(ResourceNotFoundException.class, () -> foodCategoryService.findCategoryById(1));
     verify(foodCategoryRepository, times(1)).findById(1);
   }
 
@@ -115,7 +157,7 @@ class FoodCategoryServiceImplTest {
   void viewAllCategoryTest() {
     FoodCategory category1 = new FoodCategory();
     category1.setId(1);
-    category1.setCategoryName("Fast Food");
+    category1.setCategoryName("category");
 
     FoodCategory category2 = new FoodCategory();
     category2.setId(2);
@@ -133,7 +175,7 @@ class FoodCategoryServiceImplTest {
   void findCategoryByRestaurantIdTest() {
     FoodCategory category1 = new FoodCategory();
     category1.setId(1);
-    category1.setCategoryName("Fast Food");
+    category1.setCategoryName("category");
     category1.setRestaurantId(1);
 
     when(foodCategoryRepository.findByRestaurantId(1)).thenReturn(Collections.singletonList(category1));

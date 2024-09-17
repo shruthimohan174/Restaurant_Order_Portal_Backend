@@ -1,23 +1,22 @@
 package com.restaurants.service.impl;
 
 import com.restaurants.constants.RestaurantConstants;
-import com.restaurants.dto.indto.FoodItemInDto;
-import com.restaurants.dto.indto.FoodItemUpdateInDto;
-import com.restaurants.dto.outdto.FoodItemOutDto;
-import com.restaurants.dto.outdto.MessageOutDto;
-import com.restaurants.dtoconversion.DtoConversion;
+import com.restaurants.dto.FoodItemInDto;
+import com.restaurants.dto.FoodItemUpdateInDto;
+import com.restaurants.dto.FoodItemOutDto;
+import com.restaurants.dto.MessageOutDto;
+import com.restaurants.converter.DtoConversion;
 import com.restaurants.entities.FoodCategory;
 import com.restaurants.entities.FoodItem;
 import com.restaurants.entities.Restaurant;
-import com.restaurants.exception.FoodItemAlreadyExistsException;
-import com.restaurants.exception.FoodItemNotFoundException;
-import com.restaurants.exception.InvalidFileTypeException;
+import com.restaurants.exception.ResourceConflictException;
+import com.restaurants.exception.InvalidRequestException;
+import com.restaurants.exception.ResourceNotFoundException;
 import com.restaurants.repositories.FoodItemRepository;
 import com.restaurants.service.FoodCategoryService;
 import com.restaurants.service.FoodItemService;
 import com.restaurants.service.RestaurantService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,16 +30,29 @@ import java.util.List;
  * Provides methods to manage food items.
  */
 @Service
+@Slf4j
 public class FoodItemServiceImpl implements FoodItemService {
 
-  private static final Logger logger = LoggerFactory.getLogger(FoodItemServiceImpl.class);
+  /**
+   * The maximum allowed file size for uploads, set to 5 megabytes (5 MB).
+   */
+  private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
+  /**
+   * Service layer dependency for foodItem-related operations.
+   */
   @Autowired
   private FoodItemRepository foodItemRepository;
 
+  /**
+   * Service layer dependency for restaurant-related operations.
+   */
   @Autowired
   private RestaurantService restaurantService;
 
+  /**
+   * Service layer dependency for category-related operations.
+   */
   @Autowired
   private FoodCategoryService foodCategoryService;
 
@@ -52,31 +64,32 @@ public class FoodItemServiceImpl implements FoodItemService {
    * @return the success message wrapped in {@link MessageOutDto}
    */
   @Override
-  public MessageOutDto addFoodItems(FoodItemInDto request, MultipartFile image) {
-    logger.info("Adding food item: {}", request);
+  public MessageOutDto addFoodItems(final FoodItemInDto request, final MultipartFile image) {
+    log.info("Adding food item");
     Restaurant restaurant = restaurantService.findRestaurantById(request.getRestaurantId());
     FoodCategory category = foodCategoryService.findCategoryById(request.getCategoryId());
 
-    if (itemExistsInRestaurant(restaurant.getId(), request.getItemName())) {
-      throw new FoodItemAlreadyExistsException(RestaurantConstants.ITEM_ALREADY_EXISTS);
+    String normalizedItemName = normalizeItemName(request.getItemName());
+    if (itemExistsInRestaurant(restaurant.getId(), normalizedItemName)) {
+      throw new ResourceConflictException(RestaurantConstants.ITEM_ALREADY_EXISTS);
     }
 
     FoodItem foodItem = DtoConversion.convertFoodItemRequestToFoodItem(request);
+    foodItem.setItemName(normalizedItemName);
 
     if (image != null && !image.isEmpty()) {
       try {
         validateImageFile(image);
         foodItem.setImageData(image.getBytes());
       } catch (IOException e) {
-        logger.error("Error occurred while processing the image file for food item: {}", request.getItemName(), e);
+        log.error("Error occurred while processing the image file for food item: {}", normalizedItemName, e);
       }
     }
 
     foodItemRepository.save(foodItem);
-    logger.info("Food item added successfully: {}", request.getItemName());
+    log.info("Food item added successfully: {}", normalizedItemName);
     return new MessageOutDto(RestaurantConstants.FOOD_ITEM_ADDED_SUCCESSFULLY);
   }
-
   /**
    * Updates an existing food item.
    *
@@ -85,21 +98,33 @@ public class FoodItemServiceImpl implements FoodItemService {
    * @return the success message wrapped in {@link MessageOutDto}
    */
   @Override
-  public MessageOutDto updateFoodItems(FoodItemUpdateInDto request, Integer id) {
-    logger.info("Updating food item with ID: {}", id);
+  public MessageOutDto updateFoodItems(final FoodItemUpdateInDto request, final Integer id,
+                                       final MultipartFile image) {
+    log.info("Updating food item with ID: {}", id);
     FoodItem existingItem = findFoodItemsById(id);
 
-    if (!existingItem.getItemName().equals(request.getItemName()) &&
-      itemExistsInRestaurant(existingItem.getRestaurantId(), request.getItemName())) {
-      throw new FoodItemAlreadyExistsException(RestaurantConstants.ITEM_ALREADY_EXISTS);
+    String normalizedItemName = normalizeItemName(request.getItemName());
+    if (!existingItem.getItemName().equals(normalizedItemName)
+      && itemExistsInRestaurant(existingItem.getRestaurantId(), normalizedItemName)) {
+      throw new ResourceConflictException(RestaurantConstants.ITEM_ALREADY_EXISTS);
     }
 
-    existingItem.setItemName(request.getItemName());
+    existingItem.setItemName(normalizedItemName);
     existingItem.setDescription(request.getDescription());
     existingItem.setPrice(request.getPrice());
+    existingItem.setIsVeg(request.getIsVeg());
+
+    if (image != null && !image.isEmpty()) {
+      try {
+        validateImageFile(image);
+        existingItem.setImageData(image.getBytes());
+      } catch (IOException e) {
+        log.error("Error occurred while processing the image file for food item: {}", normalizedItemName, e);
+      }
+    }
 
     foodItemRepository.save(existingItem);
-    logger.info("Food item updated successfully: {}", request.getItemName());
+    log.info("Food item updated successfully: {}", normalizedItemName);
     return new MessageOutDto(RestaurantConstants.FOOD_ITEM_UPDATED_SUCCESSFULLY);
   }
 
@@ -108,14 +133,14 @@ public class FoodItemServiceImpl implements FoodItemService {
    *
    * @param id the ID of the food item
    * @return the food item
-   * @throws FoodItemNotFoundException if the food item is not found
+//   * @throws FoodItemNotFoundException if the food item is not found
    */
   @Override
-  public FoodItem findFoodItemsById(Integer id) {
-    logger.info("Finding food item by ID: {}", id);
+  public FoodItem findFoodItemsById(final Integer id) {
+    log.info("Finding food item by ID: {}", id);
     return foodItemRepository.findById(id).orElseThrow(() -> {
-      logger.error("Food item not found for ID: {}", id);
-      return new FoodItemNotFoundException(RestaurantConstants.FOOD_ITEM_NOT_FOUND);
+      log.error("Food item not found for ID: {}", id);
+      return new ResourceNotFoundException(RestaurantConstants.FOOD_ITEM_NOT_FOUND);
     });
   }
 
@@ -126,13 +151,13 @@ public class FoodItemServiceImpl implements FoodItemService {
    */
   @Override
   public List<FoodItemOutDto> getAllFoodItems() {
-    logger.info("Retrieving all food items");
+    log.info("Retrieving all food items");
     List<FoodItem> foodItemList = foodItemRepository.findAll();
     List<FoodItemOutDto> foodItemResponsesList = new ArrayList<>();
     for (FoodItem foodItem : foodItemList) {
       foodItemResponsesList.add(DtoConversion.convertFoodItemToFoodItemResponse(foodItem));
     }
-    logger.info("Retrieved {} food items", foodItemResponsesList.size());
+    log.info("Retrieved {} food items", foodItemResponsesList.size());
     return foodItemResponsesList;
   }
 
@@ -143,14 +168,14 @@ public class FoodItemServiceImpl implements FoodItemService {
    * @return a list of food items for the given restaurant
    */
   @Override
-  public List<FoodItemOutDto> getAllByRestaurantId(Integer restaurantId) {
-    logger.info("Retrieving food items for restaurant ID: {}", restaurantId);
+  public List<FoodItemOutDto> getAllByRestaurantId(final Integer restaurantId) {
+    log.info("Retrieving food items for restaurant ID: {}", restaurantId);
     List<FoodItem> foodItemList = foodItemRepository.findByRestaurantId(restaurantId);
     List<FoodItemOutDto> responseList = new ArrayList<>();
     for (FoodItem foodItem : foodItemList) {
       responseList.add(DtoConversion.convertFoodItemToFoodItemResponse(foodItem));
     }
-    logger.info("Retrieved {} food items for restaurant ID: {}", responseList.size(), restaurantId);
+    log.info("Retrieved {} food items for restaurant ID: {}", responseList.size(), restaurantId);
     return responseList;
   }
 
@@ -161,14 +186,14 @@ public class FoodItemServiceImpl implements FoodItemService {
    * @return a list of food items for the given category
    */
   @Override
-  public List<FoodItemOutDto> getAllByCategoryId(Integer categoryId) {
-    logger.info("Retrieving food items for category ID: {}", categoryId);
+  public List<FoodItemOutDto> getAllByCategoryId(final Integer categoryId) {
+    log.info("Retrieving food items for category ID: {}", categoryId);
     List<FoodItem> foodItemList = foodItemRepository.findByCategoryId(categoryId);
     List<FoodItemOutDto> responseList = new ArrayList<>();
     for (FoodItem foodItem : foodItemList) {
       responseList.add(DtoConversion.convertFoodItemToFoodItemResponse(foodItem));
     }
-    logger.info("Retrieved {} food items for category ID: {}", responseList.size(), categoryId);
+    log.info("Retrieved {} food items for category ID: {}", responseList.size(), categoryId);
     return responseList;
   }
 
@@ -179,8 +204,8 @@ public class FoodItemServiceImpl implements FoodItemService {
    * @return the image data as a byte array
    */
   @Override
-  public byte[] getFoodItemImage(Integer id) {
-    logger.info("Fetching image for Food Item with ID: {}", id);
+  public byte[] getFoodItemImage(final Integer id) {
+    log.info("Fetching image for Food Item with ID: {}", id);
     FoodItem foodItem = findFoodItemsById(id);
     return foodItem.getImageData();
   }
@@ -192,22 +217,34 @@ public class FoodItemServiceImpl implements FoodItemService {
    * @param itemName     the name of the food item
    * @return true if the item exists, false otherwise
    */
-  @Override
-  public boolean itemExistsInRestaurant(Integer restaurantId, String itemName) {
-    return foodItemRepository.existsByRestaurantIdAndItemNameIgnoreCase(restaurantId, itemName);
+  public boolean itemExistsInRestaurant(final Integer restaurantId, final String itemName) {
+    String normalizedItemName = normalizeItemName(itemName);
+    return foodItemRepository.existsByRestaurantIdAndItemNameIgnoreCase(restaurantId, normalizedItemName);
   }
-
   /**
    * Validates the image file to ensure it is of a valid type (JPEG or PNG).
    *
    * @param image the image file to validate
-   * @throws InvalidFileTypeException if the file type is not valid
    */
   @Override
-  public void validateImageFile(MultipartFile image) {
+  public void validateImageFile(final MultipartFile image) {
     String contentType = image.getContentType();
     if (contentType == null || !contentType.equals("image/jpeg") && !contentType.equals("image/png")) {
-      throw new InvalidFileTypeException(RestaurantConstants.INVALID_FILE_TYPE);
+      throw new InvalidRequestException(RestaurantConstants.INVALID_FILE_TYPE);
+    }
+
+    if (image.getSize() > MAX_FILE_SIZE) {
+      throw new InvalidRequestException(RestaurantConstants.FILE_SIZE_EXCEEDED);
     }
   }
+  /**
+   * Normalizes a category name by trimming whitespace and replacing multiple spaces with a single space.
+   *
+   * @param itemName the category name to normalize; can be {@code null}
+   * @return the normalized category name, or {@code null} if the input was {@code null}
+   */
+  private String normalizeItemName(final String itemName) {
+    return itemName.trim().replaceAll("\\s+", "").toLowerCase();
+  }
+
 }

@@ -1,12 +1,12 @@
 package com.restaurants.controller;
 
-import com.restaurants.dto.indto.FoodItemInDto;
-import com.restaurants.dto.indto.FoodItemUpdateInDto;
-import com.restaurants.dto.outdto.FoodItemOutDto;
-import com.restaurants.dto.outdto.MessageOutDto;
+import com.restaurants.dto.FoodItemInDto;
+import com.restaurants.dto.FoodItemUpdateInDto;
+import com.restaurants.dto.FoodItemOutDto;
+import com.restaurants.dto.MessageOutDto;
+import com.restaurants.entities.FoodItem;
 import com.restaurants.service.FoodItemService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,9 +29,11 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/foodItem")
+@Slf4j
 public class FoodItemController {
-  private static final Logger logger = LoggerFactory.getLogger(FoodItemController.class);
-
+  /**
+   * Service layer dependency for foodItem-related operations.
+   */
   @Autowired
   private FoodItemService foodItemService;
 
@@ -43,12 +44,12 @@ public class FoodItemController {
    * @param image the image representing the food item
    * @return a response entity containing a message indicating the result of the operation
    */
-  @PostMapping("/food/add")
-  public ResponseEntity<MessageOutDto> addFoodItems(@Valid @ModelAttribute FoodItemInDto request,
-                                                    @RequestParam("image") MultipartFile image) {
-    logger.info("Received request to add food item: {}", request);
+  @PostMapping("")
+  public ResponseEntity<MessageOutDto> addFoodItems(final @Valid @ModelAttribute FoodItemInDto request,
+                                                    final @RequestParam("image") MultipartFile image) {
+    log.info("Received request to add food item");
     MessageOutDto message = foodItemService.addFoodItems(request, image);
-    logger.info(String.valueOf(message));
+    log.info("Food items added successfully");
     return new ResponseEntity<>(message, HttpStatus.CREATED);
   }
 
@@ -57,14 +58,16 @@ public class FoodItemController {
    *
    * @param request the details of the food item to be updated
    * @param id      the ID of the food item to be updated
+   * @param image  the image of food item
    * @return a response entity containing a message indicating the result of the operation
    */
   @PutMapping("/update/{id}")
-  public ResponseEntity<MessageOutDto> updateFoodItem(@Valid @RequestBody FoodItemUpdateInDto request,
-                                                      @PathVariable Integer id) {
-    logger.info("Received request to update food item with ID: {}", id);
-    MessageOutDto message = foodItemService.updateFoodItems(request, id);
-    logger.info(String.valueOf(message));
+  public ResponseEntity<MessageOutDto> updateFoodItem(final @Valid @ModelAttribute FoodItemUpdateInDto request,
+                                                      final @PathVariable Integer id,
+                                                      final @RequestParam MultipartFile image) {
+    log.info("Received request to update food item with ID: {}", id);
+    MessageOutDto message = foodItemService.updateFoodItems(request, id, image);
+    log.info("Food item updated successfully");
     return new ResponseEntity<>(message, HttpStatus.OK);
   }
 
@@ -75,9 +78,9 @@ public class FoodItemController {
    */
   @GetMapping("")
   public ResponseEntity<List<FoodItemOutDto>> getAllFoodItems() {
-    logger.info("Retrieving all food items");
+    log.info("Retrieving all food items");
     List<FoodItemOutDto> response = foodItemService.getAllFoodItems();
-    logger.info("Retrieved {} food items", response.size());
+    log.info("Retrieved {} food items", response.size());
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
@@ -88,10 +91,10 @@ public class FoodItemController {
    * @return a response entity containing a list of food items for the specified restaurant
    */
   @GetMapping("/restaurant/{restaurantId}")
-  public ResponseEntity<List<FoodItemOutDto>> getAllFoodItemsByRestaurantId(@PathVariable Integer restaurantId) {
-    logger.info("Retrieving food items for restaurant ID: {}", restaurantId);
+  public ResponseEntity<List<FoodItemOutDto>> getAllFoodItemsByRestaurantId(final @PathVariable Integer restaurantId) {
+    log.info("Retrieving food items for restaurant ID: {}", restaurantId);
     List<FoodItemOutDto> response = foodItemService.getAllByRestaurantId(restaurantId);
-    logger.info("Retrieved {} food items for restaurant ID: {}", response.size(), restaurantId);
+    log.info("Retrieved {} food items for restaurant ID: {}", response.size(), restaurantId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
@@ -102,10 +105,10 @@ public class FoodItemController {
    * @return a response entity containing a list of food items for the specified category
    */
   @GetMapping("/category/{categoryId}")
-  public ResponseEntity<List<FoodItemOutDto>> getAllFoodItemsByCategoryId(@PathVariable Integer categoryId) {
-    logger.info("Retrieving food items for category ID: {}", categoryId);
+  public ResponseEntity<List<FoodItemOutDto>> getAllFoodItemsByCategoryId(final @PathVariable Integer categoryId) {
+    log.info("Retrieving food items for category ID: {}", categoryId);
     List<FoodItemOutDto> response = foodItemService.getAllByCategoryId(categoryId);
-    logger.info("Retrieved {} food items for category ID: {}", response.size(), categoryId);
+    log.info("Retrieved {} food items for category ID: {}", response.size(), categoryId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
@@ -116,9 +119,23 @@ public class FoodItemController {
    * @return a response entity containing the image data as a byte array
    */
   @GetMapping("/{id}/image")
-  public ResponseEntity<byte[]> getFoodItemImage(@PathVariable Integer id) {
-    logger.info("Retrieving image for Food Item with ID: {}", id);
+  public ResponseEntity<byte[]> getFoodItemImage(final @PathVariable Integer id) {
+    log.info("Retrieving image for Food Item with ID: {}", id);
     byte[] imageData = foodItemService.getFoodItemImage(id);
     return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageData);
   }
+
+  /**
+   * Retrieves the image data for a food item by its ID.
+   *
+   * @param id the ID of the food item
+   * @return a response entity containing the data as a food item
+   */
+  @GetMapping("/{id}")
+  public ResponseEntity<FoodItem> getFoodItemById(final @PathVariable Integer id) {
+    log.info("Retrieving food items for category ID: {}", id);
+    FoodItem response = foodItemService.findFoodItemsById(id);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
 }

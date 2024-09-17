@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Restaurants</a> &gt; <a href="index.source.html" class="el_package">com.restaurants.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.restaurants.exception;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -17,111 +21,178 @@ import java.util.stream.Collectors;
 
 /**
  * Global exception handler to manage exceptions thrown across the application.
+ * &lt;p&gt;
+ * This class uses Spring's {@link ControllerAdvice} to handle exceptions globally
+ * and provide consistent error responses for various types of exceptions.
+ * &lt;/p&gt;
  */
 @ControllerAdvice
-<span class="fc" id="L22">public class GlobalExceptionHandler {</span>
+<span class="fc" id="L30">public class GlobalExceptionHandler {</span>
 
   /**
-   * Handles {@link CategoryNotFoundException} and returns a standardized error response.
+   * Handles {@link MethodArgumentNotValidException} thrown when validation of method arguments fails.
+   * &lt;p&gt;
+   * This method collects validation error messages from the exception and returns them
+   * in a standardized error response with HTTP status 400 (Bad Request).
+   * &lt;/p&gt;
    *
-   * @param ex      the exception thrown
+   * @param ex      the {@link MethodArgumentNotValidException} thrown
    * @param request the HTTP request that caused the exception
-   * @return the error response
-   */
-  @ExceptionHandler(CategoryNotFoundException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public final ErrorResponse handleCategoryNotFoundException(CategoryNotFoundException ex, HttpServletRequest request) {
-<span class="nc" id="L35">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
-  }
-
-  /**
-   * Handles {@link RestaurantNotFoundException} and returns a standardized error response.
-   *
-   * @param ex      the exception thrown
-   * @param request the HTTP request that caused the exception
-   * @return the error response
-   */
-  @ExceptionHandler(RestaurantNotFoundException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public final ErrorResponse handleRestaurantNotFoundException(RestaurantNotFoundException ex, HttpServletRequest request) {
-<span class="nc" id="L49">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
-  }
-
-  /**
-   * Handles {@link FoodItemNotFoundException} and returns a standardized error response.
-   *
-   * @param ex      the exception thrown
-   * @param request the HTTP request that caused the exception
-   * @return the error response
-   */
-  @ExceptionHandler(FoodItemNotFoundException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public final ErrorResponse handleFoodItemNotFoundException(FoodItemNotFoundException ex, HttpServletRequest request) {
-<span class="nc" id="L63">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
-  }
-
-  /**
-   * Handles {@link MethodArgumentNotValidException} and returns a standardized error response for validation errors.
-   *
-   * @param ex      the exception thrown
-   * @param request the HTTP request that caused the exception
-   * @return the error response
+   * @return an {@link ErrorResponse} containing validation error details
    */
   @ExceptionHandler(MethodArgumentNotValidException.class)
   @ResponseBody
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ErrorResponse handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
-<span class="nc" id="L77">    List&lt;String&gt; errors = ex.getBindingResult()</span>
-<span class="nc" id="L78">      .getFieldErrors()</span>
-<span class="nc" id="L79">      .stream()</span>
-<span class="nc" id="L80">      .map(FieldError::getDefaultMessage)</span>
-<span class="nc" id="L81">      .collect(Collectors.toList());</span>
+  public ErrorResponse handleValidationException(final MethodArgumentNotValidException ex, final HttpServletRequest request) {
+<span class="nc" id="L47">    List&lt;String&gt; errors = ex.getBindingResult()</span>
+<span class="nc" id="L48">      .getFieldErrors()</span>
+<span class="nc" id="L49">      .stream()</span>
+<span class="nc" id="L50">      .map(FieldError::getDefaultMessage)</span>
+<span class="nc" id="L51">      .collect(Collectors.toList());</span>
 
-<span class="nc" id="L83">    String errorMessage = String.join(&quot;, &quot;, errors);</span>
-<span class="nc" id="L84">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), &quot;Validation failed: &quot; + errorMessage,</span>
-<span class="nc" id="L85">      request.getRequestURI());</span>
+<span class="nc" id="L53">    String errorMessage = String.join(&quot;, &quot;, errors);</span>
+<span class="nc" id="L54">    return new ErrorResponse(</span>
+<span class="nc" id="L55">      LocalDateTime.now(),</span>
+<span class="nc" id="L56">      HttpStatus.BAD_REQUEST.value(),</span>
+      &quot;Validation failed: &quot; + errorMessage,
+<span class="nc" id="L58">      request.getRequestURI()</span>
+    );
   }
 
-  @ExceptionHandler(CategoryAlreadyExistsException.class)
+  /**
+   * Handles {@link ResourceNotFoundException} thrown when a requested resource is not found.
+   * &lt;p&gt;
+   * This method returns a standardized error response with HTTP status 404 (Not Found).
+   * &lt;/p&gt;
+   *
+   * @param ex      the {@link ResourceNotFoundException} thrown
+   * @param request the HTTP request that caused the exception
+   * @return an {@link ErrorResponse} containing the error message
+   */
+  @ExceptionHandler(ResourceNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public ErrorResponse handleResourceNotFoundException(final ResourceNotFoundException ex, final HttpServletRequest request) {
+<span class="nc" id="L76">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link ResourceConflictException} thrown when there is a conflict in the request.
+   * &lt;p&gt;
+   * This method returns a standardized error response with HTTP status 409 (Conflict).
+   * &lt;/p&gt;
+   *
+   * @param ex      the {@link ResourceConflictException} thrown
+   * @param request the HTTP request that caused the exception
+   * @return an {@link ErrorResponse} containing the error message
+   */
+  @ExceptionHandler(ResourceConflictException.class)
   @ResponseStatus(HttpStatus.CONFLICT)
   @ResponseBody
-  public final ErrorResponse handleCategoryAlreadyExistsException(CategoryAlreadyExistsException ex, HttpServletRequest request) {
-<span class="nc" id="L92">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), ex.getMessage(), request.getRequestURI());</span>
+  public ErrorResponse handleConflictException(final ResourceConflictException ex, final HttpServletRequest request) {
+<span class="nc" id="L93">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), ex.getMessage(), request.getRequestURI());</span>
   }
 
-  @ExceptionHandler(FoodItemAlreadyExistsException.class)
-  @ResponseStatus(HttpStatus.CONFLICT)
-  @ResponseBody
-  public final ErrorResponse handleFoodItemAlreadyExistsException(FoodItemAlreadyExistsException ex, HttpServletRequest request) {
-<span class="nc" id="L99">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), ex.getMessage(), request.getRequestURI());</span>
-  }
-
-  @ExceptionHandler(InvalidFileTypeException.class)
-  @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-  @ResponseBody
-  public final ErrorResponse handleInvalidFileTypeException(InvalidFileTypeException ex, HttpServletRequest request) {
-<span class="nc" id="L106">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(), ex.getMessage(), request.getRequestURI());</span>
-  }
-
-  @ExceptionHandler(NotRestaurantOwnerException.class)
+  /**
+   * Handles {@link AccessDeniedException} thrown when a request is deemed invalid.
+   * &lt;p&gt;
+   * This method returns a standardized error response with HTTP status 400 (Bad Request).
+   * &lt;/p&gt;
+   *
+   * @param ex      the {@link AccessDeniedException} thrown
+   * @param request the HTTP request that caused the exception
+   * @return an {@link ErrorResponse} containing the error message
+   */
+  @ExceptionHandler(AccessDeniedException.class)
   @ResponseStatus(HttpStatus.FORBIDDEN)
   @ResponseBody
-  public final ErrorResponse handleNotRestaurantOwnerException(NotRestaurantOwnerException ex, HttpServletRequest request) {
-<span class="nc" id="L113">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.FORBIDDEN.value(), ex.getMessage(), request.getRequestURI());</span>
+  public ErrorResponse handleResourceNotFoundException(final AccessDeniedException ex, final HttpServletRequest request) {
+<span class="nc" id="L110">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.FORBIDDEN.value(), ex.getMessage(), request.getRequestURI());</span>
   }
+
+  /**
+   * Handles {@link InvalidRequestException} thrown when a request is deemed invalid.
+   * &lt;p&gt;
+   * This method returns a standardized error response with HTTP status 400 (Bad Request).
+   * &lt;/p&gt;
+   *
+   * @param ex      the {@link InvalidRequestException} thrown
+   * @param request the HTTP request that caused the exception
+   * @return an {@link ErrorResponse} containing the error message
+   */
+  @ExceptionHandler(InvalidRequestException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public final ErrorResponse handleInvalidRequestException(final InvalidRequestException ex, final HttpServletRequest request) {
+<span class="nc" id="L127">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link FeignException} thrown by Feign clients during communication with external services.
+   * &lt;p&gt;
+   * This method attempts to extract and parse the error message from the Feign exception response.
+   * If parsing fails, a generic message is used. The response is returned with the appropriate HTTP status.
+   * &lt;/p&gt;
+   *
+   * @param ex      the {@link FeignException} thrown
+   * @param request the HTTP request that caused the exception
+   * @return a {@link ResponseEntity} containing the {@link ErrorResponse} and the HTTP status
+   */
+  @ExceptionHandler(FeignException.class)
+  public ResponseEntity&lt;ErrorResponse&gt; handleFeignException(final FeignException ex, final HttpServletRequest request) {
+<span class="nc" id="L143">    HttpStatus status = HttpStatus.valueOf(ex.status());</span>
+<span class="nc" id="L144">    String message = &quot;An error occurred while processing your request&quot;;</span>
+
+<span class="nc" id="L146">    String feignResponseBody = ex.contentUTF8();</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">    if (feignResponseBody != null) {</span>
+      try {
+<span class="nc" id="L149">        ObjectMapper objectMapper = new ObjectMapper();</span>
+<span class="nc" id="L150">        JsonNode jsonNode = objectMapper.readTree(feignResponseBody);</span>
+<span class="nc" id="L151">        message = jsonNode.get(&quot;message&quot;).asText();</span>
+<span class="nc" id="L152">      } catch (Exception e) {</span>
+<span class="nc" id="L153">        message = ex.getMessage();</span>
+<span class="nc" id="L154">      }</span>
+    }
+
+<span class="nc" id="L157">    ErrorResponse errorResponse = new ErrorResponse(</span>
+<span class="nc" id="L158">      LocalDateTime.now(),</span>
+<span class="nc" id="L159">      status.value(),</span>
+      message,
+<span class="nc" id="L161">      request.getRequestURI()</span>
+    );
+
+<span class="nc" id="L164">    return new ResponseEntity&lt;&gt;(errorResponse, status);</span>
+  }
+
   /**
    * Represents the error response returned by the exception handler.
    */
-<span class="nc bnc" id="L118" title="All 32 branches missed.">  @Data</span>
-<span class="nc" id="L119">  @AllArgsConstructor</span>
+<span class="nc bnc" id="L170" title="All 32 branches missed.">  @Data</span>
+<span class="nc" id="L171">  @AllArgsConstructor</span>
   public static class ErrorResponse {
-<span class="nc" id="L121">    private LocalDateTime timestamp;</span>
-<span class="nc" id="L122">    private int status;</span>
-<span class="nc" id="L123">    private String message;</span>
-<span class="nc" id="L124">    private String path;</span>
+    /**
+     * The timestamp when the error occurred.
+     * This is useful for logging and debugging to determine when the error happened.
+     */
+<span class="nc" id="L177">    private LocalDateTime timestamp;</span>
+
+    /**
+     * The HTTP status code associated with the error.
+     * This code indicates the type of error that occurred (e.g., 404 for Not Found, 500 for Internal Server Error).
+     */
+<span class="nc" id="L183">    private int status;</span>
+
+    /**
+     * A descriptive message explaining the error.
+     * This message provides more details about the error to help understand what went wrong.
+     */
+<span class="nc" id="L189">    private String message;</span>
+
+    /**
+     * The path or endpoint where the error occurred.
+     * This helps in identifying which part of the application triggered the error.
+     */
+<span class="nc" id="L195">    private String path;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

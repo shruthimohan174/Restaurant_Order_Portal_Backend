@@ -1,8 +1,8 @@
 package com.restaurants.service;
 
-import com.restaurants.dto.indto.FoodCategoryInDto;
-import com.restaurants.dto.outdto.FoodCategoryOutDto;
-import com.restaurants.dto.outdto.MessageOutDto;
+import com.restaurants.dto.FoodCategoryInDto;
+import com.restaurants.dto.FoodCategoryOutDto;
+import com.restaurants.dto.MessageOutDto;
 import com.restaurants.entities.FoodCategory;
 
 import java.util.List;

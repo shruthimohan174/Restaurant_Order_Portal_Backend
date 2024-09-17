@@ -1,14 +1,14 @@
 package com.restaurants.service.impl;
 
 import com.restaurants.constants.RestaurantConstants;
-import com.restaurants.dto.indto.RestaurantInDto;
-import com.restaurants.dto.outdto.MessageOutDto;
-import com.restaurants.dto.outdto.RestaurantOutDto;
-import com.restaurants.dto.outdto.UserOutDto;
+import com.restaurants.dto.MessageOutDto;
+import com.restaurants.dto.RestaurantInDto;
+import com.restaurants.dto.RestaurantOutDto;
+import com.restaurants.dto.UserOutDto;
 import com.restaurants.entities.Restaurant;
-import com.restaurants.exception.InvalidFileTypeException;
-import com.restaurants.exception.NotRestaurantOwnerException;
-import com.restaurants.exception.RestaurantNotFoundException;
+import com.restaurants.exception.AccessDeniedException;
+import com.restaurants.exception.InvalidRequestException;
+import com.restaurants.exception.ResourceNotFoundException;
 import com.restaurants.repositories.RestaurantRepository;
 import com.restaurants.service.UserFeignClient;
 import com.restaurants.utils.UserRole;
@@ -32,23 +32,59 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class RestaurantServiceImplTest {
+/**
+ * Unit test class for {@link RestaurantServiceImpl}.
+ * This class contains tests for the methods of the {@link RestaurantServiceImpl} class.
+ */
+public class RestaurantServiceImplTest {
+
+  /**
+   * Mocked {@link UserFeignClient} used to simulate interactions with the user service.
+   */
   @Mock
   private UserFeignClient userFeignClient;
 
+  /**
+   * Mocked {@link RestaurantRepository} used to simulate interactions with the restaurant database.
+   */
   @Mock
   private RestaurantRepository restaurantRepository;
 
+  /**
+   * Mocked {@link MultipartFile} used to simulate image file uploads.
+   */
   @Mock
   private MultipartFile image;
 
+  /**
+   * Instance of {@link RestaurantServiceImpl} being tested.
+   * This instance is injected with the mocked dependencies.
+   */
   @InjectMocks
   private RestaurantServiceImpl restaurantService;
 
+  /**
+   * The {@link Restaurant} entity used for testing.
+   * This field is initialized with a sample restaurant object for use in test cases.
+   */
   private Restaurant restaurant;
+
+  /**
+   * The {@link RestaurantInDto} data transfer object used for testing.
+   * This field is initialized with a sample input DTO for use in test cases involving restaurant creation or updates.
+   */
   private RestaurantInDto restaurantInDto;
+
+  /**
+   * The {@link RestaurantOutDto} data transfer object used for testing.
+   * This field is initialized with a sample output DTO for use in test cases involving responses from the service.
+   */
   private RestaurantOutDto restaurantOutDto;
 
+  /**
+   * Sets up test data before each test case.
+   * Initializes the instances of {@link Restaurant}, {@link RestaurantInDto}, and {@link RestaurantOutDto} with test data.
+   */
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
@@ -117,10 +153,10 @@ class RestaurantServiceImplTest {
   }
 
   @Test
-  void testAddRestaurant_NotRestaurantOwnerException() {
+  void testAddRestaurantNotRestaurantOwnerException() {
     when(userFeignClient.getUserById(123)).thenReturn(new UserOutDto(123, UserRole.CUSTOMER));
 
-    assertThrows(NotRestaurantOwnerException.class, () -> restaurantService.addRestaurant(restaurantInDto, image));
+    assertThrows(AccessDeniedException.class, () -> restaurantService.addRestaurant(restaurantInDto, image));
   }
 
   @Test
@@ -134,18 +170,18 @@ class RestaurantServiceImplTest {
   }
 
   @Test
-  void testFindRestaurantById_RestaurantNotFoundException() {
+  void testFindRestaurantByIdRestaurantNotFoundException() {
     when(restaurantRepository.findById(1)).thenReturn(Optional.empty());
 
-    assertThrows(RestaurantNotFoundException.class, () -> restaurantService.findRestaurantById(1));
+    assertThrows(ResourceNotFoundException.class, () -> restaurantService.findRestaurantById(1));
   }
 
   @Test
-  void testValidateImageFile_InvalidFileTypeException() {
+  void testValidateImageFileInvalidFileTypeException() {
     when(image.getContentType()).thenReturn("application/pdf");
 
-    InvalidFileTypeException exception = assertThrows(
-      InvalidFileTypeException.class,
+    InvalidRequestException exception = assertThrows(
+      InvalidRequestException.class,
       () -> restaurantService.validateImageFile(image)
     );
 
@@ -153,7 +189,7 @@ class RestaurantServiceImplTest {
   }
 
   @Test
-  void testGetRestaurantImage_Success() {
+  void testGetRestaurantImageSuccess() {
     int foodItemId = 1;
     Restaurant restaurant1 = new Restaurant();
     byte[] imageData = "imageData".getBytes();
@@ -166,12 +202,12 @@ class RestaurantServiceImplTest {
   }
 
   @Test
-  void testGetRestaurantImage_RestaurantNotFoundException() {
+  void testGetRestaurantImageRestaurantNotFoundException() {
     int foodItemId = 1;
     when(restaurantRepository.findById(foodItemId)).thenReturn(Optional.empty());
 
-    RestaurantNotFoundException exception = assertThrows(
-      RestaurantNotFoundException.class,
+    ResourceNotFoundException exception = assertThrows(
+      ResourceNotFoundException.class,
       () -> restaurantService.getRestaurantImage(foodItemId)
     );
 

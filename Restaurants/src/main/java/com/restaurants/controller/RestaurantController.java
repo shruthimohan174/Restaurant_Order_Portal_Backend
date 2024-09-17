@@ -1,12 +1,11 @@
 package com.restaurants.controller;
 
-import com.restaurants.dto.indto.RestaurantInDto;
-import com.restaurants.dto.outdto.MessageOutDto;
-import com.restaurants.dto.outdto.RestaurantOutDto;
+import com.restaurants.dto.RestaurantInDto;
+import com.restaurants.dto.MessageOutDto;
+import com.restaurants.dto.RestaurantOutDto;
 import com.restaurants.entities.Restaurant;
 import com.restaurants.service.RestaurantService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,10 +27,12 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/restaurant")
+@Slf4j
 public class RestaurantController {
 
-  private static final Logger logger = LoggerFactory.getLogger(RestaurantController.class);
-
+  /**
+   * Service layer dependency for restaurant-related operations.
+   */
   @Autowired
   private RestaurantService restaurantService;
 
@@ -42,12 +43,12 @@ public class RestaurantController {
    * @param image   the image representing the restaurant
    * @return a {@link ResponseEntity} containing a {@link MessageOutDto} with the result of the operation
    */
-  @PostMapping("/add")
-  public ResponseEntity<MessageOutDto> addRestaurant(@Valid @ModelAttribute RestaurantInDto request,
-                                                     @RequestParam("image") MultipartFile image) {
-    logger.info("Received request to add restaurant: {}", request);
+  @PostMapping("")
+  public ResponseEntity<MessageOutDto> addRestaurant(final @Valid @ModelAttribute RestaurantInDto request,
+                                                     final @RequestParam("image") MultipartFile image) {
+    log.info("Received request to add restaurant: {}", request);
     MessageOutDto message = restaurantService.addRestaurant(request, image);
-    logger.info(String.valueOf(message));
+    log.info("Restaurant added successfully.");
 
     return new ResponseEntity<>(message, HttpStatus.CREATED);
   }
@@ -59,9 +60,9 @@ public class RestaurantController {
    */
   @GetMapping("")
   public ResponseEntity<List<RestaurantOutDto>> getAllRestaurants() {
-    logger.info("Retrieving all restaurants");
+    log.info("Retrieving all restaurants");
     List<RestaurantOutDto> response = restaurantService.getALlRestaurants();
-    logger.info("Retrieved {} restaurants", response.size());
+    log.info("Retrieved {} restaurants", response.size());
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
@@ -72,10 +73,9 @@ public class RestaurantController {
    * @return a {@link ResponseEntity} containing the {@link Restaurant} with the specified ID
    */
   @GetMapping("/{id}")
-  public ResponseEntity<Restaurant> getRestaurantById(@PathVariable Integer id) {
-    logger.info("Retrieving restaurant with ID: {}", id);
+  public ResponseEntity<Restaurant> getRestaurantById(final @PathVariable Integer id) {
+    log.info("Retrieving restaurant with ID: {}", id);
     Restaurant response = restaurantService.findRestaurantById(id);
-    logger.info("Retrieved restaurant: {}", response);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
@@ -86,10 +86,10 @@ public class RestaurantController {
    * @return a {@link ResponseEntity} containing a list of {@link RestaurantOutDto} associated with the specified user
    */
   @GetMapping("/user/{userId}")
-  public ResponseEntity<List<RestaurantOutDto>> getAllRestaurantByUserId(@PathVariable Integer userId) {
-    logger.info("Retrieving restaurants for user ID: {}", userId);
+  public ResponseEntity<List<RestaurantOutDto>> getAllRestaurantByUserId(final @PathVariable Integer userId) {
+    log.info("Retrieving restaurants for user ID: {}", userId);
     List<RestaurantOutDto> response = restaurantService.getALlRestaurantsByUserId(userId);
-    logger.info("Retrieved {} restaurants for user ID: {}", response.size(), userId);
+    log.info("Retrieved {} restaurants for user ID: {}", response.size(), userId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
@@ -100,8 +100,8 @@ public class RestaurantController {
    * @return a {@link ResponseEntity} containing the image data as a byte array
    */
   @GetMapping("/{id}/image")
-  public ResponseEntity<byte[]> getRestaurantImage(@PathVariable Integer id) {
-    logger.info("Retrieving image for restaurant with ID: {}", id);
+  public ResponseEntity<byte[]> getRestaurantImage(final @PathVariable Integer id) {
+    log.info("Retrieving image for restaurant with ID: {}", id);
     byte[] imageData = restaurantService.getRestaurantImage(id);
     return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageData);
   }

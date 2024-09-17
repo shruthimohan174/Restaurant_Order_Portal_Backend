@@ -1,9 +1,9 @@
 package com.restaurants.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.restaurants.dto.indto.FoodCategoryInDto;
-import com.restaurants.dto.outdto.FoodCategoryOutDto;
-import com.restaurants.dto.outdto.MessageOutDto;
+import com.restaurants.dto.FoodCategoryInDto;
+import com.restaurants.dto.FoodCategoryOutDto;
+import com.restaurants.dto.MessageOutDto;
 import com.restaurants.service.FoodCategoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,23 +28,56 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Unit tests for {@link FoodCategoryController}.
+ * This class tests the endpoints of the {@link FoodCategoryController} class, ensuring correct functionality
+ * and handling of various scenarios
+ * related to food category operations such as adding, updating, retrieving, and deleting food categories.
+ */
 @ExtendWith(MockitoExtension.class)
 public class FoodCategoryControllerTest {
 
+  /**
+   * Instance of {@link FoodCategoryController} to be tested.
+   */
   @InjectMocks
   private FoodCategoryController foodCategoryController;
 
+  /**
+   * Mock for the {@link FoodCategoryService} used to interact with food category-related services.
+   */
   @Mock
   private FoodCategoryService foodCategoryService;
 
+  /**
+   * MockMvc instance for performing HTTP requests and verifying responses.
+   */
   private MockMvc mockMvc;
+
+  /**
+   * ObjectMapper instance for serializing and deserializing JSON data.
+   */
   private ObjectMapper objectMapper;
 
+  /**
+   * Data Transfer Object for food category input.
+   */
   private FoodCategoryInDto foodCategoryInDto;
+
+  /**
+   * Data Transfer Object for food category output.
+   */
   private FoodCategoryOutDto foodCategoryOutDto;
+
+  /**
+   * Data Transfer Object for message output.
+   */
   private MessageOutDto messageOutDto;
 
-
+  /**
+   * Sets up the test environment by initializing the {@link MockMvc} and {@link ObjectMapper} instances.
+   * This method is executed before each test method to ensure a clean state.
+   */
   @BeforeEach
   void setUp() {
     mockMvc = MockMvcBuilders.standaloneSetup(foodCategoryController).build();
@@ -52,12 +85,12 @@ public class FoodCategoryControllerTest {
 
     foodCategoryInDto = new FoodCategoryInDto();
     foodCategoryInDto.setRestaurantId(1);
-    foodCategoryInDto.setCategoryName("Desserts");
+    foodCategoryInDto.setCategoryName("category");
 
     foodCategoryOutDto = new FoodCategoryOutDto();
     foodCategoryOutDto.setId(1);
     foodCategoryOutDto.setRestaurantId(1);
-    foodCategoryOutDto.setCategoryName("Desserts");
+    foodCategoryOutDto.setCategoryName("category");
 
     messageOutDto = new MessageOutDto();
   }
@@ -69,7 +102,7 @@ public class FoodCategoryControllerTest {
     when(foodCategoryService.addCategory(any(FoodCategoryInDto.class)))
       .thenReturn(messageOutDto);
 
-    mockMvc.perform(post("/category/add")
+    mockMvc.perform(post("/category")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(foodCategoryInDto)))
       .andExpect(status().isCreated())
@@ -79,11 +112,12 @@ public class FoodCategoryControllerTest {
 
   @Test
   void updateFoodCategoryTest() throws Exception {
+    int categoryId = 1;
     messageOutDto.setMessage("Food category updated successfully");
     when(foodCategoryService.updateCategory(any(FoodCategoryInDto.class), anyInt()))
       .thenReturn(messageOutDto);
 
-    mockMvc.perform(put("/category/update/1")
+    mockMvc.perform(put("/category/update/" + categoryId)
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(foodCategoryInDto)))
       .andExpect(status().isOk())
@@ -104,21 +138,22 @@ public class FoodCategoryControllerTest {
       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(jsonPath("$[0].id").value(1))
       .andExpect(jsonPath("$[0].restaurantId").value(1))
-      .andExpect(jsonPath("$[0].categoryName").value("Desserts"));
+      .andExpect(jsonPath("$[0].categoryName").value("category"));
   }
 
   @Test
   void getAllCategoryByRestaurantIdTest() throws Exception {
+    int restaurantId = 1;
     List<FoodCategoryOutDto> categories = Collections.singletonList(foodCategoryOutDto);
 
     when(foodCategoryService.findCategoryByRestaurantId(anyInt())).thenReturn(categories);
 
-    mockMvc.perform(get("/category/restaurant/1")
+    mockMvc.perform(get("/category/restaurant/" + restaurantId)
         .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(jsonPath("$[0].id").value(1))
       .andExpect(jsonPath("$[0].restaurantId").value(1))
-      .andExpect(jsonPath("$[0].categoryName").value("Desserts"));
+      .andExpect(jsonPath("$[0].categoryName").value("category"));
   }
 }

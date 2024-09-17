@@ -1,19 +1,18 @@
 package com.restaurants.service.impl;
 
 import com.restaurants.constants.RestaurantConstants;
-import com.restaurants.dto.indto.FoodCategoryInDto;
-import com.restaurants.dto.outdto.FoodCategoryOutDto;
-import com.restaurants.dto.outdto.MessageOutDto;
-import com.restaurants.dtoconversion.DtoConversion;
+import com.restaurants.dto.FoodCategoryInDto;
+import com.restaurants.dto.FoodCategoryOutDto;
+import com.restaurants.dto.MessageOutDto;
+import com.restaurants.converter.DtoConversion;
 import com.restaurants.entities.FoodCategory;
 import com.restaurants.entities.Restaurant;
-import com.restaurants.exception.CategoryAlreadyExistsException;
-import com.restaurants.exception.CategoryNotFoundException;
+import com.restaurants.exception.ResourceConflictException;
+import com.restaurants.exception.ResourceNotFoundException;
 import com.restaurants.repositories.FoodCategoryRepository;
 import com.restaurants.service.FoodCategoryService;
 import com.restaurants.service.RestaurantService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,13 +24,18 @@ import java.util.List;
  * Provides methods to manage food categories.
  */
 @Service
+@Slf4j
 public class FoodCategoryServiceImpl implements FoodCategoryService {
 
-  private static final Logger logger = LoggerFactory.getLogger(FoodCategoryServiceImpl.class);
-
+  /**
+   * Service layer dependency for category repository-related operations.
+   */
   @Autowired
   private FoodCategoryRepository foodCategoryRepository;
 
+  /**
+   * Service layer dependency for restaurant-related operations.
+   */
   @Autowired
   private RestaurantService restaurantService;
 
@@ -42,15 +46,20 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
    * @return the response message indicating success or failure
    */
   @Override
-  public MessageOutDto addCategory(FoodCategoryInDto request) {
-    logger.info("Adding category: {}", request);
+  public MessageOutDto addCategory(final FoodCategoryInDto request) {
+    log.info("Adding category ");
     Restaurant restaurant = restaurantService.findRestaurantById(request.getRestaurantId());
-    if (categoryExistsRestaurant(restaurant.getId(), request.getCategoryName())) {
-      throw new CategoryAlreadyExistsException(RestaurantConstants.CATEGORY_ALREADY_EXISTS);
+    String sanitizedCategoryName = normalizedCategoryName(request.getCategoryName());
+
+    if (categoryExistsRestaurant(restaurant.getId(), sanitizedCategoryName)) {
+      throw new ResourceConflictException(RestaurantConstants.CATEGORY_ALREADY_EXISTS);
     }
+
     FoodCategory category = DtoConversion.convertCategoryRequestToCategory(request);
+    category.setCategoryName(sanitizedCategoryName);
     foodCategoryRepository.save(category);
-    logger.info("Category added successfully: {}", request.getCategoryName());
+
+    log.info("Category added successfully: {}", request.getCategoryName());
     return new MessageOutDto(RestaurantConstants.FOOD_CATEGORY_ADDED_SUCCESSFULLY);
   }
 
@@ -62,16 +71,20 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
    * @return the response message indicating success or failure
    */
   @Override
-  public MessageOutDto updateCategory(FoodCategoryInDto request, Integer id) {
-    logger.info("Updating category with ID: {}", id);
+  public MessageOutDto updateCategory(final FoodCategoryInDto request, final Integer id) {
+    log.info("Updating category with ID: {}", id);
     FoodCategory existingCategory = findCategoryById(id);
-    if (!existingCategory.getCategoryName().equalsIgnoreCase(request.getCategoryName()) &&
-      categoryExistsRestaurant(request.getRestaurantId(), request.getCategoryName())) {
-      throw new CategoryAlreadyExistsException(RestaurantConstants.CATEGORY_ALREADY_EXISTS);
+    String sanitizedCategoryName = normalizedCategoryName(request.getCategoryName());
+
+    if (!existingCategory.getCategoryName().equalsIgnoreCase(sanitizedCategoryName)
+      && categoryExistsRestaurant(request.getRestaurantId(), sanitizedCategoryName)) {
+      throw new ResourceConflictException(RestaurantConstants.CATEGORY_ALREADY_EXISTS);
     }
-    existingCategory.setCategoryName(request.getCategoryName());
+
+    existingCategory.setCategoryName(sanitizedCategoryName);
     foodCategoryRepository.save(existingCategory);
-    logger.info("Category updated successfully: {}", request.getCategoryName());
+
+    log.info("Category updated successfully: {}", request.getCategoryName());
     return new MessageOutDto(RestaurantConstants.FOOD_CATEGORY_UPDATED_SUCCESSFULLY);
   }
 
@@ -82,12 +95,15 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
    */
   @Override
   public List<FoodCategoryOutDto> viewAllCategory() {
-    logger.info("Retrieving all categories");
+    log.info("Retrieving all categories");
     List<FoodCategory> categoryList = foodCategoryRepository.findAll();
     List<FoodCategoryOutDto> responseList = new ArrayList<>();
-    for (FoodCategory category : categoryList)
+
+    for (FoodCategory category : categoryList) {
       responseList.add(DtoConversion.convertCategoryToResponse(category));
-    logger.info("Retrieved {} categories", responseList.size());
+    }
+
+    log.info("Retrieved {} categories", responseList.size());
     return responseList;
   }
 
@@ -98,29 +114,32 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
    * @return a list of food categories for the given restaurant
    */
   @Override
-  public List<FoodCategoryOutDto> findCategoryByRestaurantId(Integer restaurantId) {
-    logger.info("Retrieving categories for restaurant ID: {}", restaurantId);
+  public List<FoodCategoryOutDto> findCategoryByRestaurantId(final Integer restaurantId) {
+    log.info("Retrieving categories for restaurant ID: {}", restaurantId);
     List<FoodCategory> categoryList = foodCategoryRepository.findByRestaurantId(restaurantId);
     List<FoodCategoryOutDto> responseList = new ArrayList<>();
-    for (FoodCategory category : categoryList)
+
+    for (FoodCategory category : categoryList) {
       responseList.add(DtoConversion.convertCategoryToResponse(category));
-    logger.info("Retrieved {} categories for restaurant ID: {}", responseList.size(), restaurantId);
+    }
+
+    log.info("Retrieved {} categories for restaurant ID: {}", responseList.size(), restaurantId);
     return responseList;
   }
+
 
   /**
    * Finds a food category by its ID.
    *
    * @param id the ID of the food category
    * @return the food category
-   * @throws CategoryNotFoundException if the food category is not found
    */
   @Override
-  public FoodCategory findCategoryById(Integer id) {
-    logger.info("Finding category by ID: {}", id);
+  public FoodCategory findCategoryById(final Integer id) {
+    log.info("Finding category by ID: {}", id);
     return foodCategoryRepository.findById(id).orElseThrow(() -> {
-      logger.error("Category not found for ID: {}", id);
-      return new CategoryNotFoundException(RestaurantConstants.CATEGORY_NOT_FOUND);
+      log.error("Category not found for ID: {}", id);
+      return new ResourceNotFoundException(RestaurantConstants.CATEGORY_NOT_FOUND);
     });
   }
 
@@ -131,7 +150,22 @@ public class FoodCategoryServiceImpl implements FoodCategoryService {
    * @param categoryName the name of the food category
    * @return true if the category exists, false otherwise
    */
-  private boolean categoryExistsRestaurant(Integer restaurantId, String categoryName) {
-    return foodCategoryRepository.existsByRestaurantIdAndCategoryNameIgnoreCase(restaurantId, categoryName);
+  private boolean categoryExistsRestaurant(final Integer restaurantId, final String categoryName) {
+    return foodCategoryRepository.existsByRestaurantIdAndCategoryNameIgnoreCase(
+      restaurantId, categoryName.trim().replaceAll("\\s+", " ")
+    );
+  }
+
+  /**
+   * Normalizes a category name by trimming whitespace and replacing multiple spaces with a single space.
+   *
+   * @param categoryName the category name to normalize; can be {@code null}
+   * @return the normalized category name, or {@code null} if the input was {@code null}
+   */
+  private String normalizedCategoryName(final String categoryName) {
+    if (categoryName == null) {
+      return null;
+    }
+    return categoryName.trim().replaceAll("\\s+", " ");
   }
 }

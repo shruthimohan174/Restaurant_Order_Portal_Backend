@@ -1,8 +1,8 @@
 package com.restaurants.service;
 
-import com.restaurants.dto.indto.RestaurantInDto;
-import com.restaurants.dto.outdto.MessageOutDto;
-import com.restaurants.dto.outdto.RestaurantOutDto;
+import com.restaurants.dto.RestaurantInDto;
+import com.restaurants.dto.MessageOutDto;
+import com.restaurants.dto.RestaurantOutDto;
 import com.restaurants.entities.Restaurant;
 import org.springframework.web.multipart.MultipartFile;
 

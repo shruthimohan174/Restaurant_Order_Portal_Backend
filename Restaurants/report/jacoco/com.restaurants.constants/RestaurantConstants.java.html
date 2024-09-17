@@ -69,10 +69,17 @@ public final class RestaurantConstants {
    * Success message indicating that a restaurant was added successfully.
    */
   public static final String RESTAURANT_ADDED_SUCCESSFULLY = &quot;Restaurant added successfully&quot;;
+  /**
+   * Error message indicating restaurant name already exists.
+   */
+  public static final String RESTAURANT_NAME_EXISTS = &quot;Restaurant name already exists. Please choose a different name.&quot;;
+  /**
+   * Error message indicating that the file should not be exceeded.
+   */
+  public static final String FILE_SIZE_EXCEEDED = &quot;File size exceeds the maximum limit of 5 MB&quot;;
 
-  // Private constructor to prevent instantiation
-<span class="nc" id="L74">  private RestaurantConstants() {</span>
-<span class="nc" id="L75">    throw new UnsupportedOperationException(&quot;This is a utility class and cannot be instantiated&quot;);</span>
+<span class="nc" id="L81">  private RestaurantConstants() {</span>
+<span class="nc" id="L82">    throw new UnsupportedOperationException(&quot;This is a utility class and cannot be instantiated&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

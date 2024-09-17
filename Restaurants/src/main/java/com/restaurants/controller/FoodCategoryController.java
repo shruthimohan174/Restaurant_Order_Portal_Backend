@@ -1,11 +1,10 @@
 package com.restaurants.controller;
 
-import com.restaurants.dto.indto.FoodCategoryInDto;
-import com.restaurants.dto.outdto.FoodCategoryOutDto;
-import com.restaurants.dto.outdto.MessageOutDto;
+import com.restaurants.dto.FoodCategoryInDto;
+import com.restaurants.dto.FoodCategoryOutDto;
+import com.restaurants.dto.MessageOutDto;
 import com.restaurants.service.FoodCategoryService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +24,12 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/category")
+@Slf4j
 public class FoodCategoryController {
 
-  private static final Logger logger = LoggerFactory.getLogger(FoodCategoryController.class);
-
+  /**
+   * Service layer dependency for service-related operations.
+   */
   @Autowired
   private FoodCategoryService foodCategoryService;
 
@@ -38,11 +39,11 @@ public class FoodCategoryController {
    * @param request the details of the food category to be added
    * @return a response entity containing a message indicating the result of the operation
    */
-  @PostMapping("/add")
-  public ResponseEntity<MessageOutDto> addCategory(@Valid @RequestBody FoodCategoryInDto request) {
-    logger.info("Received request to add category: {}", request);
+  @PostMapping("")
+  public ResponseEntity<MessageOutDto> addCategory(final @Valid @RequestBody FoodCategoryInDto request) {
+    log.info("Received request to add category");
     MessageOutDto message = foodCategoryService.addCategory(request);
-    logger.info(String.valueOf(message));
+    log.info("Food category added successfully");
     return new ResponseEntity<>(message, HttpStatus.CREATED);
   }
 
@@ -54,10 +55,11 @@ public class FoodCategoryController {
    * @return a response entity containing a message indicating the result of the operation
    */
   @PutMapping("/update/{id}")
-  public ResponseEntity<MessageOutDto> updateCategory(@Valid @RequestBody FoodCategoryInDto request, @PathVariable Integer id) {
-    logger.info("Received request to update category with ID: {}", id);
+  public ResponseEntity<MessageOutDto> updateCategory(final @Valid @RequestBody FoodCategoryInDto request,
+                                                      final @PathVariable Integer id) {
+    log.info("Received request to update category with ID: {}", id);
     MessageOutDto message = foodCategoryService.updateCategory(request, id);
-    logger.info(String.valueOf(message));
+    log.info("Category updated successfully");
     return new ResponseEntity<>(message, HttpStatus.OK);
   }
 
@@ -68,9 +70,9 @@ public class FoodCategoryController {
    */
   @GetMapping("")
   public ResponseEntity<List<FoodCategoryOutDto>> getAllCategory() {
-    logger.info("Retrieving all food categories");
+    log.info("Retrieving all food categories");
     List<FoodCategoryOutDto> response = foodCategoryService.viewAllCategory();
-    logger.info("Retrieved {} food categories", response.size());
+    log.info("Retrieved {} food categories", response.size());
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
@@ -81,10 +83,10 @@ public class FoodCategoryController {
    * @return a response entity containing a list of food categories for the specified restaurant
    */
   @GetMapping("/restaurant/{restaurantId}")
-  public ResponseEntity<List<FoodCategoryOutDto>> getAllCategoryByRestaurantId(@PathVariable Integer restaurantId) {
-    logger.info("Retrieving food categories for restaurant ID: {}", restaurantId);
+  public ResponseEntity<List<FoodCategoryOutDto>> getAllCategoryByRestaurantId(final @PathVariable Integer restaurantId) {
+    log.info("Retrieving food categories for restaurant ID: {}", restaurantId);
     List<FoodCategoryOutDto> response = foodCategoryService.findCategoryByRestaurantId(restaurantId);
-    logger.info("Retrieved {} food categories for restaurant ID: {}", response.size(), restaurantId);
+    log.info("Retrieved {} food categories for restaurant ID: {}", response.size(), restaurantId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }

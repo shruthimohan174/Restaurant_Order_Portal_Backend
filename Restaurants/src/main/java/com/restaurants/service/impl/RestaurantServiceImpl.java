@@ -1,21 +1,20 @@
 package com.restaurants.service.impl;
 
 import com.restaurants.constants.RestaurantConstants;
-import com.restaurants.dto.indto.RestaurantInDto;
-import com.restaurants.dto.outdto.MessageOutDto;
-import com.restaurants.dto.outdto.RestaurantOutDto;
-import com.restaurants.dto.outdto.UserOutDto;
-import com.restaurants.dtoconversion.DtoConversion;
+import com.restaurants.dto.RestaurantInDto;
+import com.restaurants.dto.MessageOutDto;
+import com.restaurants.dto.RestaurantOutDto;
+import com.restaurants.dto.UserOutDto;
+import com.restaurants.converter.DtoConversion;
 import com.restaurants.entities.Restaurant;
-import com.restaurants.exception.InvalidFileTypeException;
-import com.restaurants.exception.NotRestaurantOwnerException;
-import com.restaurants.exception.RestaurantNotFoundException;
+import com.restaurants.exception.AccessDeniedException;
+import com.restaurants.exception.InvalidRequestException;
+import com.restaurants.exception.ResourceNotFoundException;
 import com.restaurants.repositories.RestaurantRepository;
 import com.restaurants.service.RestaurantService;
 import com.restaurants.service.UserFeignClient;
 import com.restaurants.utils.UserRole;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,13 +29,23 @@ import java.util.List;
  * Provides methods to manage restaurants.
  */
 @Service
+@Slf4j
 public class RestaurantServiceImpl implements RestaurantService {
 
-  private static final Logger logger = LoggerFactory.getLogger(RestaurantServiceImpl.class);
+  /**
+   * The maximum allowed file size for uploads, set to 5 megabytes (5 MB).
+   */
+  private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
+  /**
+   * Service layer dependency for restaurant repository-related operations.
+   */
   @Autowired
   private RestaurantRepository restaurantRepository;
 
+  /**
+   * Service layer dependency for userFeignClient-related operations.
+   */
   @Autowired
   private UserFeignClient userFeignClient;
 
@@ -49,45 +58,55 @@ public class RestaurantServiceImpl implements RestaurantService {
    */
   @Override
   @Transactional
-  public MessageOutDto addRestaurant(RestaurantInDto request, MultipartFile image) {
-    logger.info("Adding restaurant: {}", request);
+  public MessageOutDto addRestaurant(final RestaurantInDto request, final MultipartFile image) {
+    log.info("Adding restaurant");
+
     UserOutDto user = userFeignClient.getUserById(request.getUserId());
     if (user.getUserRole() != UserRole.RESTAURANT_OWNER) {
-      logger.error("User {} is not a restaurant owner", request.getUserId());
-      throw new NotRestaurantOwnerException(RestaurantConstants.NOT_RESTAURANT_OWNER);
+      log.error("User {} is not a restaurant owner", request.getUserId());
+      throw new AccessDeniedException(RestaurantConstants.NOT_RESTAURANT_OWNER);
     }
+
+    String normalizedRestaurantName = request.getRestaurantName().trim().toLowerCase();
+
+    if (restaurantRepository.existsByRestaurantNameIgnoreCase(normalizedRestaurantName)) {
+      log.error("Restaurant name {} already exists", request.getRestaurantName());
+      throw new InvalidRequestException(RestaurantConstants.RESTAURANT_NAME_EXISTS);
+    }
+
     Restaurant restaurant = DtoConversion.convertRestaurantRequestToRestaurant(request);
+    restaurant.setRestaurantName(normalizedRestaurantName);
 
     if (image != null && !image.isEmpty()) {
       try {
         validateImageFile(image);
         restaurant.setImageData(image.getBytes());
       } catch (IOException e) {
-        logger.error("Error occurred while processing the image file for restaurant: {}", request.getRestaurantName(), e);
-        throw new NotRestaurantOwnerException(RestaurantConstants.ERROR_PROCESSING_IMAGE);
+        log.error("Error occurred while processing the image file for restaurant: {}", request.getRestaurantName(), e);
+        throw new AccessDeniedException(RestaurantConstants.ERROR_PROCESSING_IMAGE);
       }
     }
 
     Restaurant savedRestaurant = restaurantRepository.save(restaurant);
-    logger.info("Restaurant added successfully: {}", savedRestaurant);
+    log.info("Restaurant added successfully");
 
     return new MessageOutDto(RestaurantConstants.RESTAURANT_ADDED_SUCCESSFULLY);
   }
-
-  /**.
+  /**
+   * .
    * Retrieves all restaurants.
    *
    * @return a list of all restaurants
    */
   @Override
   public List<RestaurantOutDto> getALlRestaurants() {
-    logger.info("Retrieving all restaurants");
+    log.info("Retrieving all restaurants");
     List<Restaurant> restaurants = restaurantRepository.findAll();
     List<RestaurantOutDto> responseList = new ArrayList<>();
     for (Restaurant restaurant : restaurants) {
       responseList.add(DtoConversion.convertRestaurantToRestaurantResponse(restaurant));
     }
-    logger.info("Retrieved {} restaurants", responseList.size());
+    log.info("Retrieved {} restaurants", responseList.size());
     return responseList;
   }
 
@@ -99,14 +118,14 @@ public class RestaurantServiceImpl implements RestaurantService {
    */
   @Override
   @Transactional(readOnly = true)
-  public List<RestaurantOutDto> getALlRestaurantsByUserId(Integer userId) {
-    logger.info("Retrieving restaurants for user ID: {}", userId);
+  public List<RestaurantOutDto> getALlRestaurantsByUserId(final Integer userId) {
+    log.info("Retrieving restaurants for user ID: {}", userId);
     List<Restaurant> restaurants = restaurantRepository.findByUserId(userId);
     List<RestaurantOutDto> responseList = new ArrayList<>();
     for (Restaurant restaurant : restaurants) {
       responseList.add(DtoConversion.convertRestaurantToRestaurantResponse(restaurant));
     }
-    logger.info("Retrieved {} restaurants for user ID: {}", responseList.size(), userId);
+    log.info("Retrieved {} restaurants for user ID: {}", responseList.size(), userId);
     return responseList;
   }
 
@@ -117,8 +136,8 @@ public class RestaurantServiceImpl implements RestaurantService {
    * @return the image data as a byte array
    */
   @Override
-  public byte[] getRestaurantImage(Integer id) {
-    logger.info("Fetching image for restaurant with ID: {}", id);
+  public byte[] getRestaurantImage(final Integer id) {
+    log.info("Fetching image for restaurant with ID: {}", id);
     Restaurant restaurant = findRestaurantById(id);
     return restaurant.getImageData();
   }
@@ -128,23 +147,32 @@ public class RestaurantServiceImpl implements RestaurantService {
    *
    * @param id the ID of the restaurant
    * @return the restaurant
-   * @throws RestaurantNotFoundException if the restaurant is not found
    */
   @Override
-  public Restaurant findRestaurantById(Integer id) {
-    logger.info("Finding restaurant by ID: {}", id);
+  public Restaurant findRestaurantById(final Integer id) {
+    log.info("Finding restaurant by ID: {}", id);
     return restaurantRepository.findById(id).orElseThrow(() -> {
-      logger.error("Restaurant not found for ID: {}", id);
+      log.error("Restaurant not found for ID: {}", id);
 
-      return new RestaurantNotFoundException(RestaurantConstants.RESTAURANT_NOT_FOUND);
+      return new ResourceNotFoundException(RestaurantConstants.RESTAURANT_NOT_FOUND);
     });
   }
-
+  /**
+   * Validates an image file to ensure it meets the required criteria.
+   *
+   * @param image the image file to validate; must not be {@code null}
+   * @throws InvalidRequestException if the file type is not JPEG or PNG, or if the file size exceeds the maximum limit
+   */
   @Override
-  public void validateImageFile(MultipartFile image) {
+  public void validateImageFile(final MultipartFile image) {
     String contentType = image.getContentType();
+
     if (contentType == null || !contentType.equals("image/jpeg") && !contentType.equals("image/png")) {
-      throw new InvalidFileTypeException(RestaurantConstants.INVALID_FILE_TYPE);
+      throw new InvalidRequestException(RestaurantConstants.INVALID_FILE_TYPE);
+    }
+
+    if (image.getSize() > MAX_FILE_SIZE) {
+      throw new InvalidRequestException(RestaurantConstants.FILE_SIZE_EXCEEDED);
     }
   }
 }

@@ -155,9 +155,7 @@
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <failOnViolation>true</failOnViolation>
                     <configLocation>config/checkstyle/checkstyle.xml</configLocation>
-                    <suppressionsLocation>config/checkstyle/suppressions.xml</suppressionsLocation>
-                    <suppressionsFileExpression>suppressions.xml</suppressionsFileExpression>
-                    <outputDirectory>${project.basedir}/report/checkstyle</outputDirectory>
+                     <outputDirectory>${project.basedir}/report/checkstyle</outputDirectory>
                     <outputFile>${project.basedir}/report/checkstyle/checkstyle.xml</outputFile>
                 </configuration>
                 <executions>

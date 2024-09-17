@@ -69,8 +69,15 @@ public final class RestaurantConstants {
    * Success message indicating that a restaurant was added successfully.
    */
   public static final String RESTAURANT_ADDED_SUCCESSFULLY = "Restaurant added successfully";
+  /**
+   * Error message indicating restaurant name already exists.
+   */
+  public static final String RESTAURANT_NAME_EXISTS = "Restaurant name already exists. Please choose a different name.";
+  /**
+   * Error message indicating that the file should not be exceeded.
+   */
+  public static final String FILE_SIZE_EXCEEDED = "File size exceeds the maximum limit of 5 MB";
 
-  // Private constructor to prevent instantiation
   private RestaurantConstants() {
     throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
   }

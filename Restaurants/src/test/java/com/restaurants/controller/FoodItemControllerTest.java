@@ -1,9 +1,10 @@
 package com.restaurants.controller;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.restaurants.dto.indto.FoodItemInDto;
-import com.restaurants.dto.indto.FoodItemUpdateInDto;
-import com.restaurants.dto.outdto.FoodItemOutDto;
-import com.restaurants.dto.outdto.MessageOutDto;
+import com.restaurants.dto.FoodItemInDto;
+import com.restaurants.dto.FoodItemOutDto;
+import com.restaurants.dto.FoodItemUpdateInDto;
+import com.restaurants.dto.MessageOutDto;
 import com.restaurants.service.FoodItemService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,29 +32,70 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Unit test class for {@link FoodItemController}.
+ * <p>
+ * This test class uses Mockito for mocking dependencies and
+ * Spring's MockMvc for testing web layer components.
+ * </p>
+ */
 @ExtendWith(MockitoExtension.class)
 public class FoodItemControllerTest {
 
+  /**
+   * The controller being tested.
+   */
   @InjectMocks
   private FoodItemController foodItemController;
 
+  /**
+   * Mock of the {@link FoodItemService} used in the controller.
+   */
   @Mock
   private FoodItemService foodItemService;
 
+  /**
+   * MockMvc instance for performing HTTP requests and verifying responses.
+   */
   private MockMvc mockMvc;
+
+  /**
+   * ObjectMapper instance for serializing and deserializing JSON.
+   */
   private ObjectMapper objectMapper;
+
+  /**
+   * Data transfer object for input operations related to food items.
+   */
   private FoodItemInDto request;
+
+  /**
+   * Data transfer object for output operations related to food items.
+   */
   private FoodItemOutDto response;
+
+  /**
+   * Data transfer object for messages.
+   */
   private MessageOutDto messageOutDto;
 
+  /**
+   * Mock of the {@link MultipartFile} used for file uploads in tests.
+   */
   @Mock
   private MultipartFile image;
 
+  /**
+   * Sets up the testing environment before each test case.
+   * <p>
+   * Initializes MockMvc and ObjectMapper instances and sets up
+   * sample data transfer objects for use in test cases.
+   * </p>
+   */
   @BeforeEach
   public void setUp() {
     objectMapper = new ObjectMapper();
@@ -63,8 +106,8 @@ public class FoodItemControllerTest {
     request = new FoodItemInDto();
     request.setCategoryId(1);
     request.setRestaurantId(1);
-    request.setItemName("Pizza");
-    request.setDescription("Delicious cheese pizza");
+    request.setItemName("dummy");
+    request.setDescription("dummy description");
     request.setIsVeg(true);
     request.setPrice(BigDecimal.valueOf(9.99));
 
@@ -72,14 +115,22 @@ public class FoodItemControllerTest {
     response.setId(1);
     response.setCategoryId(1);
     response.setRestaurantId(1);
-    response.setItemName("Pizza");
-    response.setDescription("Delicious cheese pizza");
+    response.setItemName("dummy");
+    response.setDescription("dummy description");
     response.setIsVeg(true);
     response.setPrice(BigDecimal.valueOf(9.99));
 
     messageOutDto = new MessageOutDto();
-
   }
+
+  /**
+   * Tests the {@link FoodItemController#addFoodItems(FoodItemInDto, MultipartFile)} method.
+   * <p>
+   * Verifies that a food item is added successfully and that the service method is called
+   * with the correct parameters.
+   * </p>
+   * @throws Exception if an error occurs during the test execution
+   */
   @Test
   void testAddFoodItem() throws Exception {
     messageOutDto.setMessage("Food item added successfully");
@@ -95,21 +146,49 @@ public class FoodItemControllerTest {
     verify(foodItemService, times(1)).addFoodItems(any(FoodItemInDto.class), any(MultipartFile.class));
   }
 
+  /**
+   * Tests the {@link FoodItemController#updateFoodItem(FoodItemUpdateInDto, Integer, MultipartFile)} method.
+   * <p>
+   * Verifies that a food item is updated successfully and that the service method is called
+   * with the correct parameters.
+   * </p>
+   * @throws Exception if an error occurs during the test execution
+   */
   @Test
   public void testUpdateFoodItem() throws Exception {
+    FoodItemUpdateInDto updateRequest = new FoodItemUpdateInDto();
+
+    updateRequest.setItemName("dummy");
+    updateRequest.setDescription("dummy description");
+    updateRequest.setIsVeg(true);
+    updateRequest.setPrice(BigDecimal.valueOf(9.99));
     messageOutDto.setMessage("Food item updated successfully");
 
-    when(foodItemService.updateFoodItems(any(FoodItemUpdateInDto.class), any(Integer.class)))
+    MockMultipartFile image = new MockMultipartFile("image", "image.jpg",
+      MediaType.IMAGE_JPEG_VALUE,
+      "test image content".getBytes());
+
+    when(foodItemService.updateFoodItems(any(FoodItemUpdateInDto.class), any(Integer.class), any(MultipartFile.class)))
       .thenReturn(messageOutDto);
 
-    mockMvc.perform(put("/foodItem/update/1")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-      .andExpect(status().isOk())
-      .andExpect(content().json(objectMapper.writeValueAsString(messageOutDto)));
+    ResponseEntity<MessageOutDto> responseEntity = foodItemController.updateFoodItem(updateRequest, 1, image);
+
+    assertNotNull(responseEntity);
+    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    assertEquals("Food item updated successfully", responseEntity.getBody().getMessage());
+
+    verify(foodItemService, times(1)).updateFoodItems(any(FoodItemUpdateInDto.class), any(Integer.class),
+      any(MultipartFile.class));
   }
 
-
+  /**
+   * Tests the {@link FoodItemController#getAllFoodItems()} method.
+   * <p>
+   * Verifies that all food items are retrieved successfully and that the response contains
+   * the expected data.
+   * </p>
+   * @throws Exception if an error occurs during the test execution
+   */
   @Test
   public void testGetAllFoodItems() throws Exception {
     FoodItemOutDto response2 = new FoodItemOutDto();
@@ -129,11 +208,19 @@ public class FoodItemControllerTest {
       .andExpect(status().isOk())
       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(jsonPath("$[0].id").value(1))
-      .andExpect(jsonPath("$[0].itemName").value("Pizza"))
+      .andExpect(jsonPath("$[0].itemName").value("dummy"))
       .andExpect(jsonPath("$[1].id").value(2))
       .andExpect(jsonPath("$[1].itemName").value("Burger"));
   }
 
+  /**
+   * Tests the {@link FoodItemController#getAllFoodItemsByRestaurantId(Integer)} method.
+   * <p>
+   * Verifies that food items for a specific restaurant are retrieved successfully and that
+   * the response contains the expected data.
+   * </p>
+   * @throws Exception if an error occurs during the test execution
+   */
   @Test
   public void testGetAllFoodItemsByRestaurantId() throws Exception {
     List<FoodItemOutDto> responseList = Collections.singletonList(response);
@@ -144,9 +231,17 @@ public class FoodItemControllerTest {
       .andExpect(status().isOk())
       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(jsonPath("$[0].id").value(1))
-      .andExpect(jsonPath("$[0].itemName").value("Pizza"));
+      .andExpect(jsonPath("$[0].itemName").value("dummy"));
   }
 
+  /**
+   * Tests the {@link FoodItemController#getAllFoodItemsByCategoryId(Integer)} method.
+   * <p>
+   * Verifies that food items for a specific category are retrieved successfully and that
+   * the response contains the expected data.
+   * </p>
+   * @throws Exception if an error occurs during the test execution
+   */
   @Test
   public void testGetAllFoodItemsByCategoryId() throws Exception {
     List<FoodItemOutDto> responseList = Collections.singletonList(response);
@@ -157,12 +252,20 @@ public class FoodItemControllerTest {
       .andExpect(status().isOk())
       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(jsonPath("$[0].id").value(1))
-      .andExpect(jsonPath("$[0].itemName").value("Pizza"));
+      .andExpect(jsonPath("$[0].itemName").value("dummy"));
   }
 
+  /**
+   * Tests the {@link FoodItemController#getFoodItemImage(Integer)} method.
+   * <p>
+   * Verifies that the image of a food item is retrieved successfully and that the response
+   * contains the expected image data.
+   * </p>
+   * @throws Exception if an error occurs during the test execution
+   */
   @Test
   public void testGetFoodItemImage() throws Exception {
-    byte[] imageData = new byte[] {1, 2, 3, 4, 5}; // Example byte array
+    byte[] imageData = new byte[] {1, 2, 3, 4, 5};
 
     when(foodItemService.getFoodItemImage(1)).thenReturn(imageData);
 

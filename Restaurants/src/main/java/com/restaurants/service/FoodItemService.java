@@ -1,9 +1,9 @@
 package com.restaurants.service;
 
-import com.restaurants.dto.indto.FoodItemInDto;
-import com.restaurants.dto.indto.FoodItemUpdateInDto;
-import com.restaurants.dto.outdto.FoodItemOutDto;
-import com.restaurants.dto.outdto.MessageOutDto;
+import com.restaurants.dto.FoodItemInDto;
+import com.restaurants.dto.FoodItemUpdateInDto;
+import com.restaurants.dto.FoodItemOutDto;
+import com.restaurants.dto.MessageOutDto;
 import com.restaurants.entities.FoodItem;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,9 +28,10 @@ public interface FoodItemService {
    *
    * @param request the updated details of the food item
    * @param id      the ID of the food item to be updated
+   * @param image the image of food item
    * @return a {@link MessageOutDto} containing the success message
    */
-  MessageOutDto updateFoodItems(FoodItemUpdateInDto request, Integer id);
+  MessageOutDto updateFoodItems(FoodItemUpdateInDto request, Integer id, MultipartFile image);
 
   /**
    * Retrieves a food item by its ID.

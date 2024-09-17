@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RestaurantServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Restaurants</a> &gt; <a href="index.source.html" class="el_package">com.restaurants.service.impl</a> &gt; <span class="el_source">RestaurantServiceImpl.java</span></div><h1>RestaurantServiceImpl.java</h1><pre class="source lang-java linenums">package com.restaurants.service.impl;
 
 import com.restaurants.constants.RestaurantConstants;
-import com.restaurants.dto.indto.RestaurantInDto;
-import com.restaurants.dto.outdto.MessageOutDto;
-import com.restaurants.dto.outdto.RestaurantOutDto;
-import com.restaurants.dto.outdto.UserOutDto;
-import com.restaurants.dtoconversion.DtoConversion;
+import com.restaurants.dto.RestaurantInDto;
+import com.restaurants.dto.MessageOutDto;
+import com.restaurants.dto.RestaurantOutDto;
+import com.restaurants.dto.UserOutDto;
+import com.restaurants.converter.DtoConversion;
 import com.restaurants.entities.Restaurant;
-import com.restaurants.exception.InvalidFileTypeException;
-import com.restaurants.exception.NotRestaurantOwnerException;
-import com.restaurants.exception.RestaurantNotFoundException;
+import com.restaurants.exception.AccessDeniedException;
+import com.restaurants.exception.InvalidRequestException;
+import com.restaurants.exception.ResourceNotFoundException;
 import com.restaurants.repositories.RestaurantRepository;
 import com.restaurants.service.RestaurantService;
 import com.restaurants.service.UserFeignClient;
 import com.restaurants.utils.UserRole;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,13 +29,23 @@ import java.util.List;
  * Provides methods to manage restaurants.
  */
 @Service
+<span class="fc" id="L32">@Slf4j</span>
 <span class="fc" id="L33">public class RestaurantServiceImpl implements RestaurantService {</span>
 
-<span class="fc" id="L35">  private static final Logger logger = LoggerFactory.getLogger(RestaurantServiceImpl.class);</span>
+  /**
+   * The maximum allowed file size for uploads, set to 5 megabytes (5 MB).
+   */
+  private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
+  /**
+   * Service layer dependency for restaurant repository-related operations.
+   */
   @Autowired
   private RestaurantRepository restaurantRepository;
 
+  /**
+   * Service layer dependency for userFeignClient-related operations.
+   */
   @Autowired
   private UserFeignClient userFeignClient;
 
@@ -49,46 +58,56 @@ import java.util.List;
    */
   @Override
   @Transactional
-  public MessageOutDto addRestaurant(RestaurantInDto request, MultipartFile image) {
-<span class="fc" id="L53">    logger.info(&quot;Adding restaurant: {}&quot;, request);</span>
-<span class="fc" id="L54">    UserOutDto user = userFeignClient.getUserById(request.getUserId());</span>
-<span class="fc bfc" id="L55" title="All 2 branches covered.">    if (user.getUserRole() != UserRole.RESTAURANT_OWNER) {</span>
-<span class="fc" id="L56">      logger.error(&quot;User {} is not a restaurant owner&quot;, request.getUserId());</span>
-<span class="fc" id="L57">      throw new NotRestaurantOwnerException(RestaurantConstants.NOT_RESTAURANT_OWNER);</span>
-    }
-<span class="fc" id="L59">    Restaurant restaurant = DtoConversion.convertRestaurantRequestToRestaurant(request);</span>
+  public MessageOutDto addRestaurant(final RestaurantInDto request, final MultipartFile image) {
+<span class="fc" id="L62">    log.info(&quot;Adding restaurant&quot;);</span>
 
-<span class="pc bpc" id="L61" title="2 of 4 branches missed.">    if (image != null &amp;&amp; !image.isEmpty()) {</span>
+<span class="fc" id="L64">    UserOutDto user = userFeignClient.getUserById(request.getUserId());</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">    if (user.getUserRole() != UserRole.RESTAURANT_OWNER) {</span>
+<span class="fc" id="L66">      log.error(&quot;User {} is not a restaurant owner&quot;, request.getUserId());</span>
+<span class="fc" id="L67">      throw new AccessDeniedException(RestaurantConstants.NOT_RESTAURANT_OWNER);</span>
+    }
+
+<span class="fc" id="L70">    String normalizedRestaurantName = request.getRestaurantName().trim().toLowerCase();</span>
+
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">    if (restaurantRepository.existsByRestaurantNameIgnoreCase(normalizedRestaurantName)) {</span>
+<span class="nc" id="L73">      log.error(&quot;Restaurant name {} already exists&quot;, request.getRestaurantName());</span>
+<span class="nc" id="L74">      throw new InvalidRequestException(RestaurantConstants.RESTAURANT_NAME_EXISTS);</span>
+    }
+
+<span class="fc" id="L77">    Restaurant restaurant = DtoConversion.convertRestaurantRequestToRestaurant(request);</span>
+<span class="fc" id="L78">    restaurant.setRestaurantName(normalizedRestaurantName);</span>
+
+<span class="pc bpc" id="L80" title="2 of 4 branches missed.">    if (image != null &amp;&amp; !image.isEmpty()) {</span>
       try {
-<span class="fc" id="L63">        validateImageFile(image);</span>
-<span class="fc" id="L64">        restaurant.setImageData(image.getBytes());</span>
-<span class="nc" id="L65">      } catch (IOException e) {</span>
-<span class="nc" id="L66">        logger.error(&quot;Error occurred while processing the image file for restaurant: {}&quot;, request.getRestaurantName(), e);</span>
-<span class="nc" id="L67">        throw new NotRestaurantOwnerException(RestaurantConstants.ERROR_PROCESSING_IMAGE);</span>
-<span class="fc" id="L68">      }</span>
+<span class="fc" id="L82">        validateImageFile(image);</span>
+<span class="fc" id="L83">        restaurant.setImageData(image.getBytes());</span>
+<span class="nc" id="L84">      } catch (IOException e) {</span>
+<span class="nc" id="L85">        log.error(&quot;Error occurred while processing the image file for restaurant: {}&quot;, request.getRestaurantName(), e);</span>
+<span class="nc" id="L86">        throw new AccessDeniedException(RestaurantConstants.ERROR_PROCESSING_IMAGE);</span>
+<span class="fc" id="L87">      }</span>
     }
 
-<span class="fc" id="L71">    Restaurant savedRestaurant = restaurantRepository.save(restaurant);</span>
-<span class="fc" id="L72">    logger.info(&quot;Restaurant added successfully: {}&quot;, savedRestaurant);</span>
+<span class="fc" id="L90">    Restaurant savedRestaurant = restaurantRepository.save(restaurant);</span>
+<span class="fc" id="L91">    log.info(&quot;Restaurant added successfully&quot;);</span>
 
-<span class="fc" id="L74">    return new MessageOutDto(RestaurantConstants.RESTAURANT_ADDED_SUCCESSFULLY);</span>
+<span class="fc" id="L93">    return new MessageOutDto(RestaurantConstants.RESTAURANT_ADDED_SUCCESSFULLY);</span>
   }
-
-  /**.
+  /**
+   * .
    * Retrieves all restaurants.
    *
    * @return a list of all restaurants
    */
   @Override
   public List&lt;RestaurantOutDto&gt; getALlRestaurants() {
-<span class="fc" id="L84">    logger.info(&quot;Retrieving all restaurants&quot;);</span>
-<span class="fc" id="L85">    List&lt;Restaurant&gt; restaurants = restaurantRepository.findAll();</span>
-<span class="fc" id="L86">    List&lt;RestaurantOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L87" title="All 2 branches covered.">    for (Restaurant restaurant : restaurants) {</span>
-<span class="fc" id="L88">      responseList.add(DtoConversion.convertRestaurantToRestaurantResponse(restaurant));</span>
-<span class="fc" id="L89">    }</span>
-<span class="fc" id="L90">    logger.info(&quot;Retrieved {} restaurants&quot;, responseList.size());</span>
-<span class="fc" id="L91">    return responseList;</span>
+<span class="fc" id="L103">    log.info(&quot;Retrieving all restaurants&quot;);</span>
+<span class="fc" id="L104">    List&lt;Restaurant&gt; restaurants = restaurantRepository.findAll();</span>
+<span class="fc" id="L105">    List&lt;RestaurantOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">    for (Restaurant restaurant : restaurants) {</span>
+<span class="fc" id="L107">      responseList.add(DtoConversion.convertRestaurantToRestaurantResponse(restaurant));</span>
+<span class="fc" id="L108">    }</span>
+<span class="fc" id="L109">    log.info(&quot;Retrieved {} restaurants&quot;, responseList.size());</span>
+<span class="fc" id="L110">    return responseList;</span>
   }
 
   /**
@@ -99,15 +118,15 @@ import java.util.List;
    */
   @Override
   @Transactional(readOnly = true)
-  public List&lt;RestaurantOutDto&gt; getALlRestaurantsByUserId(Integer userId) {
-<span class="fc" id="L103">    logger.info(&quot;Retrieving restaurants for user ID: {}&quot;, userId);</span>
-<span class="fc" id="L104">    List&lt;Restaurant&gt; restaurants = restaurantRepository.findByUserId(userId);</span>
-<span class="fc" id="L105">    List&lt;RestaurantOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L106" title="All 2 branches covered.">    for (Restaurant restaurant : restaurants) {</span>
-<span class="fc" id="L107">      responseList.add(DtoConversion.convertRestaurantToRestaurantResponse(restaurant));</span>
-<span class="fc" id="L108">    }</span>
-<span class="fc" id="L109">    logger.info(&quot;Retrieved {} restaurants for user ID: {}&quot;, responseList.size(), userId);</span>
-<span class="fc" id="L110">    return responseList;</span>
+  public List&lt;RestaurantOutDto&gt; getALlRestaurantsByUserId(final Integer userId) {
+<span class="fc" id="L122">    log.info(&quot;Retrieving restaurants for user ID: {}&quot;, userId);</span>
+<span class="fc" id="L123">    List&lt;Restaurant&gt; restaurants = restaurantRepository.findByUserId(userId);</span>
+<span class="fc" id="L124">    List&lt;RestaurantOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">    for (Restaurant restaurant : restaurants) {</span>
+<span class="fc" id="L126">      responseList.add(DtoConversion.convertRestaurantToRestaurantResponse(restaurant));</span>
+<span class="fc" id="L127">    }</span>
+<span class="fc" id="L128">    log.info(&quot;Retrieved {} restaurants for user ID: {}&quot;, responseList.size(), userId);</span>
+<span class="fc" id="L129">    return responseList;</span>
   }
 
   /**
@@ -117,10 +136,10 @@ import java.util.List;
    * @return the image data as a byte array
    */
   @Override
-  public byte[] getRestaurantImage(Integer id) {
-<span class="fc" id="L121">    logger.info(&quot;Fetching image for restaurant with ID: {}&quot;, id);</span>
-<span class="fc" id="L122">    Restaurant restaurant = findRestaurantById(id);</span>
-<span class="fc" id="L123">    return restaurant.getImageData();</span>
+  public byte[] getRestaurantImage(final Integer id) {
+<span class="fc" id="L140">    log.info(&quot;Fetching image for restaurant with ID: {}&quot;, id);</span>
+<span class="fc" id="L141">    Restaurant restaurant = findRestaurantById(id);</span>
+<span class="fc" id="L142">    return restaurant.getImageData();</span>
   }
 
   /**
@@ -128,24 +147,33 @@ import java.util.List;
    *
    * @param id the ID of the restaurant
    * @return the restaurant
-   * @throws RestaurantNotFoundException if the restaurant is not found
    */
   @Override
-  public Restaurant findRestaurantById(Integer id) {
-<span class="fc" id="L135">    logger.info(&quot;Finding restaurant by ID: {}&quot;, id);</span>
-<span class="fc" id="L136">    return restaurantRepository.findById(id).orElseThrow(() -&gt; {</span>
-<span class="fc" id="L137">      logger.error(&quot;Restaurant not found for ID: {}&quot;, id);</span>
+  public Restaurant findRestaurantById(final Integer id) {
+<span class="fc" id="L153">    log.info(&quot;Finding restaurant by ID: {}&quot;, id);</span>
+<span class="fc" id="L154">    return restaurantRepository.findById(id).orElseThrow(() -&gt; {</span>
+<span class="fc" id="L155">      log.error(&quot;Restaurant not found for ID: {}&quot;, id);</span>
 
-<span class="fc" id="L139">      return new RestaurantNotFoundException(RestaurantConstants.RESTAURANT_NOT_FOUND);</span>
+<span class="fc" id="L157">      return new ResourceNotFoundException(RestaurantConstants.RESTAURANT_NOT_FOUND);</span>
     });
   }
-
+  /**
+   * Validates an image file to ensure it meets the required criteria.
+   *
+   * @param image the image file to validate; must not be {@code null}
+   * @throws InvalidRequestException if the file type is not JPEG or PNG, or if the file size exceeds the maximum limit
+   */
   @Override
-  public void validateImageFile(MultipartFile image) {
-<span class="fc" id="L145">    String contentType = image.getContentType();</span>
-<span class="pc bpc" id="L146" title="2 of 6 branches missed.">    if (contentType == null || !contentType.equals(&quot;image/jpeg&quot;) &amp;&amp; !contentType.equals(&quot;image/png&quot;)) {</span>
-<span class="fc" id="L147">      throw new InvalidFileTypeException(RestaurantConstants.INVALID_FILE_TYPE);</span>
+  public void validateImageFile(final MultipartFile image) {
+<span class="fc" id="L168">    String contentType = image.getContentType();</span>
+
+<span class="pc bpc" id="L170" title="2 of 6 branches missed.">    if (contentType == null || !contentType.equals(&quot;image/jpeg&quot;) &amp;&amp; !contentType.equals(&quot;image/png&quot;)) {</span>
+<span class="fc" id="L171">      throw new InvalidRequestException(RestaurantConstants.INVALID_FILE_TYPE);</span>
     }
-<span class="fc" id="L149">  }</span>
+
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">    if (image.getSize() &gt; MAX_FILE_SIZE) {</span>
+<span class="nc" id="L175">      throw new InvalidRequestException(RestaurantConstants.FILE_SIZE_EXCEEDED);</span>
+    }
+<span class="fc" id="L177">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

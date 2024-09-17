@@ -2,16 +2,18 @@ package com.restaurants.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurants.constants.RestaurantConstants;
-import com.restaurants.dto.indto.RestaurantInDto;
-import com.restaurants.dto.outdto.MessageOutDto;
-import com.restaurants.dto.outdto.RestaurantOutDto;
+import com.restaurants.dto.MessageOutDto;
+import com.restaurants.dto.RestaurantInDto;
+import com.restaurants.dto.RestaurantOutDto;
 import com.restaurants.entities.Restaurant;
 import com.restaurants.service.RestaurantService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,21 +34,53 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Unit tests for {@link RestaurantController}.
+ * This class tests the endpoints of the {@link RestaurantController} class, ensuring
+ * correct functionality and handling of various scenarios
+ * related to restaurant operations such as adding, updating, and retrieving
+ * restaurant details, as well as handling restaurant images.
+ */
+@ExtendWith(MockitoExtension.class)
 class RestaurantControllerTest {
 
+  /**
+   * Mock for the RestaurantService used to interact with restaurant-related services.
+   */
   @Mock
   private RestaurantService restaurantService;
 
+  /**
+   * Mock for handling multipart file uploads representing restaurant images.
+   */
   @Mock
   private MultipartFile image;
 
+  /**
+   * Instance of {@link RestaurantController} to be tested.
+   */
   @InjectMocks
   private RestaurantController restaurantController;
 
+  /**
+   * Data Transfer Object for restaurant input.
+   */
   private RestaurantInDto restaurantInDto;
+
+  /**
+   * Data Transfer Object for restaurant output.
+   */
   private RestaurantOutDto restaurantOutDto;
+
+  /**
+   * Data Transfer Object for message output.
+   */
   private MessageOutDto messageOutDto;
 
+  /**
+   * Sets up the test environment by initializing the necessary objects and mocks.
+   * This method is executed before each test method to ensure a clean state.
+   */
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
@@ -130,7 +164,7 @@ class RestaurantControllerTest {
 
   @Test
   public void testGetFoodItemImage() throws Exception {
-    byte[] imageData = new byte[] {1, 2, 3, 4, 5}; // Example byte array
+    byte[] imageData = new byte[] {1, 2, 3, 4, 5};
 
     when(restaurantService.getRestaurantImage(1)).thenReturn(imageData);
     MockMvc mockMvc;

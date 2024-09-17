@@ -27,7 +27,14 @@ public interface FoodItemRepository extends JpaRepository<FoodItem, Integer> {
    */
   List<FoodItem> findByCategoryId(Integer categoryId);
 
+  /**
+   * Checks if a food item exists for a specific restaurant.
+   *
+   * @param restaurantId the ID of the restaurant to check
+   * @param itemName the name of the item to check, case-insensitive
+   * @return {@code true} if a food item with the specified name exists for the given restaurant;
+   *         {@code false} otherwise
+   */
   boolean existsByRestaurantIdAndItemNameIgnoreCase(Integer restaurantId, String itemName);
-
 
 }
