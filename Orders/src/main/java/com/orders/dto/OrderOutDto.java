@@ -1,6 +1,5 @@
 package com.orders.dto;
 
-import com.orders.entities.Cart;
 import com.orders.utils.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,6 +11,7 @@ import java.util.List;
 
 /**
  * Data Transfer Object for representing a order
+ * This class encapsulates the message content to be transferred between different layers or systems.
  */
 @Data
 @NoArgsConstructor
@@ -41,7 +41,7 @@ public class OrderOutDto {
   /**
    * List of cart items associated with the order.
    */
-  private List<Cart> cartItems;
+  private List<CartItemDto> cartItems;
 
   /**
    * Timestamp when the order was placed.

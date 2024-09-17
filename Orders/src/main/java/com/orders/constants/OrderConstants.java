@@ -6,6 +6,11 @@ package com.orders.constants;
  */
 public final class OrderConstants {
   /**
+   * Message indicating that there is insufficient balance in wallet.
+   */
+  public static final String INSUFFICIENT_BALANCE = "Insufficient balance to place the order.";
+
+  /**
    * Message indicating that an order was placed successfully.
    */
   public static final String ORDER_PLACED_SUCCESSFULLY = "Order placed successfully";
@@ -61,5 +66,15 @@ public final class OrderConstants {
    * Message indicating a price mismatch for a food item.
    */
   public static final String PRICE_MISMATCH = "This is not the current price of this food item.";
-
+  /**
+   * Message indicating that no order was found with the specified id.
+   */
+  public static final String ORDER_NOT_FOUND = "Order not found with this id";
+  /**
+   * Message indicating that no cart items was found with the specified id.
+   */
+  public static final String INVALID_CART_ITEMS = "Invalid items present in cart";
+  private OrderConstants() {
+    throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+  }
 }

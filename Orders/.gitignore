@@ -32,8 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 
-# Additional files and directories to ignore
-.editorconfig
-.mvn/wrapper/
-.mvnw.cmd
-.mvnw
+#  Additional files and directories to ignore
+  .editorconfig
+  .mvn/wrapper/
+  .mvnw.cmd
+  .mvnw

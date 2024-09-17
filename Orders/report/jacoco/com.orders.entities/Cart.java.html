@@ -14,8 +14,8 @@ import java.math.BigDecimal;
  * Entity representing a cart item.
  */
 @Entity
-<span class="pc bpc" id="L17" title="16 of 54 branches missed.">@Data</span>
-<span class="nc" id="L18">@AllArgsConstructor</span>
+<span class="pc bpc" id="L17" title="29 of 54 branches missed.">@Data</span>
+<span class="fc" id="L18">@AllArgsConstructor</span>
 <span class="fc" id="L19">@NoArgsConstructor</span>
 public class Cart {
   /**
@@ -49,15 +49,6 @@ public class Cart {
    * ID of the restaurant that offers the food item.
    */
 <span class="fc" id="L51">  private Integer restaurantId;</span>
-
-
-<span class="fc" id="L54">  public Cart(Integer userId, Integer foodItemId, Integer quantity, BigDecimal price, Integer restaurantId) {</span>
-<span class="fc" id="L55">    this.userId = userId;</span>
-<span class="fc" id="L56">    this.foodItemId = foodItemId;</span>
-<span class="fc" id="L57">    this.quantity = quantity;</span>
-<span class="fc" id="L58">    this.price = price;</span>
-<span class="fc" id="L59">    this.restaurantId = restaurantId;</span>
-<span class="fc" id="L60">  }</span>
 
 }
 

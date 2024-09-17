@@ -1,11 +1,10 @@
 package com.orders.controller;
 
-import com.orders.dto.OrderInDto;
 import com.orders.dto.MessageOutDto;
+import com.orders.dto.OrderInDto;
 import com.orders.dto.OrderOutDto;
 import com.orders.service.OrderService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,10 +25,11 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/orders")
+@Slf4j
 public class OrderController {
-
-  private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
-
+  /**
+   * Service layer dependency for order-related operations.
+   */
   @Autowired
   private OrderService orderService;
 
@@ -39,11 +39,11 @@ public class OrderController {
    * @param orderInDto DTO containing order details.
    * @return Response entity containing a success message.
    */
-  @PostMapping("/place")
-  public ResponseEntity<MessageOutDto> placeOrder(@Valid @RequestBody OrderInDto orderInDto) {
-    logger.info("Placing order with details: {}", orderInDto);
+  @PostMapping("")
+  public ResponseEntity<MessageOutDto> placeOrder(final @Valid @RequestBody OrderInDto orderInDto) {
+    log.info("Placing order");
     MessageOutDto response = orderService.placeOrder(orderInDto);
-    logger.info("Order placed successfully with ID {}", response.getMessage());
+    log.info("Order placed successfully");
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
 
@@ -54,10 +54,10 @@ public class OrderController {
    * @return Response entity containing a success message.
    */
   @DeleteMapping("/cancel/{orderId}")
-  public ResponseEntity<MessageOutDto> cancelOrder(@Valid @PathVariable Integer orderId) {
-    logger.info("Cancelling order with ID {}", orderId);
+  public ResponseEntity<MessageOutDto> cancelOrder(final @Valid @PathVariable Integer orderId) {
+    log.info("Cancelling order with ID {}", orderId);
     MessageOutDto response = orderService.cancelOrder(orderId);
-    logger.info("Order with ID {} cancelled successfully", orderId);
+    log.info("Order with ID {} cancelled successfully", orderId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
@@ -68,8 +68,8 @@ public class OrderController {
    * @return Response entity containing a list of orders.
    */
   @GetMapping("/user/{userId}")
-  public ResponseEntity<List<OrderOutDto>> getOrdersByUserId(@PathVariable Integer userId) {
-    logger.info("Fetching orders for user ID {}", userId);
+  public ResponseEntity<List<OrderOutDto>> getOrdersByUserId(@PathVariable final Integer userId) {
+    log.info("Fetching orders for user ID {}", userId);
     List<OrderOutDto> orders = orderService.getOrdersByUserId(userId);
     return new ResponseEntity<>(orders, HttpStatus.OK);
   }
@@ -81,8 +81,8 @@ public class OrderController {
    * @return Response entity containing a list of orders.
    */
   @GetMapping("/restaurant/{restaurantId}")
-  public ResponseEntity<List<OrderOutDto>> getOrdersByRestaurantId(@PathVariable Integer restaurantId) {
-    logger.info("Fetching orders for restaurant ID {}", restaurantId);
+  public ResponseEntity<List<OrderOutDto>> getOrdersByRestaurantId(@PathVariable final Integer restaurantId) {
+    log.info("Fetching orders for restaurant ID {}", restaurantId);
     List<OrderOutDto> orders = orderService.getOrdersByRestaurantId(restaurantId);
     return new ResponseEntity<>(orders, HttpStatus.OK);
   }
@@ -95,10 +95,10 @@ public class OrderController {
    * @return Response entity with HTTP status OK.
    */
   @PostMapping("/complete/{orderId}/user/{userId}")
-  public ResponseEntity<Void> markOrderAsCompleted(@PathVariable Integer orderId, @PathVariable Integer userId) {
-    logger.info("Marking order with ID {} as completed by user ID {}", orderId, userId);
+  public ResponseEntity<Void> markOrderAsCompleted(@PathVariable final Integer orderId, @PathVariable final Integer userId) {
+    log.info("Marking order with ID {} as completed by user ID {}", orderId, userId);
     orderService.markOrderAsCompleted(orderId, userId);
-    logger.info("Order with ID {} marked as completed successfully", orderId);
+    log.info("Order with ID {} marked as completed successfully", orderId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

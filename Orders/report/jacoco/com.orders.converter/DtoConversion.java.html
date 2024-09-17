@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DtoConversion.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Orders</a> &gt; <a href="index.source.html" class="el_package">com.orders.converter</a> &gt; <span class="el_source">DtoConversion.java</span></div><h1>DtoConversion.java</h1><pre class="source lang-java linenums">package com.orders.converter;
+
+import com.orders.dto.OrderInDto;
+import com.orders.dto.OrderOutDto;
+import com.orders.entities.Order;
+
+
+/**
+ * Utility class for converting between DTOs and entity objects.
+ */
+public final class DtoConversion {
+
+
+<span class="nc" id="L14">  private DtoConversion() {</span>
+<span class="nc" id="L15">    throw new UnsupportedOperationException(&quot;Utility class&quot;);</span>
+  }
+
+  /**
+   * Converts an OrderInDto to an Order entity.
+   *
+   * @param orderInDto DTO containing order details.
+   * @return The Order entity.
+   */
+  public static Order convertOrderInDtoToOrder(final OrderInDto orderInDto) {
+<span class="fc" id="L25">    Order order = new Order();</span>
+<span class="fc" id="L26">    order.setUserId(orderInDto.getUserId());</span>
+<span class="fc" id="L27">    order.setDeliveryAddressId(orderInDto.getDeliveryAddressId());</span>
+<span class="fc" id="L28">    order.setRestaurantId(orderInDto.getRestaurantId());</span>
+<span class="fc" id="L29">    return order;</span>
+  }
+
+  /**
+   * Converts an Order entity to an OrderOutDto.
+   *
+   * @param order The Order entity.
+   * @return The OrderOutDto containing order details.
+   */
+  public static OrderOutDto convertOrderToOrderOutDto(final Order order) {
+<span class="fc" id="L39">    OrderOutDto dto = new OrderOutDto();</span>
+<span class="fc" id="L40">    dto.setId(order.getId());</span>
+<span class="fc" id="L41">    dto.setDeliveryAddressId(order.getDeliveryAddressId());</span>
+<span class="fc" id="L42">    dto.setUserId(order.getUserId());</span>
+<span class="fc" id="L43">    dto.setRestaurantId(order.getRestaurantId());</span>
+<span class="fc" id="L44">    dto.setTotalPrice(order.getTotalPrice());</span>
+<span class="fc" id="L45">    dto.setOrderStatus(order.getOrderStatus());</span>
+<span class="fc" id="L46">    dto.setOrderTime(order.getOrderTime());</span>
+<span class="fc" id="L47">    dto.setCartItems(null);</span>
+<span class="fc" id="L48">    return dto;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

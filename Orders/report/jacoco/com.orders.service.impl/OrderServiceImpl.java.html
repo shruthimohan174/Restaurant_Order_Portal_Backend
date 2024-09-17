@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Orders</a> &gt; <a href="index.source.html" class="el_package">com.orders.service.impl</a> &gt; <span class="el_source">OrderServiceImpl.java</span></div><h1>OrderServiceImpl.java</h1><pre class="source lang-java linenums">package com.orders.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.orders.constants.OrderConstants;
-import com.orders.conversion.DtoConversion;
-import com.orders.dto.OrderInDto;
+import com.orders.converter.DtoConversion;
 import com.orders.dto.AddressOutDto;
+import com.orders.dto.CartItemDto;
 import com.orders.dto.FoodItemOutDto;
 import com.orders.dto.MessageOutDto;
+import com.orders.dto.OrderInDto;
 import com.orders.dto.OrderOutDto;
 import com.orders.dto.UserOutDto;
 import com.orders.entities.Cart;
 import com.orders.entities.Order;
-import com.orders.exception.AddressNotFoundException;
-import com.orders.exception.CartNotFoundException;
-import com.orders.exception.CustomerNotFoundException;
-import com.orders.exception.InsufficientBalanceException;
-import com.orders.exception.OrderNotFoundException;
-import com.orders.exception.OrderUpdateException;
+import com.orders.exception.AccessDeniedException;
+import com.orders.exception.ResourceConflictException;
+import com.orders.exception.ResourceNotFoundException;
 import com.orders.repositories.OrderRepository;
-import com.orders.service.AddressFeignClient;
 import com.orders.service.CartService;
 import com.orders.service.OrderService;
 import com.orders.service.RestaurantFeignClient;
 import com.orders.service.UserFeignClient;
 import com.orders.utils.OrderStatus;
 import com.orders.utils.UserRole;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,171 +33,336 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+<span class="fc" id="L36">@Slf4j</span>
 @Service
-<span class="fc" id="L37">public class OrderServiceImpl implements OrderService {</span>
+<span class="fc" id="L38">public class OrderServiceImpl implements OrderService {</span>
+  /**
+   * An instance of {@link ObjectMapper} used for JSON processing.
+   * The {@link ObjectMapper} is provided by the Jackson library and is used to convert Java objects to JSON
+   * and vice versa. It is a powerful utility for serializing and deserializing data.
+   */
+<span class="fc" id="L44">  private final ObjectMapper objectMapper = new ObjectMapper();</span>
 
+  /**
+   * Service layer dependency for restaurant-related operations.
+   */
   @Autowired
   private RestaurantFeignClient restaurantClient;
 
+  /**
+   * Service layer dependency for order-related operations.
+   */
   @Autowired
   private OrderRepository orderRepository;
 
+  /**
+   * Service layer dependency for cart-related operations.
+   */
   @Autowired
   private CartService cartService;
 
+  /**
+   * Service layer dependency for user-related operations.
+   */
   @Autowired
   private UserFeignClient userClient;
 
-  @Autowired
-  private AddressFeignClient addressClient;
-
+  /**
+   * Places an order based on the provided order details.
+   * Validates user role, address, and cart items. Calculates total price and updates wallet balance.
+   * Creates an order and clears the cart after order placement.
+   *
+   * @param orderInDto DTO containing the details of the order to be placed
+   * @return A MessageOutDto indicating the success or failure of the operation
+   */
   @Override
-  public MessageOutDto placeOrder(OrderInDto orderInDto) {
-<span class="fc" id="L56">    UserOutDto user = getUser(orderInDto.getUserId());</span>
-<span class="fc" id="L57">    validateUserRole(user);</span>
-<span class="fc" id="L58">    List&lt;AddressOutDto&gt; addresses = getAddresses(orderInDto.getUserId());</span>
-<span class="fc" id="L59">    validateAddress(orderInDto.getDeliveryAddressId(), addresses);</span>
-<span class="fc" id="L60">    List&lt;Cart&gt; cartItems = getCartItems(orderInDto);</span>
-<span class="fc" id="L61">    validateCartItems(cartItems, orderInDto.getCartItems());</span>
+  public MessageOutDto placeOrder(final OrderInDto orderInDto) {
+<span class="fc" id="L80">    log.info(&quot;Placing order for userId: {}&quot;, orderInDto.getUserId());</span>
 
-<span class="fc" id="L63">    BigDecimal totalPrice = calculateTotalPrice(orderInDto.getCartItems());</span>
-<span class="fc" id="L64">    validateWalletBalance(user, totalPrice);</span>
+<span class="fc" id="L82">    UserOutDto user = getUser(orderInDto.getUserId());</span>
+<span class="fc" id="L83">    validateUserRole(user);</span>
 
-<span class="fc" id="L66">    updateWalletBalance(user, totalPrice);</span>
-<span class="fc" id="L67">    Order order = createOrder(orderInDto, totalPrice, cartItems);</span>
+<span class="fc" id="L85">    List&lt;AddressOutDto&gt; addresses = getAddresses(orderInDto.getUserId());</span>
+<span class="fc" id="L86">    validateAddress(orderInDto.getDeliveryAddressId(), addresses);</span>
 
-<span class="fc" id="L69">    orderRepository.save(order);</span>
-<span class="fc" id="L70">    cartService.clearCartAfterOrderPlaced(orderInDto.getUserId(), orderInDto.getRestaurantId());</span>
+<span class="fc" id="L88">    List&lt;Cart&gt; cartItems = getCartItems(orderInDto);</span>
+<span class="fc" id="L89">    validateCartItems(cartItems, orderInDto.getCartItems());</span>
 
-<span class="fc" id="L72">    return new MessageOutDto(OrderConstants.ORDER_PLACED_SUCCESSFULLY);</span>
+<span class="fc" id="L91">    BigDecimal totalPrice = calculateTotalPrice(orderInDto.getCartItems());</span>
+<span class="fc" id="L92">    validateWalletBalance(user, totalPrice);</span>
+
+<span class="fc" id="L94">    updateWalletBalance(user, totalPrice);</span>
+
+<span class="fc" id="L96">    List&lt;CartItemDto&gt; cartItemDtos = cartItems.stream()</span>
+<span class="fc" id="L97">      .map(cart -&gt; new CartItemDto(cart.getFoodItemId(), cart.getQuantity(), cart.getPrice()))</span>
+<span class="fc" id="L98">      .collect(Collectors.toList());</span>
+
+<span class="fc" id="L100">    Order order = createOrder(orderInDto, totalPrice, cartItemDtos);</span>
+<span class="fc" id="L101">    orderRepository.save(order);</span>
+
+<span class="fc" id="L103">    cartService.clearCartAfterOrderPlaced(orderInDto.getUserId(), orderInDto.getRestaurantId());</span>
+<span class="fc" id="L104">    log.info(&quot;Order placed successfully for userId: {}, orderId: {}&quot;, orderInDto.getUserId(), order.getId());</span>
+<span class="fc" id="L105">    return new MessageOutDto(OrderConstants.ORDER_PLACED_SUCCESSFULLY);</span>
+  }
+  /**
+   * Retrieves a user by their ID.
+   *
+   * @param userId The ID of the user to be fetched
+   * @return UserOutDto representing the fetched user
+   */
+
+  private UserOutDto getUser(final Integer userId) {
+<span class="fc" id="L115">    log.debug(&quot;Fetching user with userId: {}&quot;, userId);</span>
+<span class="fc" id="L116">    return userClient.getUserById(userId);</span>
+  }
+  /**
+   * Validates the role of the user.
+   * Throws an exception if the user is not a customer.
+   *
+   * @param user The user to be validated
+   */
+  private void validateUserRole(final UserOutDto user) {
+<span class="fc" id="L125">    log.debug(&quot;Validating user role for userId: {}&quot;, user.getId());</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">    if (!user.getUserRole().equals(UserRole.CUSTOMER)) {</span>
+<span class="fc" id="L127">      throw new AccessDeniedException(OrderConstants.CUSTOMER_NOT_FOUND);</span>
+    }
+<span class="fc" id="L129">  }</span>
+  /**
+   * Retrieves a list of addresses for a given user.
+   *
+   * @param userId The ID of the user whose addresses are to be fetched
+   * @return List of AddressOutDto representing the addresses
+   */
+  private List&lt;AddressOutDto&gt; getAddresses(final Integer userId) {
+<span class="fc" id="L137">    log.info(&quot;Fetching addresses for user ID: {}&quot;, userId);</span>
+<span class="fc" id="L138">    return userClient.getAddressesByUserId(userId);</span>
+  }
+  /**
+   * Validates the delivery address against the user's addresses.
+   * Throws an exception if the address is not found.
+   *
+   * @param deliveryAddressId The ID of the delivery address
+   * @param addresses The list of addresses associated with the user
+   */
+  private void validateAddress(final Integer deliveryAddressId, final List&lt;AddressOutDto&gt; addresses) {
+<span class="fc" id="L148">    boolean validAddress = addresses.stream()</span>
+<span class="fc" id="L149">      .anyMatch(address -&gt; address.getId().equals(deliveryAddressId));</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">    if (!validAddress) {</span>
+<span class="fc" id="L151">      log.error(&quot;Delivery address ID: {} not found for user&quot;, deliveryAddressId);</span>
+<span class="fc" id="L152">      throw new ResourceNotFoundException(OrderConstants.ADDRESS_NOT_FOUND);</span>
+    }
+<span class="fc" id="L154">  }</span>
+  /**
+   * Retrieves cart items for a user and restaurant.
+   * Throws an exception if the cart is empty.
+   *
+   * @param orderInDto DTO containing order details
+   * @return List of Cart entities representing the cart items
+   */
+  public List&lt;Cart&gt; getCartItems(final OrderInDto orderInDto) {
+<span class="fc" id="L163">    log.info(&quot;Fetching cart items for user ID: {} and restaurant ID: {}&quot;, orderInDto.getUserId(),</span>
+<span class="fc" id="L164">      orderInDto.getRestaurantId());</span>
+
+<span class="fc" id="L166">    List&lt;Cart&gt; cartItems = cartService.getCartItemsByUserIdAndRestaurantId(orderInDto.getUserId(),</span>
+<span class="fc" id="L167">      orderInDto.getRestaurantId());</span>
+
+<span class="fc bfc" id="L169" title="All 2 branches covered.">    if (cartItems.isEmpty()) {</span>
+<span class="fc" id="L170">      log.error(&quot;No items found in the cart for user ID: {} and restaurant ID: {}&quot;,</span>
+<span class="fc" id="L171">        orderInDto.getUserId(), orderInDto.getRestaurantId());</span>
+<span class="fc" id="L172">      throw new ResourceConflictException(OrderConstants.INVALID_CART_ITEMS);</span>
+    }
+<span class="fc" id="L174">    return cartItems;</span>
   }
 
-  private UserOutDto getUser(Integer userId) {
-<span class="fc" id="L76">    return userClient.getUserById(userId);</span>
+  /**
+   * Validates that the cart items match the provided cart items DTO.
+   * Logs a warning if some items do not match but proceeds without error.
+   *
+   * @param cartItems List of Cart entities representing the items in the cart
+   * @param cartItemsDto List of CartItemDto representing the cart items to be validated
+   */
+  public void validateCartItems(final List&lt;Cart&gt; cartItems, final List&lt;CartItemDto&gt; cartItemsDto) {
+<span class="fc" id="L185">    boolean allItemsValid = cartItemsDto.stream()</span>
+<span class="fc" id="L186">      .allMatch(cartItemDto -&gt; cartItems.stream()</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        .anyMatch(cartItem -&gt; cartItem.getFoodItemId().equals(cartItemDto.getFoodItemId())</span>
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">          &amp;&amp; cartItem.getQuantity().equals(cartItemDto.getQuantity())</span>
+<span class="pc bnc" id="L189" title="All 2 branches missed.">          &amp;&amp; cartItem.getPrice().compareTo(cartItemDto.getPrice()) == 0));</span>
+
+<span class="fc bfc" id="L191" title="All 2 branches covered.">    if (allItemsValid) {</span>
+<span class="fc" id="L192">      log.info(&quot;All cart items validated successfully.&quot;);</span>
+    } else {
+<span class="fc" id="L194">      log.error(&quot;Some cart items do not match but proceeding without errors.&quot;);</span>
+    }
+<span class="fc" id="L196">  }</span>
+  /**
+   * Calculates the total price of the cart items.
+   *
+   * @param cartItems List of CartItemDto representing the items in the cart
+   * @return BigDecimal representing the total price
+   */
+  public BigDecimal calculateTotalPrice(final List&lt;CartItemDto&gt; cartItems) {
+<span class="fc" id="L204">    BigDecimal totalPrice = cartItems.stream()</span>
+<span class="fc" id="L205">      .map(item -&gt; item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))</span>
+<span class="fc" id="L206">      .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+
+<span class="fc" id="L208">    log.info(&quot;Total price calculated: {}&quot;, totalPrice);</span>
+<span class="fc" id="L209">    return totalPrice;</span>
   }
-
-  private void validateUserRole(UserOutDto user) {
-<span class="fc bfc" id="L80" title="All 2 branches covered.">    if (user.getUserRole() != UserRole.CUSTOMER) {</span>
-<span class="fc" id="L81">      throw new CustomerNotFoundException(OrderConstants.CUSTOMER_NOT_FOUND);</span>
+  /**
+   * Validates that the user has sufficient wallet balance to place the order.
+   * Throws an exception if the balance is insufficient.
+   *
+   * @param user The user whose wallet balance is to be validated
+   * @param totalPrice The total price of the order
+   */
+  public void validateWalletBalance(final UserOutDto user, final BigDecimal totalPrice) {
+<span class="fc bfc" id="L219" title="All 2 branches covered.">    if (user.getWalletBalance().compareTo(totalPrice) &lt; 0) {</span>
+<span class="fc" id="L220">      log.error(&quot;Insufficient balance in wallet. Required: {}, Available: {}&quot;, totalPrice, user.getWalletBalance());</span>
+<span class="fc" id="L221">      throw new ResourceConflictException(OrderConstants.INSUFFICIENT_BALANCE);</span>
     }
-<span class="fc" id="L83">  }</span>
+<span class="fc" id="L223">    log.info(&quot;Wallet balance validated successfully.&quot;);</span>
+<span class="fc" id="L224">  }</span>
+  /**
+   * Updates the user's wallet balance by deducting the order total.
+   *
+   * @param user The user whose wallet balance is to be updated
+   * @param totalPrice The total price to be deducted
+   */
+  private void updateWalletBalance(final UserOutDto user, final BigDecimal totalPrice) {
+<span class="fc" id="L232">    userClient.updateWalletBalance(user.getId(), totalPrice.negate());</span>
+<span class="fc" id="L233">    log.info(&quot;Wallet balance updated for userId: {}. Amount deducted: {}&quot;, user.getId(), totalPrice);</span>
+<span class="fc" id="L234">  }</span>
 
-  private List&lt;AddressOutDto&gt; getAddresses(Integer userId) {
-<span class="fc" id="L86">    return addressClient.getAddressesByUserId(userId);</span>
-  }
-
-  private void validateAddress(Integer deliveryAddressId, List&lt;AddressOutDto&gt; addresses) {
-<span class="fc" id="L90">    boolean validAddress = addresses.stream()</span>
-<span class="fc" id="L91">      .anyMatch(address -&gt; address.getId().equals(deliveryAddressId));</span>
-<span class="fc bfc" id="L92" title="All 2 branches covered.">    if (!validAddress) {</span>
-<span class="fc" id="L93">      throw new AddressNotFoundException(OrderConstants.ADDRESS_NOT_FOUND);</span>
-    }
-<span class="fc" id="L95">  }</span>
-
-  private List&lt;Cart&gt; getCartItems(OrderInDto orderInDto) {
-<span class="fc" id="L98">    List&lt;Cart&gt; cartItems = cartService.getCartItemsByUserIdAndRestaurantId(orderInDto.getUserId(), orderInDto.getRestaurantId());</span>
-<span class="fc bfc" id="L99" title="All 2 branches covered.">    if (cartItems.isEmpty()) {</span>
-<span class="fc" id="L100">      throw new CartNotFoundException(&quot;No items found in the cart for user &quot; + orderInDto.getUserId() +</span>
-<span class="fc" id="L101">        &quot; and restaurant &quot; + orderInDto.getRestaurantId());</span>
-    }
-<span class="fc" id="L103">    return cartItems;</span>
-  }
-
-  private void validateCartItems(List&lt;Cart&gt; cartItems, List&lt;Cart&gt; cartItemsDto) {
-<span class="fc" id="L107">    List&lt;Cart&gt; invalidCartItems = cartItemsDto.stream()</span>
-<span class="pc" id="L108">      .filter(cartItemDto -&gt; cartItems.stream()</span>
-<span class="nc bnc" id="L109" title="All 2 branches missed.">        .noneMatch(cartItem -&gt; cartItem.getFoodItemId().equals(cartItemDto.getFoodItemId())</span>
-<span class="nc bnc" id="L110" title="All 2 branches missed.">          &amp;&amp; cartItem.getQuantity().equals(cartItemDto.getQuantity())</span>
-<span class="nc bnc" id="L111" title="All 2 branches missed.">          &amp;&amp; cartItem.getPrice().compareTo(cartItemDto.getPrice()) == 0))</span>
-<span class="fc" id="L112">      .collect(Collectors.toList());</span>
-<span class="pc bpc" id="L113" title="1 of 2 branches missed.">    if (!invalidCartItems.isEmpty()) {</span>
-<span class="nc" id="L114">      throw new RuntimeException(&quot;Some items are not valid in the cart: &quot; + invalidCartItems.stream()</span>
-<span class="nc" id="L115">        .map(dto -&gt; String.format(&quot;foodItemId=%d, quantity=%d, price=%s&quot;, dto.getFoodItemId(), dto.getQuantity(), dto.getPrice()))</span>
-<span class="nc" id="L116">        .collect(Collectors.joining(&quot;, &quot;)));</span>
-    }
-<span class="fc" id="L118">  }</span>
-
-  private BigDecimal calculateTotalPrice(List&lt;Cart&gt; cartItems) {
-<span class="fc" id="L121">    return cartItems.stream()</span>
-<span class="pc" id="L122">      .map(item -&gt; item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))</span>
-<span class="fc" id="L123">      .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
-  }
-
-  private void validateWalletBalance(UserOutDto user, BigDecimal totalPrice) {
-<span class="pc bpc" id="L127" title="1 of 2 branches missed.">    if (user.getWalletBalance().compareTo(totalPrice) &lt; 0) {</span>
-<span class="nc" id="L128">      throw new InsufficientBalanceException(&quot;Insufficient balance in wallet to place the order.&quot;);</span>
-    }
-<span class="fc" id="L130">  }</span>
-
-  private void updateWalletBalance(UserOutDto user, BigDecimal totalPrice) {
-<span class="fc" id="L133">    userClient.updateWalletBalance(user.getId(), totalPrice.negate());</span>
-<span class="fc" id="L134">  }</span>
-
-  private Order createOrder(OrderInDto orderInDto, BigDecimal totalPrice, List&lt;Cart&gt; validCartItems) {
-<span class="fc" id="L137">    Order order = DtoConversion.convertOrderInDtoToOrder(orderInDto);</span>
-<span class="fc" id="L138">    order.setRestaurantId(orderInDto.getRestaurantId());</span>
-<span class="fc" id="L139">    order.setOrderStatus(OrderStatus.PLACED);</span>
-<span class="fc" id="L140">    order.setOrderTime(LocalDateTime.now());</span>
+  /**
+   * Creates an order entity from the provided order details and cart items.
+   *
+   * @param orderInDto DTO containing order details
+   * @param totalPrice The total price of the order
+   * @param validCartItems List of CartItemDto representing the valid cart items
+   * @return Order entity with the specified details
+   */
+  public Order createOrder(final OrderInDto orderInDto, final BigDecimal totalPrice, final List&lt;CartItemDto&gt; validCartItems) {
+<span class="fc" id="L245">    Order order = DtoConversion.convertOrderInDtoToOrder(orderInDto);</span>
+<span class="fc" id="L246">    order.setRestaurantId(orderInDto.getRestaurantId());</span>
+<span class="fc" id="L247">    order.setOrderStatus(OrderStatus.PLACED);</span>
+<span class="fc" id="L248">    order.setOrderTime(LocalDateTime.now());</span>
     try {
-<span class="fc" id="L142">      order.setCartItemsFromList(validCartItems);</span>
-<span class="nc" id="L143">    } catch (JsonProcessingException e) {</span>
-<span class="nc" id="L144">      throw new RuntimeException(&quot;Failed to process cart items&quot;, e);</span>
-<span class="fc" id="L145">    }</span>
-<span class="fc" id="L146">    order.setTotalPrice(totalPrice);</span>
-<span class="fc" id="L147">    return order;</span>
+<span class="fc" id="L250">      order.setCartItems(objectMapper.writeValueAsString(validCartItems));</span>
+<span class="nc" id="L251">    } catch (JsonProcessingException e) {</span>
+<span class="nc" id="L252">      log.error(&quot;Failed to process cart items&quot;, e);</span>
+<span class="nc" id="L253">      throw new RuntimeException(&quot;Failed to process cart items&quot;, e);</span>
+<span class="fc" id="L254">    }</span>
+<span class="fc" id="L255">    order.setTotalPrice(totalPrice);</span>
+<span class="fc" id="L256">    log.info(&quot;Order created with ID: {}&quot;, order.getId());</span>
+<span class="fc" id="L257">    return order;</span>
   }
 
+  /**
+   * Cancels an existing order if it is within the allowed cancellation time.
+   * Updates the order status to CANCELLED and refunds the total price to the user's wallet.
+   *
+   * @param orderId The ID of the order to be cancelled
+   * @return A MessageOutDto indicating the success of the cancellation
+   * @throws ResourceNotFoundException if the order with the given ID is not found
+   * @throws ResourceConflictException if the cancellation time has expired (more than 30 seconds since order creation)
+   */
   @Override
-  public MessageOutDto cancelOrder(Integer orderId) {
-<span class="fc" id="L152">    Order order = orderRepository.findById(orderId)</span>
-<span class="pc" id="L153">      .orElseThrow(() -&gt; new OrderNotFoundException(&quot;Order not found for ID: &quot; + orderId));</span>
+  public MessageOutDto cancelOrder(final Integer orderId) {
+<span class="fc" id="L271">    Order order = orderRepository.findById(orderId)</span>
+<span class="pc" id="L272">      .orElseThrow(() -&gt; new ResourceNotFoundException(OrderConstants.ORDER_NOT_FOUND));</span>
 
-<span class="fc bfc" id="L155" title="All 2 branches covered.">    if (order.getOrderTime().plusSeconds(30).isBefore(LocalDateTime.now())) {</span>
-<span class="fc" id="L156">      throw new OrderUpdateException(&quot;Order cannot be cancelled after 30 seconds.&quot;);</span>
+<span class="fc bfc" id="L274" title="All 2 branches covered.">    if (order.getOrderTime().plusSeconds(30).isBefore(LocalDateTime.now())) {</span>
+<span class="fc" id="L275">      log.error(&quot;Order cancellation time exceeded for orderId: {}&quot;, orderId);</span>
+<span class="fc" id="L276">      throw new ResourceConflictException(OrderConstants.ORDER_CANCELLED_FAILURE);</span>
     }
 
-<span class="fc" id="L159">    userClient.updateWalletBalance(order.getUserId(), order.getTotalPrice());</span>
+<span class="fc" id="L279">    userClient.updateWalletBalance(order.getUserId(), order.getTotalPrice());</span>
 
-<span class="fc" id="L161">    order.setOrderStatus(OrderStatus.CANCELLED);</span>
-<span class="fc" id="L162">    orderRepository.save(order);</span>
-<span class="fc" id="L163">    return new MessageOutDto(OrderConstants.ORDER_CANCELLED_SUCCESSFULLY);</span>
+<span class="fc" id="L281">    order.setOrderStatus(OrderStatus.CANCELLED);</span>
+<span class="fc" id="L282">    orderRepository.save(order);</span>
+
+<span class="fc" id="L284">    log.info(&quot;Order cancelled successfully with ID: {}&quot;, orderId);</span>
+<span class="fc" id="L285">    return new MessageOutDto(OrderConstants.ORDER_CANCELLED_SUCCESSFULLY);</span>
+  }
+  /**
+   * Retrieves all orders associated with a specific user.
+   * Validates the user's role and fetches orders based on the user's ID.
+   *
+   * @param userId The ID of the user whose orders are to be retrieved
+   * @return A list of OrderOutDto representing the orders for the specified user
+   * @throws ResourceNotFoundException if the user with the given ID is not found
+   * @throws AccessDeniedException if the user does not have the appropriate role (not CUSTOMER)
+   */
+  @Override
+  public List&lt;OrderOutDto&gt; getOrdersByUserId(final Integer userId) {
+<span class="fc" id="L298">    UserOutDto user = getUser(userId);</span>
+<span class="fc" id="L299">    validateUserRole(user);</span>
+<span class="fc" id="L300">    List&lt;Order&gt; orders = orderRepository.findByUserId(userId);</span>
+<span class="fc" id="L301">    List&lt;OrderOutDto&gt; orderOutDtos = orders.stream()</span>
+<span class="fc" id="L302">      .map(this::convertOrderToOrderOutDto)</span>
+<span class="fc" id="L303">      .collect(Collectors.toList());</span>
+
+<span class="fc" id="L305">    log.info(&quot;Retrieved {} orders for userId: {}&quot;, orderOutDtos.size(), userId);</span>
+<span class="fc" id="L306">    return orderOutDtos;</span>
   }
 
+  /**
+   * Retrieves all orders associated with a specific restaurant.
+   * Fetches orders based on the restaurant's ID.
+   *
+   * @param restaurantId The ID of the restaurant whose orders are to be retrieved
+   * @return A list of OrderOutDto representing the orders for the specified restaurant
+   * @throws ResourceNotFoundException if the restaurant with the given ID is not found
+   */
   @Override
-  public List&lt;OrderOutDto&gt; getOrdersByUserId(Integer userId) {
-<span class="fc" id="L168">    UserOutDto user = getUser(userId);</span>
-<span class="fc" id="L169">    validateUserRole(user);</span>
-<span class="fc" id="L170">    List&lt;Order&gt; orders = orderRepository.findByUserId(userId);</span>
-<span class="fc" id="L171">    return orders.stream()</span>
-<span class="fc" id="L172">      .map(DtoConversion::convertOrderToOrderOutDto)</span>
-<span class="fc" id="L173">      .collect(Collectors.toList());</span>
+  public List&lt;OrderOutDto&gt; getOrdersByRestaurantId(final Integer restaurantId) {
+<span class="fc" id="L319">    FoodItemOutDto restaurant = restaurantClient.getRestaurantById(restaurantId);</span>
+
+<span class="fc" id="L321">    List&lt;Order&gt; orders = orderRepository.findByRestaurantId(restaurantId);</span>
+<span class="fc" id="L322">    List&lt;OrderOutDto&gt; orderOutDtos = orders.stream()</span>
+<span class="fc" id="L323">      .map(this::convertOrderToOrderOutDto)</span>
+<span class="fc" id="L324">      .collect(Collectors.toList());</span>
+
+<span class="fc" id="L326">    log.info(&quot;Retrieved {} orders for restaurantId: {}&quot;, orderOutDtos.size(), restaurantId);</span>
+<span class="fc" id="L327">    return orderOutDtos;</span>
+  }
+  /**
+   * Marks an order as completed and updates its status in the repository.
+   *
+   * @param orderId The ID of the order to be marked as completed
+   * @param userId The ID of the user performing the action
+   * @return A MessageOutDto indicating the success of the operation
+   * @throws ResourceNotFoundException if the order with the given ID is not found
+   */
+  @Override
+  public MessageOutDto markOrderAsCompleted(final Integer orderId, final Integer userId) {
+<span class="fc" id="L339">    Order order = orderRepository.findById(orderId)</span>
+<span class="fc" id="L340">      .orElseThrow(() -&gt; new ResourceNotFoundException(OrderConstants.ORDER_NOT_FOUND));</span>
+
+<span class="fc" id="L342">    order.setOrderStatus(OrderStatus.COMPLETED);</span>
+<span class="fc" id="L343">    orderRepository.save(order);</span>
+
+<span class="fc" id="L345">    log.info(&quot;Order marked as completed with ID: {}&quot;, orderId);</span>
+<span class="fc" id="L346">    return new MessageOutDto(OrderConstants.ORDER_COMPLETED_SUCCESSFULLY);</span>
   }
 
-  @Override
-  public List&lt;OrderOutDto&gt; getOrdersByRestaurantId(Integer restaurantId) {
-<span class="nc" id="L178">    FoodItemOutDto restaurant = restaurantClient.getRestaurantById(restaurantId);</span>
-
-<span class="nc" id="L180">    List&lt;Order&gt; orders = orderRepository.findByRestaurantId(restaurantId);</span>
-<span class="nc" id="L181">    return orders.stream()</span>
-<span class="nc" id="L182">      .map(DtoConversion::convertOrderToOrderOutDto)</span>
-<span class="nc" id="L183">      .collect(Collectors.toList());</span>
-  }
-
-  @Override
-  public MessageOutDto markOrderAsCompleted(Integer orderId, Integer userId) {
-<span class="fc" id="L188">    Order order = orderRepository.findById(orderId)</span>
-<span class="fc" id="L189">      .orElseThrow(() -&gt; new OrderNotFoundException(&quot;Order not found for ID: &quot; + orderId));</span>
-
-<span class="fc" id="L191">    UserOutDto user = getUser(userId);</span>
-
-<span class="fc bfc" id="L193" title="All 2 branches covered.">    if (user.getUserRole() != UserRole.RESTAURANT_OWNER) {</span>
-<span class="fc" id="L194">      throw new OrderUpdateException(&quot;Only a restaurant owner can complete this order.&quot;);</span>
-    }
-<span class="fc" id="L196">    order.setOrderStatus(OrderStatus.COMPLETED);</span>
-<span class="fc" id="L197">    orderRepository.save(order);</span>
-
-<span class="fc" id="L199">    new MessageOutDto(OrderConstants.ORDER_COMPLETED_SUCCESSFULLY);</span>
-<span class="fc" id="L200">    return null;</span>
+  /**
+   * Converts an Order entity to an OrderOutDto.
+   *
+   * @param order The Order entity to be converted
+   * @return An OrderOutDto representing the converted order
+   */
+  public OrderOutDto convertOrderToOrderOutDto(final Order order) {
+<span class="fc" id="L356">    OrderOutDto dto = DtoConversion.convertOrderToOrderOutDto(order);</span>
+    try {
+<span class="fc" id="L358">      List&lt;CartItemDto&gt; cartItems = objectMapper.readValue(order.getCartItems(),</span>
+<span class="fc" id="L359">        TypeFactory.defaultInstance().constructCollectionType(List.class, CartItemDto.class));</span>
+<span class="fc" id="L360">      dto.setCartItems(cartItems);</span>
+<span class="fc" id="L361">    } catch (JsonProcessingException e) {</span>
+<span class="fc" id="L362">      log.error(&quot;Failed to process cart items for order ID: {}&quot;, order.getId(), e);</span>
+<span class="fc" id="L363">      throw new RuntimeException(&quot;Failed to process cart items&quot;, e);</span>
+<span class="fc" id="L364">    }</span>
+<span class="fc" id="L365">    return dto;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

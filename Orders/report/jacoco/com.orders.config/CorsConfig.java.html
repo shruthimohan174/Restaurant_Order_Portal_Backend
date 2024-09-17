@@ -24,7 +24,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
    * @param registry the {@link CorsRegistry} to which CORS mappings are added
    */
   @Override
-  public void addCorsMappings(CorsRegistry registry) {
+  public void addCorsMappings(final CorsRegistry registry) {
 <span class="fc" id="L28">    registry.addMapping(&quot;/**&quot;)</span>
 <span class="fc" id="L29">      .allowedOrigins(&quot;http://localhost:3000&quot;)</span>
 <span class="fc" id="L30">      .allowedMethods(&quot;*&quot;)</span>

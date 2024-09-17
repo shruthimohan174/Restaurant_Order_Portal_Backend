@@ -6,64 +6,67 @@ import com.orders.dto.FoodItemOutDto;
 import com.orders.dto.MessageOutDto;
 import com.orders.dto.UserOutDto;
 import com.orders.entities.Cart;
-import com.orders.exception.CartNotFoundException;
-import com.orders.exception.CustomerNotFoundException;
-import com.orders.exception.PriceMismatchException;
+import com.orders.exception.AccessDeniedException;
+import com.orders.exception.ResourceConflictException;
+import com.orders.exception.ResourceNotFoundException;
 import com.orders.repositories.CartRepository;
 import com.orders.service.CartService;
-import com.orders.service.FoodItemFeignClient;
 import com.orders.service.RestaurantFeignClient;
 import com.orders.service.UserFeignClient;
 import com.orders.utils.UserRole;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+
 /**
  * Service implementation for Cart-related operations.
  */
 @Service
+@Slf4j
 public class CartServiceImpl implements CartService {
-  private static final Logger logger = LoggerFactory.getLogger(CartServiceImpl.class);
 
+  /**
+   * Service layer dependency for user-related operations.
+   */
   @Autowired
   private UserFeignClient userClient;
 
+  /**
+   * Service layer dependency for cart-related operations.
+   */
   @Autowired
   private CartRepository cartRepository;
 
+  /**
+   * Service layer dependency for restaurant-related operations.
+   */
   @Autowired
   private RestaurantFeignClient restaurantClient;
-
-  @Autowired
-  private FoodItemFeignClient foodItemClient;
 
   /**
    * Adds an item to the cart. If the item already exists in the cart, updates its quantity.
    *
    * @param cartInDto Data transfer object containing cart details.
    * @return Success message indicating the action performed.
-   * @throws CustomerNotFoundException If the user is not a customer.
-   * @throws PriceMismatchException    If the price of the item doesn't match the expected value.
    */
   @Override
-  public MessageOutDto addItemToCart(CartInDto cartInDto) {
-    logger.info("Adding item to cart for userId: {}, foodItemId: {}", cartInDto.getUserId(), cartInDto.getFoodItemId());
+  public MessageOutDto addItemToCart(final CartInDto cartInDto) {
+    log.info("Adding item to cart for userId: {}, foodItemId: {}", cartInDto.getUserId(), cartInDto.getFoodItemId());
 
     UserOutDto user = userClient.getUserById(cartInDto.getUserId());
-    if (user.getUserRole() != UserRole.CUSTOMER) {
-      logger.error("User is not a customer. userId: {}", cartInDto.getUserId());
-      throw new CustomerNotFoundException(OrderConstants.CUSTOMER_NOT_FOUND);
+    if (!user.getUserRole().equals(UserRole.CUSTOMER)) {
+      log.error("User is not a customer. userId: {}", cartInDto.getUserId());
+      throw new AccessDeniedException(OrderConstants.CUSTOMER_NOT_FOUND);
     }
     restaurantClient.getRestaurantById(cartInDto.getRestaurantId());
-    FoodItemOutDto foodItem = foodItemClient.getFoodItemById(cartInDto.getFoodItemId());
+    FoodItemOutDto foodItem = restaurantClient.getFoodItemById(cartInDto.getFoodItemId());
 
     if (foodItem.getPrice().compareTo(cartInDto.getPrice()) != 0) {
-      throw new PriceMismatchException(OrderConstants.PRICE_MISMATCH);
+      throw new ResourceConflictException(OrderConstants.PRICE_MISMATCH);
     }
 
     Optional<Cart> existingCart = cartRepository.findByUserIdAndFoodItemIdAndRestaurantId(
@@ -73,10 +76,10 @@ public class CartServiceImpl implements CartService {
     );
 
     if (existingCart.isPresent()) {
-      logger.info("Item already in cart. Updating quantity for cartId: {}", existingCart.get().getId());
+      log.info("Item already in cart. Updating quantity for cartId: {}", existingCart.get().getId());
       return updateCartItemQuantity(existingCart.get().getId(), 1);
     } else {
-      logger.info("Adding new item to cart for userId: {}", cartInDto.getUserId());
+      log.info("Adding new item to cart for userId: {}", cartInDto.getUserId());
       return addNewCartItem(cartInDto);
     }
   }
@@ -87,8 +90,8 @@ public class CartServiceImpl implements CartService {
    * @param cartInDto DTO containing cart details.
    * @return Success message indicating the item has been added to the cart.
    */
-  private MessageOutDto addNewCartItem(CartInDto cartInDto) {
-    logger.info("Creating new cart item for userId: {}, foodItemId: {}", cartInDto.getUserId(), cartInDto.getFoodItemId());
+  private MessageOutDto addNewCartItem(final CartInDto cartInDto) {
+    log.info("Creating new cart item for userId: {}, foodItemId: {}", cartInDto.getUserId(), cartInDto.getFoodItemId());
 
     Cart newCart = new Cart();
     newCart.setUserId(cartInDto.getUserId());
@@ -98,7 +101,7 @@ public class CartServiceImpl implements CartService {
     newCart.setPrice(cartInDto.getPrice());
 
     cartRepository.save(newCart);
-    logger.info("Cart item added successfully for userId: {}", cartInDto.getUserId());
+    log.info("Cart item added successfully for userId: {}", cartInDto.getUserId());
     return new MessageOutDto(OrderConstants.CART_ADDED_SUCCESSFULLY);
   }
 
@@ -110,8 +113,8 @@ public class CartServiceImpl implements CartService {
    * @return Success message indicating the action performed.
    */
   @Override
-  public MessageOutDto updateCartItemQuantity(Integer cartId, int quantityChange) {
-    logger.info("Updating cart item quantity for cartId: {}", cartId);
+  public MessageOutDto updateCartItemQuantity(final Integer cartId, final int quantityChange) {
+    log.info("Updating cart item quantity for cartId: {}", cartId);
 
     Cart cart = getCartById(cartId);
     BigDecimal unitPrice = cart.getPrice().divide(BigDecimal.valueOf(cart.getQuantity()), BigDecimal.ROUND_HALF_EVEN);
@@ -120,7 +123,7 @@ public class CartServiceImpl implements CartService {
 
     if (newQuantity == 0) {
       cartRepository.deleteById(cartId);
-      logger.info("Cart item removed successfully for cartId: {}", cartId);
+      log.info("Cart item removed successfully for cartId: {}", cartId);
       return new MessageOutDto(OrderConstants.ITEM_REMOVED_SUCCESSFULLY);
     }
 
@@ -129,9 +132,10 @@ public class CartServiceImpl implements CartService {
     cart.setQuantity(newQuantity);
     cart.setPrice(newPrice);
     cartRepository.save(cart);
-    logger.info("Cart item updated successfully for cartId: {}", cartId);
+    log.info("Cart item updated successfully for cartId: {}", cartId);
     return new MessageOutDto(OrderConstants.CART_UPDATED_SUCCESSFULLY);
   }
+
   /**
    * Removes an item from the cart.
    *
@@ -139,11 +143,11 @@ public class CartServiceImpl implements CartService {
    * @return Success message indicating the item has been removed.
    */
   @Override
-  public MessageOutDto removeItemFromCart(Integer cartId) {
-    logger.info("Removing item from cart for cartId: {}", cartId);
+  public MessageOutDto removeItemFromCart(final Integer cartId) {
+    log.info("Removing item from cart for cartId: {}", cartId);
     Cart cart = getCartById(cartId);
     cartRepository.deleteById(cartId);
-    logger.info("Item removed successfully from cart for cartId: {}", cartId);
+    log.info("Item removed successfully from cart for cartId: {}", cartId);
     return new MessageOutDto(OrderConstants.ITEM_REMOVED_SUCCESSFULLY);
   }
 
@@ -155,11 +159,11 @@ public class CartServiceImpl implements CartService {
    * @return Success message indicating the cart has been cleared.
    */
   @Override
-  public MessageOutDto clearCartAfterOrderPlaced(Integer userId, Integer restaurantId) {
-    logger.info("Clearing cart for userId: {}, restaurantId: {}", userId, restaurantId);
+  public MessageOutDto clearCartAfterOrderPlaced(final Integer userId, final Integer restaurantId) {
+    log.info("Clearing cart for userId: {}, restaurantId: {}", userId, restaurantId);
     UserOutDto user = userClient.getUserById(userId);
-    if (user.getUserRole() != UserRole.CUSTOMER) {
-      throw new CustomerNotFoundException(OrderConstants.CUSTOMER_NOT_FOUND);
+    if (!user.getUserRole().equals(UserRole.CUSTOMER)) {
+      throw new AccessDeniedException(OrderConstants.CUSTOMER_NOT_FOUND);
     }
 
     FoodItemOutDto restaurant = restaurantClient.getRestaurantById(restaurantId);
@@ -167,10 +171,10 @@ public class CartServiceImpl implements CartService {
     List<Cart> cartItems = cartRepository.findByUserIdAndRestaurantId(userId, restaurantId);
     if (!cartItems.isEmpty()) {
       cartRepository.deleteAll(cartItems);
-      logger.info("Cart cleared successfully for userId: {}", userId);
+      log.info("Cart cleared successfully for userId: {}", userId);
       return new MessageOutDto(OrderConstants.CART_DELETED_SUCCESSFULLY);
     } else {
-      logger.info("Cart already empty for userId: {}", userId);
+      log.info("Cart already empty for userId: {}", userId);
       return new MessageOutDto(OrderConstants.CART_ALREADY_EMPTY);
     }
   }
@@ -183,11 +187,11 @@ public class CartServiceImpl implements CartService {
    * @return List of cart items.
    */
   @Override
-  public List<Cart> getCartItemsByUserIdAndRestaurantId(Integer userId, Integer restaurantId) {
-    logger.info("Retrieving cart items for userId: {}, restaurantId: {}", userId, restaurantId);
+  public List<Cart> getCartItemsByUserIdAndRestaurantId(final Integer userId, final Integer restaurantId) {
+    log.info("Retrieving cart items for userId: {}, restaurantId: {}", userId, restaurantId);
     UserOutDto user = userClient.getUserById(userId);
-    if (user.getUserRole() != UserRole.CUSTOMER) {
-      throw new CustomerNotFoundException(OrderConstants.CUSTOMER_NOT_FOUND);
+    if (!user.getUserRole().equals(UserRole.CUSTOMER)) {
+      throw new AccessDeniedException(OrderConstants.CUSTOMER_NOT_FOUND);
     }
 
     FoodItemOutDto restaurant = restaurantClient.getRestaurantById(restaurantId);
@@ -201,11 +205,11 @@ public class CartServiceImpl implements CartService {
    * @return List of cart items.
    */
   @Override
-  public List<Cart> getCartByUserId(Integer userId) {
-    logger.info("Retrieving cart items for userId: {}", userId);
-   UserOutDto user = userClient.getUserById(userId);
-    if (user.getUserRole() != UserRole.CUSTOMER) {
-      throw new CustomerNotFoundException(OrderConstants.CUSTOMER_NOT_FOUND);
+  public List<Cart> getCartByUserId(final Integer userId) {
+    log.info("Retrieving cart items for userId: {}", userId);
+    UserOutDto user = userClient.getUserById(userId);
+    if (!user.getUserRole().equals(UserRole.CUSTOMER)) {
+      throw new AccessDeniedException(OrderConstants.CUSTOMER_NOT_FOUND);
     }
     return cartRepository.findByUserId(userId);
   }
@@ -215,14 +219,12 @@ public class CartServiceImpl implements CartService {
    *
    * @param cartId The cart ID.
    * @return The cart item.
-   * @throws CartNotFoundException If the cart item is not found.
+   * @throws ResourceNotFoundException If the cart item is not found.
    */
   @Override
-  public Cart getCartById(Integer cartId) {
-    logger.info("Retrieving cart item for cartId: {}", cartId);
+  public Cart getCartById(final Integer cartId) {
+    log.info("Retrieving cart item for cartId: {}", cartId);
     return cartRepository.findById(cartId)
-      .orElseThrow(() -> {
-        return new CartNotFoundException(OrderConstants.CART_NOT_FOUND);
-      });
+      .orElseThrow(() -> new ResourceNotFoundException(OrderConstants.CART_NOT_FOUND));
   }
 }

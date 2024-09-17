@@ -4,13 +4,22 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
+/**
+ * The entry point of the Orders application.
+ * This class contains the main method which is used to launch the Spring Boot application.
+ */
 @SpringBootApplication
 @EnableFeignClients
-<span class="fc" id="L9">public class OrdersApplication {</span>
+<span class="fc" id="L13">public class OrdersApplication {</span>
 
-  public static void main(String[] args) {
-<span class="nc" id="L12">    SpringApplication.run(OrdersApplication.class, args);</span>
-<span class="nc" id="L13">  }</span>
-
+  /**
+   * The main method to start the Spring Boot application.
+   * It delegates to Spring Boot's {@link SpringApplication#run(Class, String...)} method.
+   *
+   * @param args command-line arguments passed during application startup
+   */
+  public static void main(final String[] args) {
+<span class="nc" id="L22">    SpringApplication.run(OrdersApplication.class, args);</span>
+<span class="nc" id="L23">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
