@@ -1,6 +1,5 @@
 package com.orders.dto;
 
-import com.orders.entities.Cart;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,5 +43,5 @@ public class OrderInDto {
    */
   @NotNull(message = "Cart items cannot be null")
   @Valid
-  private List<Cart> cartItems;
+  private List<CartItemDto> cartItems;
 }

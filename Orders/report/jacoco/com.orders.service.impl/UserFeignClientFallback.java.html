@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserFeignClientFallback.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Orders</a> &gt; <a href="index.source.html" class="el_package">com.orders.service.impl</a> &gt; <span class="el_source">UserFeignClientFallback.java</span></div><h1>UserFeignClientFallback.java</h1><pre class="source lang-java linenums">package com.orders.service.impl;
+
+import com.orders.dto.AddressOutDto;
+import com.orders.dto.UserOutDto;
+import com.orders.service.UserFeignClient;
+import com.orders.utils.UserRole;
+import lombok.extern.slf4j.Slf4j;
+
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Fallback implementation of {@link UserFeignClient} to handle scenarios where the User service is unavailable.
+ * &lt;p&gt;
+ * This class provides default responses for the methods in {@link UserFeignClient} when the main service fails.
+ * &lt;/p&gt;
+ */
+<span class="nc" id="L19">@Slf4j</span>
+<span class="nc" id="L20">public class UserFeignClientFallback implements UserFeignClient {</span>
+
+  /**
+   * Fallback method for retrieving a user by their ID.
+   * &lt;p&gt;
+   * Provides a default response when the User service is down or unreachable.
+   * &lt;/p&gt;
+   *
+   * @param id The ID of the user.
+   * @return A {@link UserOutDto} object with default values.
+   */
+  @Override
+  public UserOutDto getUserById(final Integer id) {
+<span class="nc" id="L33">    log.error(&quot;Fallback triggered for getUserById with id: {}&quot;, id);</span>
+<span class="nc" id="L34">    UserOutDto fallbackUser = new UserOutDto();</span>
+<span class="nc" id="L35">    fallbackUser.setId(id);</span>
+<span class="nc" id="L36">    fallbackUser.setUserRole(UserRole.CUSTOMER);</span>
+<span class="nc" id="L37">    fallbackUser.setWalletBalance(BigDecimal.ZERO);</span>
+<span class="nc" id="L38">    return fallbackUser;</span>
+  }
+
+  /**
+   * Fallback method for updating the wallet balance of a user.
+   * &lt;p&gt;
+   * This method does not perform any operation in fallback mode as it's not possible to update the balance
+   * without the main service.
+   * &lt;/p&gt;
+   *
+   * @param id     The ID of the user whose wallet balance is to be updated.
+   * @param amount The amount to be added to the wallet balance.
+   */
+  @Override
+  public void updateWalletBalance(final Integer id, final BigDecimal amount) {
+<span class="nc" id="L53">    log.error(&quot;Fallback triggered for updateWalletBalance with user id: {}&quot;, id);</span>
+<span class="nc" id="L54">  }</span>
+
+  /**
+   * Fallback method for retrieving addresses by user ID.
+   * &lt;p&gt;
+   * Provides an empty list as a fallback response when the User service is down or unreachable.
+   * &lt;/p&gt;
+   *
+   * @param userId The ID of the user whose addresses are to be retrieved.
+   * @return An empty list of {@link AddressOutDto}.
+   */
+  @Override
+  public List&lt;AddressOutDto&gt; getAddressesByUserId(final Integer userId) {
+<span class="nc" id="L67">    log.error(&quot;Fallback triggered for getAddressesByUserId with user id: {}&quot;, userId);</span>
+<span class="nc" id="L68">    return Collections.emptyList();</span>
+  }
+
+  /**
+   * Fallback method for retrieving an address by its ID.
+   * &lt;p&gt;
+   * Provides a default response when the User service is down or unreachable.
+   * &lt;/p&gt;
+   *
+   * @param addressId The ID of the address.
+   * @return An {@link AddressOutDto} object with default values.
+   */
+  @Override
+  public AddressOutDto getAddressById(final Integer addressId) {
+<span class="nc" id="L82">    log.error(&quot;Fallback triggered for getAddressById with address id: {}&quot;, addressId);</span>
+<span class="nc" id="L83">    AddressOutDto fallbackAddress = new AddressOutDto();</span>
+<span class="nc" id="L84">    fallbackAddress.setId(addressId);</span>
+<span class="nc" id="L85">    fallbackAddress.setStreet(&quot;Fallback Street&quot;);</span>
+<span class="nc" id="L86">    fallbackAddress.setCity(&quot;Fallback City&quot;);</span>
+<span class="nc" id="L87">    fallbackAddress.setState(&quot;Fallback State&quot;);</span>
+<span class="nc" id="L88">    fallbackAddress.setPincode(000000);</span>
+<span class="nc" id="L89">    return fallbackAddress;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -18,152 +16,109 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
 /**
  * Global exception handler for managing application-wide exceptions.
+ * <p>
+ * This class handles various types of exceptions thrown in the application, including custom exceptions and validation errors.
+ * </p>
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
-  private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   /**
-   * Handles AddressNotFoundException.
+   * Handles {@link ResourceNotFoundException} and returns an appropriate error response.
    *
-   * @param ex      the exception
-   * @param request the HTTP request
-   * @return the error response
+   * @param ex The exception that was thrown.
+   * @param request The HTTP request that resulted in the exception.
+   * @return An {@link ErrorResponse} with details about the error.
    */
-  @ExceptionHandler(AddressNotFoundException.class)
+  @ExceptionHandler(ResourceNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ResponseBody
-  public final ErrorResponse handleAddressNotFoundException(AddressNotFoundException ex, HttpServletRequest request) {
-    logger.error("Address not found: {}", ex.getMessage());
+  public final ErrorResponse handleResourceNotFoundException(final ResourceNotFoundException ex,
+                                                             final HttpServletRequest request) {
     return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());
   }
 
   /**
-   * Handles CartNotFoundException.
+   * Handles {@link ResourceConflictException} and returns an appropriate error response.
    *
-   * @param ex      the exception
-   * @param request the HTTP request
-   * @return the error response
+   * @param ex The exception that was thrown.
+   * @param request The HTTP request that resulted in the exception.
+   * @return An {@link ErrorResponse} with details about the error.
    */
-  @ExceptionHandler(CartNotFoundException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ExceptionHandler(ResourceConflictException.class)
+  @ResponseStatus(HttpStatus.CONFLICT)
   @ResponseBody
-  public final ErrorResponse handleCartNotFoundException(CartNotFoundException ex, HttpServletRequest request) {
-    logger.error("Cart not found: {}", ex.getMessage());
-    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());
+  public final ErrorResponse handleConflictException(final ResourceConflictException ex, final HttpServletRequest request) {
+    return new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), ex.getMessage(), request.getRequestURI());
   }
 
   /**
-   * Handles PriceMismatchException.
+   * Handles {@link MethodArgumentNotValidException} and returns validation error details.
    *
-   * @param ex      the exception
-   * @param request the HTTP request
-   * @return the error response
-   */
-  @ExceptionHandler(PriceMismatchException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public final ErrorResponse handlePriceMismatchException(PriceMismatchException ex, HttpServletRequest request) {
-    logger.error("Price mismatch: {}", ex.getMessage());
-    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());
-  }
-
-  /**
-   * Handles InsufficientBalanceException.
-   *
-   * @param ex      the exception
-   * @param request the HTTP request
-   * @return the error response
-   */
-  @ExceptionHandler(InsufficientBalanceException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ResponseBody
-  public final ErrorResponse handleInsufficientBalanceException(InsufficientBalanceException ex, HttpServletRequest request) {
-    logger.error("Insufficient balance: {}", ex.getMessage());
-    return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), ex.getMessage(), request.getRequestURI());
-  }
-
-  /**
-   * Handles CustomerNotFoundException.
-   *
-   * @param ex      the exception
-   * @param request the HTTP request
-   * @return the error response
-   */
-  @ExceptionHandler(CustomerNotFoundException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public final ErrorResponse handleCustomerNotFoundException(CustomerNotFoundException ex, HttpServletRequest request) {
-    logger.error("Customer not found: {}", ex.getMessage());
-    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());
-  }
-
-  /**
-   * Handles OrderNotFoundException.
-   *
-   * @param ex      the exception
-   * @param request the HTTP request
-   * @return the error response
-   */
-  @ExceptionHandler(OrderNotFoundException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public final ErrorResponse handleOrderNotFoundException(OrderNotFoundException ex, HttpServletRequest request) {
-    logger.error("Order not found: {}", ex.getMessage());
-    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());
-  }
-
-  /**
-   * Handles OrderUpdateException.
-   *
-   * @param ex      the exception
-   * @param request the HTTP request
-   * @return the error response
-   */
-  @ExceptionHandler(OrderUpdateException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public final ErrorResponse handleOrderUpdateException(OrderUpdateException ex, HttpServletRequest request) {
-    logger.error("Order update failed: {}", ex.getMessage());
-    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());
-  }
-
-  /**
-   * Handles {@link MethodArgumentNotValidException} and returns a standardized error response for validation errors.
-   *
-   * @param ex      the exception thrown
-   * @param request the HTTP request that caused the exception
-   * @return the error response
+   * @param ex The exception that was thrown.
+   * @param request The HTTP request that resulted in the exception.
+   * @return An {@link ErrorResponse} with details about the validation errors.
    */
   @ExceptionHandler(MethodArgumentNotValidException.class)
   @ResponseBody
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ErrorResponse handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
-    List<String> errors = ex.getBindingResult()
-      .getFieldErrors()
-      .stream()
-      .map(FieldError::getDefaultMessage)
-      .collect(Collectors.toList());
+  public ErrorResponse handleValidationException(final MethodArgumentNotValidException ex, final HttpServletRequest request) {
+    List<String> errors = new ArrayList<>();
+    for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+      errors.add(fieldError.getDefaultMessage());
+    }
 
     String errorMessage = String.join(", ", errors);
-    logger.error("Validation failed: {}", errorMessage);
     return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), "Validation failed: " + errorMessage,
       request.getRequestURI());
   }
 
   /**
-   * Handles FeignException.
+   * Handles generic exceptions and returns a generic error response.
    *
-   * @param ex      the exception
-   * @param request the HTTP request
-   * @return the error response
+   * @param ex The exception that was thrown.
+   * @param request The HTTP request that resulted in the exception.
+   * @return An {@link ErrorResponse} with details about the error.
+   */
+  @ExceptionHandler(Exception.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ResponseBody
+  public final ErrorResponse handleGenericException(final Exception ex, final HttpServletRequest request) {
+    return new ErrorResponse(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.value(),
+      "An error occurred. Please try again later.", request.getRequestURI());
+  }
+
+  /**
+   * Handles {@link AccessDeniedException} and returns an appropriate error response.
+   *
+   * @param ex The exception that was thrown.
+   * @param request The HTTP request that resulted in the exception.
+   * @return An {@link ErrorResponse} with details about the error.
+   */
+  @ExceptionHandler(AccessDeniedException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  @ResponseBody
+  public final ErrorResponse handleInvalidRequestException(final AccessDeniedException ex, final HttpServletRequest request) {
+    return new ErrorResponse(LocalDateTime.now(), HttpStatus.FORBIDDEN.value(), ex.getMessage(), request.getRequestURI());
+  }
+
+  /**
+   * Handles {@link FeignException} and returns an appropriate error response.
+   * <p>
+   * Extracts and processes the error message from the Feign client exception response.
+   * </p>
+   *
+   * @param ex The Feign exception that was thrown.
+   * @param request The HTTP request that resulted in the exception.
+   * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with details about the error.
    */
   @ExceptionHandler(FeignException.class)
-  public ResponseEntity<ErrorResponse> handleFeignException(FeignException ex, HttpServletRequest request) {
+  public ResponseEntity<ErrorResponse> handleFeignException(final FeignException ex, final HttpServletRequest request) {
     HttpStatus status = HttpStatus.valueOf(ex.status());
     String message = "An error occurred while processing your request";
 
@@ -174,12 +129,10 @@ public class GlobalExceptionHandler {
         JsonNode jsonNode = objectMapper.readTree(feignResponseBody);
         message = jsonNode.get("message").asText();
       } catch (Exception e) {
-        logger.error("Failed to parse Feign error response: {}", e.getMessage());
         message = ex.getMessage();
       }
     }
 
-    logger.error("Feign exception: {}", message);
     ErrorResponse errorResponse = new ErrorResponse(
       LocalDateTime.now(),
       status.value(),
@@ -191,14 +144,35 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * ErrorResponse class to represent standardized error information.
+   * ErrorResponse class to encapsulate error details.
    */
   @Data
   @AllArgsConstructor
   public static class ErrorResponse {
+
+    /**
+     * The timestamp when the error occurred.
+     * This is useful for logging and debugging to determine when the error happened.
+     */
     private LocalDateTime timestamp;
+
+    /**
+     * The HTTP status code associated with the error.
+     * This code indicates the type of error that occurred (e.g., 404 for Not Found, 500 for Internal Server Error).
+     */
     private int status;
+
+    /**
+     * A descriptive message explaining the error.
+     * This message provides more details about the error to help understand what went wrong.
+     */
     private String message;
+
+    /**
+     * The path or endpoint where the error occurred.
+     * This helps in identifying which part of the application triggered the error.
+     */
     private String path;
   }
 }
+

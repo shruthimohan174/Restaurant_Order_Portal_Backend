@@ -1,18 +1,24 @@
 package com.orders.entities;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.orders.utils.OrderStatus;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Unit tests for {@link Order}.
+ * This class tests the getter and setter methods, {@code toString()} method, and {@code equals()} and {@code hashCode()} methods
+ * of the {@link Order} class.
+ */
 class OrderTest {
 
+  /**
+   * Tests the {@code toString()} method of {@link Order}.
+   * Verifies that the {@code toString()} method returns the correct string representation of the object.
+   */
   @Test
   void testToString() {
     Order order = new Order();
@@ -25,11 +31,16 @@ class OrderTest {
     order.setTotalPrice(BigDecimal.valueOf(100.0));
     order.setRestaurantId(1);
 
-    String expectedString = "Order(id=1, userId=1, deliveryAddressId=1, orderStatus=PENDING, cartItems=[], orderTime="
+    String expectedString = "Order(id=1, userId=1, deliveryAddressId=1, orderStatus=PLACED, cartItems=[], orderTime="
       + order.getOrderTime() + ", totalPrice=100.0, restaurantId=1)";
     assertThat(order.toString()).contains(expectedString);
   }
 
+  /**
+   * Tests the {@code equals()} and {@code hashCode()} methods of {@link Order}.
+   * Verifies that the {@code equals()} method returns {@code true} for equal objects and {@code false} for non-equal objects,
+   * and that {@code hashCode()} returns consistent values for equal objects.
+   */
   @Test
   void testEqualsAndHashCode() {
     Order order1 = new Order();
@@ -60,8 +71,12 @@ class OrderTest {
     assertThat(order1.hashCode()).isNotEqualTo(order2.hashCode());
   }
 
+  /**
+   * Tests the getter and setter methods of {@link Order}.
+   * Verifies that the getters return the expected values after setting them through setters.
+   */
   @Test
-  void testGettersAndSetters() throws JsonProcessingException {
+  void testGettersAndSetters() {
     Order order = new Order();
     order.setId(1);
     order.setUserId(1);
@@ -79,9 +94,5 @@ class OrderTest {
     assertThat(order.getCartItems()).isEqualTo("[]");
     assertThat(order.getTotalPrice()).isEqualTo(BigDecimal.valueOf(100.00));
     assertThat(order.getRestaurantId()).isEqualTo(1);
-
-    List<Cart> cartItems = Collections.emptyList();
-    order.setCartItemsFromList(cartItems);
-    assertThat(order.getCartItemsAsList()).isEqualTo(cartItems);
   }
 }

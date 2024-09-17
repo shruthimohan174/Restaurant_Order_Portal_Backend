@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 
 /**
  * Data Transfer Object for representing a user
+ * This class encapsulates the message content to be transferred between different layers or systems.
  */
 @Data
 @NoArgsConstructor

@@ -23,5 +23,6 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
    *
    * @param restaurantId the restaurant ID
    * @return list of orders
-   */List<Order> findByRestaurantId(Integer restaurantId);
+   */
+  List<Order> findByRestaurantId(Integer restaurantId);
 }

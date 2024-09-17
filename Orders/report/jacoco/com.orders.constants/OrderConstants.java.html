@@ -4,7 +4,12 @@
  * This class contains constant messages used throughout the order processing system.
  * These constants represent various statuses and messages related to orders and carts.
  */
-<span class="nc" id="L7">public final class OrderConstants {</span>
+public final class OrderConstants {
+  /**
+   * Message indicating that there is insufficient balance in wallet.
+   */
+  public static final String INSUFFICIENT_BALANCE = &quot;Insufficient balance to place the order.&quot;;
+
   /**
    * Message indicating that an order was placed successfully.
    */
@@ -36,6 +41,9 @@
   /** Message indicating that an order was cancelled successfully. */
   public static final String ORDER_CANCELLED_SUCCESSFULLY = &quot;Order has been cancelled&quot;;
 
+  /** Message indicating that an order was not cancelled due to failure. */
+  public static final String ORDER_CANCELLED_FAILURE = &quot;Order cannot be cancelled after 30 seconds.&quot;;
+
   /** Message indicating that an order was completed successfully. */
   public static final String ORDER_COMPLETED_SUCCESSFULLY = &quot;Order has been completed&quot;;
 
@@ -58,13 +66,16 @@
    * Message indicating a price mismatch for a food item.
    */
   public static final String PRICE_MISMATCH = &quot;This is not the current price of this food item.&quot;;
-
-
-  public static final String ORDER_UPDATED_SUCCESSFULLY = &quot;Order updated successfully&quot;;
-  public static final String ORDER_FAILED = &quot;Order has been failed&quot;;
-  public static final String ORDER_UPDATE_FAILED = &quot;Update order has been failed&quot;;
-  public static final String INVALID_QUANTITY = &quot;You cannot select quantity as 0&quot;;
-  public static final String RESTAURANT_NOT_FOUND = &quot;Restaurant not found with this id&quot;;
-  public static final String FOOD_ITEM_NOT_FOUND = &quot;Food Item not found with this id&quot;;
+  /**
+   * Message indicating that no order was found with the specified id.
+   */
+  public static final String ORDER_NOT_FOUND = &quot;Order not found with this id&quot;;
+  /**
+   * Message indicating that no cart items was found with the specified id.
+   */
+  public static final String INVALID_CART_ITEMS = &quot;Invalid items present in cart&quot;;
+<span class="nc" id="L77">  private OrderConstants() {</span>
+<span class="nc" id="L78">    throw new UnsupportedOperationException(&quot;This is a utility class and cannot be instantiated&quot;);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

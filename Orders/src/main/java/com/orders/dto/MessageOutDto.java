@@ -5,7 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Data Transfer Object for representing a message
+ * Data Transfer Object for representing a message.
+ * This class encapsulates the message content to be transferred between different layers or systems.
  */
 @Data
 @AllArgsConstructor
