@@ -11,25 +11,43 @@ import javax.persistence.Id;
  * Entity representing an address.
  * &lt;p&gt;
  * This entity maps to the 'Address' table in the database and holds address-related information
- * for users.
+ * for users, including the street, city, state, and pincode.
  * &lt;/p&gt;
  */
-<span class="pc bpc" id="L17" title="33 of 54 branches missed.">@Data</span>
+<span class="pc bpc" id="L17" title="9 of 54 branches missed.">@Data</span>
 @Entity
 public class Address {
 
+  /**
+   * Unique identifier for the address.
+   */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-<span class="fc" id="L23">  private Integer id;</span>
+<span class="fc" id="L26">  private Integer id;</span>
 
-<span class="fc" id="L25">  private String street;</span>
+  /**
+   * The street address.
+   */
+<span class="fc" id="L31">  private String street;</span>
 
-<span class="fc" id="L27">  private String city;</span>
+  /**
+   * The city of the address.
+   */
+<span class="fc" id="L36">  private String city;</span>
 
-<span class="fc" id="L29">  private String state;</span>
+  /**
+   * The state of the address.
+   */
+<span class="fc" id="L41">  private String state;</span>
 
-<span class="fc" id="L31">  private Integer pincode;</span>
+  /**
+   * The postal code (pincode) of the address.
+   */
+<span class="fc" id="L46">  private Integer pincode;</span>
 
-<span class="fc" id="L33">  private Integer userId;</span>
+  /**
+   * The ID of the user associated with this address.
+   */
+<span class="fc" id="L51">  private Integer userId;</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

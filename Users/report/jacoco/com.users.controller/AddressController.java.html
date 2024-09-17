@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AddressController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Users</a> &gt; <a href="index.source.html" class="el_package">com.users.controller</a> &gt; <span class="el_source">AddressController.java</span></div><h1>AddressController.java</h1><pre class="source lang-java linenums">package com.users.controller;
 
-import com.users.dto.indto.AddressInDto;
-import com.users.dto.outdto.AddressOutDto;
+import com.users.dto.AddressInDto;
+import com.users.dto.AddressOutDto;
+import com.users.dto.MessageOutDto;
+import com.users.entities.Address;
 import com.users.service.AddressService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +30,12 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(&quot;/address&quot;)
-<span class="fc" id="L32">public class AddressController {</span>
+<span class="fc" id="L33">@Slf4j</span>
+<span class="fc" id="L34">public class AddressController {</span>
 
-<span class="fc" id="L34">  private static final Logger logger = LoggerFactory.getLogger(AddressController.class);</span>
-
+  /**
+   * Service layer dependency for addressService-related operations.
+   */
   @Autowired
   private AddressService addressService;
 
@@ -46,14 +49,14 @@ import java.util.List;
    * @param addressInDto the request body containing address details
    * @return a {@link ResponseEntity} containing the address response and HTTP status
    */
-  @PostMapping(&quot;/add&quot;)
-  public ResponseEntity&lt;AddressOutDto&gt; addAddress(@RequestBody AddressInDto addressInDto) {
-<span class="fc" id="L51">    logger.info(&quot;Adding new address for user ID: {}&quot;, addressInDto.getUserId());</span>
+  @PostMapping(&quot;&quot;)
+  public ResponseEntity&lt;MessageOutDto&gt; addAddress(final @RequestBody AddressInDto addressInDto) {
+<span class="fc" id="L54">    log.info(&quot;Adding new address for user ID: {}&quot;, addressInDto.getUserId());</span>
 
-<span class="fc" id="L53">    AddressOutDto response = addressService.addAddress(addressInDto);</span>
-<span class="fc" id="L54">    logger.info(&quot;Address added successfully for user ID: {}&quot;, addressInDto.getUserId());</span>
+<span class="fc" id="L56">    MessageOutDto response = addressService.addAddress(addressInDto);</span>
+<span class="fc" id="L57">    log.info(&quot;Address added successfully for user ID: {}&quot;, addressInDto.getUserId());</span>
 
-<span class="fc" id="L56">    return new ResponseEntity&lt;&gt;(response, HttpStatus.CREATED);</span>
+<span class="fc" id="L59">    return new ResponseEntity&lt;&gt;(response, HttpStatus.CREATED);</span>
   }
 
   /**
@@ -68,13 +71,12 @@ import java.util.List;
    * @return a {@link ResponseEntity} containing the updated address response and HTTP status
    */
   @PutMapping(&quot;/update/{id}&quot;)
-  public ResponseEntity&lt;AddressOutDto&gt; updateAddress(@RequestBody AddressInDto addressInDto, @PathVariable Integer id) {
-<span class="fc" id="L72">    logger.info(&quot;Updating address with ID: {}&quot;, id);</span>
-
-<span class="fc" id="L74">    AddressOutDto response = addressService.updateAddress(id, addressInDto);</span>
-<span class="fc" id="L75">    logger.info(&quot;Address updated successfully with ID: {}&quot;, id);</span>
-
-<span class="fc" id="L77">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+  public ResponseEntity&lt;MessageOutDto&gt; updateAddress(final @RequestBody AddressInDto addressInDto,
+                                                     final @PathVariable Integer id) {
+<span class="fc" id="L76">    log.info(&quot;Updating address with ID: {}&quot;, id);</span>
+<span class="fc" id="L77">    MessageOutDto response = addressService.updateAddress(id, addressInDto);</span>
+<span class="fc" id="L78">    log.info(&quot;Address updated successfully with ID: {}&quot;, id);</span>
+<span class="fc" id="L79">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
   }
 
   /**
@@ -88,13 +90,13 @@ import java.util.List;
    * @return a {@link ResponseEntity} with HTTP status
    */
   @DeleteMapping(&quot;/delete/{id}&quot;)
-  public ResponseEntity&lt;Void&gt; deleteAddress(@PathVariable Integer id) {
-<span class="fc" id="L92">    logger.info(&quot;Deleting address with ID: {}&quot;, id);</span>
+  public ResponseEntity&lt;MessageOutDto&gt; deleteAddress(final @PathVariable Integer id) {
+<span class="fc" id="L94">    log.info(&quot;Deleting address with ID: {}&quot;, id);</span>
 
-<span class="fc" id="L94">    addressService.deleteAdderess(id);</span>
-<span class="fc" id="L95">    logger.info(&quot;Address deleted successfully with ID: {}&quot;, id);</span>
+<span class="fc" id="L96">    MessageOutDto response = addressService.deleteAdderess(id);</span>
+<span class="fc" id="L97">    log.info(&quot;Address deleted successfully with ID: {}&quot;, id);</span>
 
-<span class="fc" id="L97">    return new ResponseEntity&lt;&gt;(HttpStatus.NO_CONTENT);</span>
+<span class="fc" id="L99">    return new ResponseEntity&lt;&gt;(response, HttpStatus.NO_CONTENT);</span>
   }
 
   /**
@@ -107,10 +109,9 @@ import java.util.List;
    */
   @GetMapping
   public ResponseEntity&lt;List&lt;AddressOutDto&gt;&gt; getAllAddresses() {
-<span class="fc" id="L110">    logger.info(&quot;Fetching all addresses&quot;);</span>
-
-<span class="fc" id="L112">    List&lt;AddressOutDto&gt; addressList = addressService.getAllAddress();</span>
-<span class="fc" id="L113">    return new ResponseEntity&lt;&gt;(addressList, HttpStatus.OK);</span>
+<span class="fc" id="L112">    log.info(&quot;Fetching all addresses&quot;);</span>
+<span class="fc" id="L113">    List&lt;AddressOutDto&gt; addressList = addressService.getAllAddress();</span>
+<span class="fc" id="L114">    return new ResponseEntity&lt;&gt;(addressList, HttpStatus.OK);</span>
   }
 
   /**
@@ -124,13 +125,27 @@ import java.util.List;
    * @return a {@link ResponseEntity} containing a list of addresses and HTTP status
    */
   @GetMapping(&quot;/user/{userId}&quot;)
-  public ResponseEntity&lt;List&lt;AddressOutDto&gt;&gt; findAddressesByUserId(@PathVariable Integer userId) {
-<span class="fc" id="L128">    logger.info(&quot;Fetching addresses for user ID: {}&quot;, userId);</span>
+  public ResponseEntity&lt;List&lt;AddressOutDto&gt;&gt; findAddressesByUserId(final @PathVariable Integer userId) {
+<span class="fc" id="L129">    log.info(&quot;Fetching addresses for user ID: {}&quot;, userId);</span>
 
-<span class="fc" id="L130">    List&lt;AddressOutDto&gt; addressList = addressService.getAddressByUserId(userId);</span>
-<span class="fc" id="L131">    logger.info(&quot;Retrieved {} addresses for user ID: {}&quot;, addressList.size(), userId);</span>
+<span class="fc" id="L131">    List&lt;AddressOutDto&gt; addressList = addressService.getAddressByUserId(userId);</span>
+<span class="fc" id="L132">    log.info(&quot;Retrieved {} addresses for user ID: {}&quot;, addressList.size(), userId);</span>
 
-<span class="fc" id="L133">    return new ResponseEntity&lt;&gt;(addressList, HttpStatus.OK);</span>
+<span class="fc" id="L134">    return new ResponseEntity&lt;&gt;(addressList, HttpStatus.OK);</span>
   }
+
+  /**
+   * Retrieves an address by its unique identifier.
+   *
+   * @param id the unique identifier of the address to retrieve
+   * @return a {@link ResponseEntity} containing the {@link Address} object and an HTTP status of 200 OK
+   */
+  @GetMapping(&quot;/{id}&quot;)
+  public ResponseEntity&lt;Address&gt; getAddressById(final @PathVariable Integer id) {
+<span class="nc" id="L145">    log.info(&quot;Fetching addresses with id{}&quot;, id);</span>
+<span class="nc" id="L146">    Address addressList = addressService.findAddressById(id);</span>
+<span class="nc" id="L147">    return new ResponseEntity&lt;&gt;(addressList, HttpStatus.OK);</span>
+  }
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

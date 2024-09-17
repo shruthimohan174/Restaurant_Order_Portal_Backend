@@ -3,12 +3,27 @@
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * The entry point of the Users application.
+ * &lt;p&gt;
+ * This class contains the {@code main} method, which is the starting point of the Spring Boot application.
+ * It triggers the application context to be initialized and the application to start.
+ * &lt;/p&gt;
+ */
 @SpringBootApplication
 @SuppressWarnings(&quot;PMD.UseUtilityClass&quot;)
-<span class="fc" id="L8">public class UsersApplication {</span>
+<span class="fc" id="L15">public class UsersApplication {</span>
 
-  public static void main(String[] args) {
-<span class="nc" id="L11">    SpringApplication.run(UsersApplication.class, args);</span>
-<span class="nc" id="L12">  }</span>
+  /**
+   * The main method which serves as the entry point for the Spring Boot application.
+   * &lt;p&gt;
+   * This method uses {@link SpringApplication#run(Class, String[])} to launch the application.
+   * &lt;/p&gt;
+   *
+   * @param args command-line arguments passed to the application
+   */
+  public static void main(final String[] args) {
+<span class="nc" id="L26">    SpringApplication.run(UsersApplication.class, args);</span>
+<span class="nc" id="L27">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

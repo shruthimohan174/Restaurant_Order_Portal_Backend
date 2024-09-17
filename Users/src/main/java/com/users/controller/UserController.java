@@ -1,19 +1,18 @@
 package com.users.controller;
 
-import com.users.dto.indto.UpdateUserInDto;
-import com.users.dto.indto.UserInDto;
-import com.users.dto.indto.UserLoginInDto;
-import com.users.dto.outdto.UpdateUserOutDto;
-import com.users.dto.outdto.UserOutDto;
-import com.users.dtoconversion.DtoConversion;
+import com.users.dto.UpdateUserInDto;
+import com.users.dto.UserInDto;
+import com.users.dto.UserLoginInDto;
+import com.users.dto.ContactUsInDto;
+import com.users.dto.MessageOutDto;
+import com.users.dto.UserOutDto;
+import com.users.converter.DtoConversion;
 import com.users.entities.User;
 import com.users.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,10 +34,11 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/user")
+@Slf4j
 public class UserController {
-
-  private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-
+  /**
+   * Service layer dependency for user-related operations.
+   */
   @Autowired
   private UserService userService;
 
@@ -53,10 +53,10 @@ public class UserController {
    * @return a {@link ResponseEntity} containing the user response and HTTP status
    */
   @PostMapping("/register")
-  public ResponseEntity<UserOutDto> registerUser(@Valid @RequestBody UserInDto userRequest) {
-    logger.info("Registering user with email: {}", userRequest.getEmail());
-    UserOutDto userResponse = userService.registerUser(userRequest);
-    logger.info("User registered successfully with email: {}", userRequest.getEmail());
+  public ResponseEntity<MessageOutDto> registerUser(final @Valid @RequestBody UserInDto userRequest) {
+    log.info("Registering user with email: {}", userRequest.getEmail());
+    MessageOutDto userResponse = userService.registerUser(userRequest);
+    log.info("User registered successfully with email: {}", userRequest.getEmail());
     return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
   }
 
@@ -71,10 +71,10 @@ public class UserController {
    * @return a {@link ResponseEntity} containing the user response and HTTP status
    */
   @PostMapping("/login")
-  public ResponseEntity<UserOutDto> loginUser(@RequestBody UserLoginInDto userRequest) {
-    logger.info("Logging in user with email: {}", userRequest.getEmail());
+  public ResponseEntity<UserOutDto> loginUser(final @RequestBody UserLoginInDto userRequest) {
+    log.info("Logging in user with email: {}", userRequest.getEmail());
     UserOutDto userResponse = userService.loginUser(userRequest);
-    logger.info("User logged in successfully with email: {}", userRequest.getEmail());
+    log.info("User logged in successfully with email: {}", userRequest.getEmail());
     return new ResponseEntity<>(userResponse, HttpStatus.OK);
   }
 
@@ -88,7 +88,7 @@ public class UserController {
    */
   @GetMapping("")
   public ResponseEntity<List<UserOutDto>> getAllUsers() {
-    logger.info("Fetching all users");
+    log.info("Fetching all users");
     List<UserOutDto> userList = userService.getAllUsers();
     return new ResponseEntity<>(userList, HttpStatus.OK);
   }
@@ -105,29 +105,12 @@ public class UserController {
    * @return a {@link ResponseEntity} containing the updated user response and HTTP status
    */
   @PutMapping("/update/{id}")
-  public ResponseEntity<UpdateUserOutDto> updateUser(@PathVariable Integer id, @Valid @RequestBody UpdateUserInDto request) {
-    logger.info("Updating user with ID: {}", id);
-    UpdateUserOutDto userResponse = userService.updateUser(id, request);
-    logger.info("User updated successfully with ID: {}", id);
+  public ResponseEntity<MessageOutDto> updateUser(final @PathVariable Integer id,
+                                                  final @Valid @RequestBody UpdateUserInDto request) {
+    log.info("Updating user with ID: {}", id);
+    MessageOutDto userResponse = userService.updateUser(id, request);
+    log.info("User updated successfully with ID: {}", id);
     return new ResponseEntity<>(userResponse, HttpStatus.OK);
-  }
-
-  /**
-   * Deletes a user.
-   * <p>
-   * This endpoint deletes the user identified by the provided ID. It returns HTTP 204 No Content
-   * status upon successful deletion.
-   * </p>
-   *
-   * @param id the ID of the user to delete
-   * @return a {@link ResponseEntity} with HTTP status
-   */
-  @DeleteMapping("/delete/{id}")
-  public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
-    logger.info("Deleting user with ID: {}", id);
-    userService.deleteUser(id);
-    logger.info("User deleted successfully with ID: {}", id);
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   /**
@@ -140,8 +123,8 @@ public class UserController {
    * @return a {@link ResponseEntity} containing the user response and HTTP status
    */
   @GetMapping("/{id}")
-  public ResponseEntity<UserOutDto> getByUserId(@PathVariable Integer id) {
-    logger.info("Fetching user details with id: {}", id);
+  public ResponseEntity<UserOutDto> getByUserId(final @PathVariable Integer id) {
+    log.info("Fetching user details with id: {}", id);
     User user = userService.findUserById(id);
     UserOutDto userResponse = DtoConversion.convertUserToUserResponse(user);
     return new ResponseEntity<>(userResponse, HttpStatus.OK);
@@ -159,9 +142,46 @@ public class UserController {
    * @return a {@link ResponseEntity} containing the updated user response and HTTP status
    */
   @PutMapping("/wallet/{id}")
-  public ResponseEntity<UserOutDto> updateWalletBalance(@PathVariable Integer id, @RequestBody BigDecimal amount) {
-    logger.info("Deducting {} from user ID: {}", amount, id);
-    UserOutDto userResponse = userService.updateWalletBalance(id, amount);
+  public ResponseEntity<MessageOutDto> updateWalletBalance(final @PathVariable Integer id,
+                                                           final @RequestBody BigDecimal amount) {
+    log.info("Deducting {} from user ID: {}", amount, id);
+    MessageOutDto userResponse = userService.updateWalletBalance(id, amount);
     return new ResponseEntity<>(userResponse, HttpStatus.OK);
+  }
+
+  /**
+   * Sends a "Contact Us" email.
+   * <p>
+   * This endpoint allows users to send a contact us email with the details provided in the request body.
+   * It returns a message indicating the success or failure of the operation.
+   * </p>
+   *
+   * @param contactUsDto the request body containing contact us details
+   * @return a {@link ResponseEntity} containing the response message and HTTP status
+   */
+  @PostMapping("/contact-us")
+  public ResponseEntity<MessageOutDto> sendContactUsEmail(final @RequestBody @Valid ContactUsInDto contactUsDto) {
+    log.info("Sending contact us email from user");
+    MessageOutDto response = userService.sendContactUsEmail(contactUsDto);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  /**
+   * Adds money to a user's wallet.
+   * <p>
+   * This endpoint allows a user to add a specified amount of money to their wallet.
+   * It returns a message indicating the success of the operation.
+   * </p>
+   *
+   * @param userId the ID of the user to whom money will be added
+   * @param amount the amount of money to be added to the user's wallet
+   * @return a {@link ResponseEntity} containing the response message and HTTP status
+   */
+  @PostMapping("/{userId}/addWallet")
+  public ResponseEntity<MessageOutDto> addMoneyToWallet(final @PathVariable Integer userId,
+                                                        final @RequestBody BigDecimal amount) {
+    log.info("Adding {} to user ID: {}", amount, userId);
+    MessageOutDto response = userService.addMoneyToWallet(userId, amount);
+    return ResponseEntity.ok(response);
   }
 }

@@ -1,9 +1,9 @@
 package com.users.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.users.dto.indto.AddressInDto;
-import com.users.dto.outdto.AddressOutDto;
-import com.users.entities.Address;
+import com.users.dto.AddressInDto;
+import com.users.dto.AddressOutDto;
+import com.users.dto.MessageOutDto;
 import com.users.service.AddressService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,6 @@ import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,22 +28,56 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Unit tests for {@link AddressController}.
+ * <p>
+ * This class contains test cases for CRUD operations on the Address entity.
+ * It uses Mockito to mock dependencies and Spring's MockMvc to perform HTTP requests and verify responses.
+ * </p>
+ */
 @ExtendWith(MockitoExtension.class)
 public class AddressControllerTest {
 
+  /**
+   * Injects the AddressController instance into the test class.
+   */
   @InjectMocks
   private AddressController addressController;
 
+  /**
+   * Mocks the AddressService dependency for the controller.
+   */
   @Mock
   private AddressService addressService;
 
+  /**
+   * MockMvc instance for performing HTTP requests and verifying responses.
+   */
   private MockMvc mockMvc;
+
+  /**
+   * ObjectMapper instance for converting objects to/from JSON.
+   */
   private ObjectMapper objectMapper;
 
-  private Address address;
+  /**
+   * DTO for address input data.
+   */
   private AddressInDto addressInDto;
+
+  /**
+   * DTO for address output data.
+   */
   private AddressOutDto addressResponse;
 
+  /**
+   * DTO for response messages.
+   */
+  private MessageOutDto messageResponse;
+
+  /**
+   * Initializes MockMvc, ObjectMapper, and sets up test data.
+   */
   @BeforeEach
   void setUp() {
     mockMvc = MockMvcBuilders.standaloneSetup(addressController).build();
@@ -52,63 +85,53 @@ public class AddressControllerTest {
 
     addressInDto = new AddressInDto();
     addressInDto.setUserId(1);
-    addressInDto.setStreet("Plot No 147, Sector 74");
-    addressInDto.setCity("Indore");
+    addressInDto.setStreet("street");
+    addressInDto.setCity("city");
     addressInDto.setPincode(123456);
 
     addressResponse = new AddressOutDto();
     addressResponse.setId(1);
     addressResponse.setUserId(1);
-    addressResponse.setStreet("Plot No 147, Sector 74");
-    addressResponse.setCity("Indore");
+    addressResponse.setStreet("street");
+    addressResponse.setCity("city");
     addressResponse.setPincode(123456);
 
-    address = new Address();
-    address.setId(1);
-    address.setUserId(1);
-    address.setStreet("Plot No 147, Sector 74");
-    address.setCity("Indore");
-    address.setPincode(123456);
+    messageResponse = new MessageOutDto();
+    messageResponse.setMessage("Success");
+
   }
 
   @Test
-  void addAddress_ShouldReturnCreated() throws Exception {
-    when(addressService.addAddress(any(AddressInDto.class))).thenReturn(addressResponse);
+  void addAddressTest() throws Exception {
+    when(addressService.addAddress(any(AddressInDto.class))).thenReturn(messageResponse);
 
-    mockMvc.perform(post("/address/add")
+    mockMvc.perform(post("/address")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(addressInDto)))
       .andExpect(status().isCreated())
       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-      .andExpect(jsonPath("$.id").value(1))
-      .andExpect(jsonPath("$.userId").value(1))
-      .andExpect(jsonPath("$.street").value("Plot No 147, Sector 74"))
-      .andExpect(jsonPath("$.city").value("Indore"))
-      .andExpect(jsonPath("$.pincode").value(123456));
+      .andExpect(jsonPath("$.message").value("Success"));
   }
 
   @Test
   void updateAddressTests() throws Exception {
-    when(addressService.updateAddress(eq(1), any(AddressInDto.class))).thenReturn(addressResponse);
+    int addressId = 1;
+    when(addressService.updateAddress(eq(1), any(AddressInDto.class))).thenReturn(messageResponse);
 
-    mockMvc.perform(put("/address/update/{id}", 1)
+    mockMvc.perform(put("/address/update/" + addressId)
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(addressInDto)))
       .andExpect(status().isOk())
       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-      .andExpect(jsonPath("$.id").value(1))
-      .andExpect(jsonPath("$.userId").value(1))
-      .andExpect(jsonPath("$.street").value("Plot No 147, Sector 74"))
-      .andExpect(jsonPath("$.city").value("Indore"))
-      .andExpect(jsonPath("$.pincode").value(123456));
-
+      .andExpect(jsonPath("$.message").value("Success"));
   }
 
   @Test
   void deleteAddressTests() throws Exception {
-    doNothing().when(addressService).deleteAdderess(1);
+    int addressId = 1;
+    when(addressService.deleteAdderess(1)).thenReturn(messageResponse);
 
-    mockMvc.perform(delete("/address/delete/{id}", 1))
+    mockMvc.perform(delete("/address/delete/" + addressId))
       .andExpect(status().isNoContent());
   }
 
@@ -121,22 +144,23 @@ public class AddressControllerTest {
       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(jsonPath("$[0].id").value(1))
       .andExpect(jsonPath("$[0].userId").value(1))
-      .andExpect(jsonPath("$[0].street").value("Plot No 147, Sector 74"))
-      .andExpect(jsonPath("$[0].city").value("Indore"))
+      .andExpect(jsonPath("$[0].street").value("street"))
+      .andExpect(jsonPath("$[0].city").value("city"))
       .andExpect(jsonPath("$[0].pincode").value(123456));
   }
 
   @Test
-  void findAddressesByUserIdTests() throws Exception {
+  void findAddressesByUserId() throws Exception {
+    int userId = 1;
     when(addressService.getAddressByUserId(1)).thenReturn(Collections.singletonList(addressResponse));
 
-    mockMvc.perform(get("/address/user/{userId}", 1))
+    mockMvc.perform(get("/address/user/" + userId))
       .andExpect(status().isOk())
       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andExpect(jsonPath("$[0].id").value(1))
       .andExpect(jsonPath("$[0].userId").value(1))
-      .andExpect(jsonPath("$[0].street").value("Plot No 147, Sector 74"))
-      .andExpect(jsonPath("$[0].city").value("Indore"))
+      .andExpect(jsonPath("$[0].street").value("street"))
+      .andExpect(jsonPath("$[0].city").value("city"))
       .andExpect(jsonPath("$[0].pincode").value(123456));
   }
 }

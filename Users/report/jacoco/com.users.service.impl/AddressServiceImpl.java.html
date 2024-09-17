@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AddressServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Users</a> &gt; <a href="index.source.html" class="el_package">com.users.service.impl</a> &gt; <span class="el_source">AddressServiceImpl.java</span></div><h1>AddressServiceImpl.java</h1><pre class="source lang-java linenums">package com.users.service.impl;
 
 import com.users.constants.UserConstants;
-import com.users.dto.indto.AddressInDto;
-import com.users.dto.outdto.AddressOutDto;
-import com.users.dtoconversion.DtoConversion;
+import com.users.dto.AddressInDto;
+import com.users.dto.AddressOutDto;
+import com.users.dto.MessageOutDto;
+import com.users.converter.DtoConversion;
 import com.users.entities.Address;
-import com.users.exception.AddressNotFoundException;
+import com.users.exception.ResourceNotFoundException;
 import com.users.repositories.AddressRepository;
 import com.users.service.AddressService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,70 +24,113 @@ import java.util.List;
  * &lt;/p&gt;
  */
 @Service
-<span class="fc" id="L27">public class AddressServiceImpl implements AddressService {</span>
-<span class="fc" id="L28">  private static final Logger logger = LoggerFactory.getLogger(AddressServiceImpl.class);</span>
+<span class="fc" id="L27">@Slf4j</span>
+<span class="fc" id="L28">public class AddressServiceImpl implements AddressService {</span>
 
+  /**
+   * Service layer dependency for addressRepository-related operations.
+   */
   @Autowired
   private AddressRepository addressRepository;
 
+  /**
+   * Adds a new address to the system.
+   *
+   * @param request the address information to be added
+   * @return a message indicating the success of the operation
+   */
   @Override
-  public AddressOutDto addAddress(AddressInDto request) {
-<span class="fc" id="L35">    logger.info(&quot;Adding new address for user ID: {}&quot;, request.getUserId());</span>
-<span class="fc" id="L36">    Address address = DtoConversion.convertAddressRequestToAddress(request);</span>
-<span class="fc" id="L37">    Address saved = addressRepository.save(address);</span>
-<span class="fc" id="L38">    logger.info(&quot;Address added successfully with ID: {}&quot;, saved.getId());</span>
-<span class="fc" id="L39">    return DtoConversion.convertAddressToAddressResponse(saved);</span>
+  public MessageOutDto addAddress(final AddressInDto request) {
+<span class="fc" id="L44">    log.info(&quot;Adding new address for user ID: {}&quot;, request.getUserId());</span>
+<span class="fc" id="L45">    Address address = DtoConversion.convertAddressRequestToAddress(request);</span>
+<span class="fc" id="L46">    Address saved = addressRepository.save(address);</span>
+<span class="fc" id="L47">    log.info(&quot;Address added successfully with ID: {}&quot;, saved.getId());</span>
+<span class="fc" id="L48">    DtoConversion.convertAddressToAddressResponse(saved);</span>
+<span class="fc" id="L49">    return new MessageOutDto(UserConstants.ADDRESS_ADDED_SUCCESS);</span>
   }
 
+  /**
+   * Retrieves all addresses from the system.
+   *
+   * @return a list of all addresses
+   */
   @Override
   public List&lt;AddressOutDto&gt; getAllAddress() {
-<span class="fc" id="L44">    logger.info(&quot;Fetching all addresses&quot;);</span>
-<span class="fc" id="L45">    List&lt;Address&gt; addresses = addressRepository.findAll();</span>
-<span class="fc" id="L46">    List&lt;AddressOutDto&gt; addressOutDtoList = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L47" title="All 2 branches covered.">    for (Address address : addresses) {</span>
-<span class="fc" id="L48">      addressOutDtoList.add(DtoConversion.convertAddressToAddressResponse(address));</span>
-<span class="fc" id="L49">    }</span>
-<span class="fc" id="L50">    logger.info(&quot;Number of addresses fetched: {}&quot;, addressOutDtoList.size());</span>
-<span class="fc" id="L51">    return addressOutDtoList;</span>
+<span class="fc" id="L59">    log.info(&quot;Fetching all addresses&quot;);</span>
+<span class="fc" id="L60">    List&lt;Address&gt; addresses = addressRepository.findAll();</span>
+<span class="fc" id="L61">    List&lt;AddressOutDto&gt; addressOutDtoList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">    for (Address address : addresses) {</span>
+<span class="fc" id="L63">      addressOutDtoList.add(DtoConversion.convertAddressToAddressResponse(address));</span>
+<span class="fc" id="L64">    }</span>
+<span class="fc" id="L65">    log.info(&quot;Number of addresses fetched: {}&quot;, addressOutDtoList.size());</span>
+<span class="fc" id="L66">    return addressOutDtoList;</span>
   }
 
+  /**
+   * Retrieves addresses for a specific user.
+   *
+   * @param userId the ID of the user whose addresses are to be retrieved
+   * @return a list of addresses associated with the specified user
+   */
   @Override
-  public List&lt;AddressOutDto&gt; getAddressByUserId(Integer userId) {
-<span class="fc" id="L56">    logger.info(&quot;Fetching addresses for user ID: {}&quot;, userId);</span>
-<span class="fc" id="L57">    List&lt;Address&gt; addresses = addressRepository.findByUserId(userId);</span>
-<span class="fc" id="L58">    List&lt;AddressOutDto&gt; addressOutDtoList = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L59" title="All 2 branches covered.">    for (Address address : addresses) {</span>
-<span class="fc" id="L60">      addressOutDtoList.add(DtoConversion.convertAddressToAddressResponse(address));</span>
-<span class="fc" id="L61">    }</span>
-<span class="fc" id="L62">    logger.info(&quot;Number of addresses fetched for user ID {}: {}&quot;, userId, addressOutDtoList.size());</span>
-<span class="fc" id="L63">    return addressOutDtoList;</span>
+  public List&lt;AddressOutDto&gt; getAddressByUserId(final Integer userId) {
+<span class="fc" id="L77">    log.info(&quot;Fetching addresses for user ID: {}&quot;, userId);</span>
+<span class="fc" id="L78">    List&lt;Address&gt; addresses = addressRepository.findByUserId(userId);</span>
+<span class="fc" id="L79">    List&lt;AddressOutDto&gt; addressOutDtoList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">    for (Address address : addresses) {</span>
+<span class="fc" id="L81">      addressOutDtoList.add(DtoConversion.convertAddressToAddressResponse(address));</span>
+<span class="fc" id="L82">    }</span>
+<span class="fc" id="L83">    log.info(&quot;Number of addresses fetched for user ID {}: {}&quot;, userId, addressOutDtoList.size());</span>
+<span class="fc" id="L84">    return addressOutDtoList;</span>
   }
 
+  /**
+   * Updates an existing address.
+   *
+   * @param id      the ID of the address to be updated
+   * @param request the updated address information
+   * @return a message indicating the success of the operation
+   */
   @Override
-  public AddressOutDto updateAddress(Integer id, AddressInDto request) {
-<span class="fc" id="L68">    logger.info(&quot;Updating address with ID: {}&quot;, id);</span>
-<span class="fc" id="L69">    Address existingAddress = findAddressById(id);</span>
-<span class="fc" id="L70">    DtoConversion.convertUpdateAddressRequestToAddress(request, existingAddress);</span>
-<span class="fc" id="L71">    Address updatedAddress = addressRepository.save(existingAddress);</span>
-<span class="fc" id="L72">    logger.info(&quot;Address updated successfully with ID: {}&quot;, updatedAddress.getId());</span>
-<span class="fc" id="L73">    return DtoConversion.convertAddressToAddressResponse(updatedAddress);</span>
+  public MessageOutDto updateAddress(final Integer id, final AddressInDto request) {
+<span class="fc" id="L96">    log.info(&quot;Updating address with ID: {}&quot;, id);</span>
+<span class="fc" id="L97">    Address existingAddress = findAddressById(id);</span>
+<span class="fc" id="L98">    DtoConversion.convertUpdateAddressRequestToAddress(request, existingAddress);</span>
+<span class="fc" id="L99">    Address updatedAddress = addressRepository.save(existingAddress);</span>
+<span class="fc" id="L100">    log.info(&quot;Address updated successfully with ID: {}&quot;, updatedAddress.getId());</span>
+<span class="fc" id="L101">    DtoConversion.convertAddressToAddressResponse(updatedAddress);</span>
+<span class="fc" id="L102">    return new MessageOutDto(UserConstants.ADDRESS_UPDATE_SUCCESS);</span>
   }
 
+  /**
+   * Deletes an address by its ID.
+   *
+   * @param id the ID of the address to be deleted
+   * @return a message indicating the success of the operation
+   */
   @Override
-  public void deleteAdderess(Integer id) {
-<span class="fc" id="L78">    logger.info(&quot;Deleting address with ID: {}&quot;, id);</span>
-<span class="fc" id="L79">    Address address = findAddressById(id);</span>
-<span class="fc" id="L80">    addressRepository.delete(address);</span>
-<span class="fc" id="L81">    logger.info(&quot;Address deleted successfully with ID: {}&quot;, id);</span>
-<span class="fc" id="L82">  }</span>
+  public MessageOutDto deleteAdderess(final Integer id) {
+<span class="fc" id="L113">    log.info(&quot;Deleting address with ID: {}&quot;, id);</span>
+<span class="fc" id="L114">    Address address = findAddressById(id);</span>
+<span class="fc" id="L115">    addressRepository.delete(address);</span>
+<span class="fc" id="L116">    log.info(&quot;Address deleted successfully with ID: {}&quot;, id);</span>
+<span class="fc" id="L117">    return new MessageOutDto(UserConstants.ADDRESS_DELETION_SUCCESS);</span>
+  }
 
+  /**
+   * Finds an address by its ID.
+   *
+   * @param id the ID of the address to be found
+   * @return the address with the specified ID
+   * @throws ResourceNotFoundException if the address is not found
+   */
   @Override
-  public Address findAddressById(Integer id) {
-<span class="fc" id="L86">    logger.info(&quot;Finding address by ID: {}&quot;, id);</span>
-<span class="fc" id="L87">    return addressRepository.findById(id)</span>
-<span class="fc" id="L88">      .orElseThrow(() -&gt; {</span>
-<span class="fc" id="L89">        logger.error(&quot;Address not found with ID: {}&quot;, id);</span>
-<span class="fc" id="L90">        return new AddressNotFoundException(UserConstants.ADDRESS_NOT_FOUND);</span>
+  public Address findAddressById(final Integer id) {
+<span class="fc" id="L129">    log.info(&quot;Finding address by ID: {}&quot;, id);</span>
+<span class="fc" id="L130">    return addressRepository.findById(id)</span>
+<span class="fc" id="L131">      .orElseThrow(() -&gt; {</span>
+<span class="fc" id="L132">        log.error(&quot;Address not found with ID: {}&quot;, id);</span>
+<span class="fc" id="L133">        return new ResourceNotFoundException(UserConstants.ADDRESS_NOT_FOUND);</span>
       });
   }
 }

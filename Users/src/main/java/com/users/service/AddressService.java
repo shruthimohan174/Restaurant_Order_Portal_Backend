@@ -1,7 +1,8 @@
 package com.users.service;
 
-import com.users.dto.indto.AddressInDto;
-import com.users.dto.outdto.AddressOutDto;
+import com.users.dto.AddressInDto;
+import com.users.dto.AddressOutDto;
+import com.users.dto.MessageOutDto;
 import com.users.entities.Address;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public interface AddressService {
    * @param request the address request DTO containing the address details
    * @return the {@link AddressOutDto} DTO with details of the added address
    */
-  AddressOutDto addAddress(AddressInDto request);
+  MessageOutDto addAddress(AddressInDto request);
 
   /**
    * Retrieves all addresses.
@@ -44,14 +45,15 @@ public interface AddressService {
    * @param request the address request DTO containing updated address details
    * @return the {@link AddressOutDto} DTO with details of the updated address
    */
-  AddressOutDto updateAddress(Integer id, AddressInDto request);
+  MessageOutDto updateAddress(Integer id, AddressInDto request);
 
   /**
    * Deletes an address by its ID.
    *
    * @param id the ID of the address to delete
+   * @return the {@link MessageOutDto} entity with the specified ID
    */
-  void deleteAdderess(Integer id);
+  MessageOutDto deleteAdderess(Integer id);
 
   /**
    * Finds an address by its ID.

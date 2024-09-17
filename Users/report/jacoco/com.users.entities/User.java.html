@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Users</a> &gt; <a href="index.source.html" class="el_package">com.users.entities</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package com.users.entities;
 
+import com.users.utils.UserRole;
 import lombok.Data;
 
 import javax.persistence.Entity;
@@ -14,31 +15,56 @@ import java.math.BigDecimal;
 /**
  * Entity representing a user.
  * &lt;p&gt;
- * This entity maps to the 'users' table in the database and holds user-related information.
+ * This entity maps to the 'users' table in the database and holds user-related information,
+ * including personal details, authentication credentials, and wallet balance.
  * &lt;/p&gt;
  */
-<span class="pc bpc" id="L20" title="43 of 70 branches missed.">@Data</span>
+<span class="pc bpc" id="L22" title="12 of 70 branches missed.">@Data</span>
 @Entity
 @Table(name = &quot;users&quot;)
 public class User {
 
+  /**
+   * Unique identifier for the user.
+   */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-<span class="fc" id="L27">  private Integer id;</span>
+<span class="fc" id="L32">  private Integer id;</span>
 
-<span class="fc" id="L29">  private String firstName;</span>
+  /**
+   * The first name of the user.
+   */
+<span class="fc" id="L37">  private String firstName;</span>
 
-<span class="fc" id="L31">  private String lastName;</span>
+  /**
+   * The last name of the user.
+   */
+<span class="fc" id="L42">  private String lastName;</span>
 
-<span class="fc" id="L33">  private String email;</span>
+  /**
+   * The email address of the user, used as a unique identifier for authentication.
+   */
+<span class="fc" id="L47">  private String email;</span>
 
-<span class="fc" id="L35">  private String password;</span>
+  /**
+   * The encrypted password for the user.
+   */
+<span class="fc" id="L52">  private String password;</span>
 
-<span class="fc" id="L37">  private String phoneNumber;</span>
+  /**
+   * The phone number of the user.
+   */
+<span class="fc" id="L57">  private String phoneNumber;</span>
 
-<span class="fc" id="L39">  private BigDecimal walletBalance;</span>
+  /**
+   * The balance of the user's wallet.
+   */
+<span class="fc" id="L62">  private BigDecimal walletBalance;</span>
 
+  /**
+   * The role of the user, indicating their permissions and access level within the system.
+   */
   @Enumerated(EnumType.STRING)
-<span class="fc" id="L42">  private UserRole userRole;</span>
+<span class="fc" id="L68">  private UserRole userRole;</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

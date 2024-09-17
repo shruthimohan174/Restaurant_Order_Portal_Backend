@@ -1,12 +1,15 @@
 package com.users.service;
 
-import com.users.dto.indto.UpdateUserInDto;
-import com.users.dto.indto.UserInDto;
-import com.users.dto.indto.UserLoginInDto;
-import com.users.dto.outdto.UpdateUserOutDto;
-import com.users.dto.outdto.UserOutDto;
+import com.users.dto.UpdateUserInDto;
+import com.users.dto.UserInDto;
+import com.users.dto.UserLoginInDto;
+import com.users.dto.ContactUsInDto;
+import com.users.dto.MessageOutDto;
+import com.users.dto.UserOutDto;
 import com.users.entities.User;
+import com.users.utils.UserRole;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -22,22 +25,22 @@ public interface UserService {
    * Registers a new user.
    *
    * @param request the user request DTO containing registration details
-   * @return the {@link UserOutDto} DTO with details of the registered user
+   * @return a {@link MessageOutDto} containing details of the registration outcome
    */
-  UserOutDto registerUser(UserInDto request);
+  MessageOutDto registerUser(UserInDto request);
 
   /**
    * Logs in a user.
    *
    * @param request the user login request DTO containing login credentials
-   * @return the {@link UserOutDto} DTO with details of the logged-in user
+   * @return a {@link UserOutDto} containing details of the logged-in user
    */
   UserOutDto loginUser(UserLoginInDto request);
 
   /**
    * Retrieves all users.
    *
-   * @return a list of {@link User} entities
+   * @return a list of {@link UserOutDto} representing all users
    */
   List<UserOutDto> getAllUsers();
 
@@ -45,7 +48,7 @@ public interface UserService {
    * Finds a user by their ID.
    *
    * @param id the ID of the user to find
-   * @return the {@link User} entity with the specified ID
+   * @return a {@link User} entity with the specified ID
    */
   User findUserById(Integer id);
 
@@ -54,23 +57,41 @@ public interface UserService {
    *
    * @param id      the ID of the user to update
    * @param request the update user request DTO containing updated user details
-   * @return the {@link UpdateUserOutDto} DTO with details of the updated user
+   * @return a {@link MessageOutDto} containing details of the update outcome
    */
-  UpdateUserOutDto updateUser(Integer id, UpdateUserInDto request);
-
-  /**
-   * Deletes a user by their ID.
-   *
-   * @param id the ID of the user to delete
-   */
-  void deleteUser(Integer id);
+  MessageOutDto updateUser(Integer id, UpdateUserInDto request);
 
   /**
    * Updates the wallet balance of a user.
    *
    * @param userId the ID of the user whose wallet balance is to be updated
    * @param amount the amount to be deducted or added to the user's wallet balance
-   * @return the {@link UserOutDto} DTO with updated user details
+   * @return a {@link MessageOutDto} containing details of the wallet balance update
    */
-  UserOutDto updateWalletBalance(Integer userId, BigDecimal amount);
+  MessageOutDto updateWalletBalance(Integer userId, BigDecimal amount);
+
+  /**
+   * Adds money to a user's wallet.
+   *
+   * @param userId the ID of the user to whom money will be added
+   * @param amount the amount to be added to the user's wallet
+   * @return a {@link MessageOutDto} containing details of the wallet update
+   */
+  @Transactional
+  MessageOutDto addMoneyToWallet(Integer userId, BigDecimal amount);
+
+  /**
+   * Sends a contact us email.
+   *
+   * @param contactUsDto the contact us request DTO containing the email details
+   * @return a {@link MessageOutDto} containing details of the email sending outcome
+   */
+  MessageOutDto sendContactUsEmail(ContactUsInDto contactUsDto);
+
+  /**
+   * Validates a user's role.
+   *
+   * @param role the role to be validated
+   */
+  void validateUserRole(UserRole role);
 }

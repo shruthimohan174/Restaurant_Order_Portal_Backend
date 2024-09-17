@@ -3,7 +3,7 @@
 /**
  * This class contains constants related to user operations.
  * &lt;p&gt;
- * It includes predefined error messages used throughout the application
+ * It includes predefined messages used throughout the application
  * for user-related operations. The class is marked final to prevent subclassing
  * and has a private constructor to prevent instantiation.
  * &lt;/p&gt;
@@ -15,19 +15,80 @@ public final class UserConstants {
    */
   public static final String USER_ALREADY_EXISTS = &quot;User already exists with this email.&quot;;
 
-  /** Error message indicating invalid email or password. */
+  /**
+   * Error message indicating invalid email or password.
+   */
   public static final String INVALID_CREDENTIALS = &quot;Invalid email or password&quot;;
 
-  /** Error message indicating that the user does not exist. */
+  /**
+   * Error message indicating that the user does not exist.
+   */
   public static final String USER_NOT_FOUND = &quot;User does not exist&quot;;
 
-  /** Error message indicating that no address was found with the given ID. */
+  /**
+   * Error message indicating that no address was found with the given ID.
+   */
   public static final String ADDRESS_NOT_FOUND = &quot;No Address found with this id&quot;;
 
   /**
    * Error message indicating insufficient balance.
    */
-  public static final String INSUFFICIENT_BALANCE = &quot;Insufficient Balance&quot;;
+  public static final String INSUFFICIENT_BALANCE = &quot;Insufficient balance in wallet to place the order.&quot;;
+
+  /**
+   * Message indicating that an email was sent successfully.
+   */
+  public static final String EMAIL_SENT_SUCCESS = &quot;Email sent successfully.&quot;;
+
+  /**
+   * Message indicating that sending an email failed.
+   */
+  public static final String EMAIL_SENT_FAILURE = &quot;Failed to send email.&quot;;
+
+  /**
+   * Error message indicating an invalid user role.
+   */
+  public static final String INVALID_USER_ROLE = &quot;Invalid user role. Must be either CUSTOMER or RESTAURANT_OWNER.&quot;;
+
+  /**
+   * Error message indicating that the amount must be greater than zero.
+   */
+  public static final String INVALID_AMOUNT = &quot;Amount must be greater than zero.&quot;;
+
+  /**
+   * Message indicating successful user registration.
+   */
+  public static final String USER_REGISTRATION_SUCCESS = &quot;User registered successfully.&quot;;
+
+  /**
+   * Message indicating successful user profile update.
+   */
+  public static final String USER_PROFILE_UPDATE_SUCCESS = &quot;User profile updated successfully.&quot;;
+
+  /**
+   * Message indicating successful addition of an address.
+   */
+  public static final String ADDRESS_ADDED_SUCCESS = &quot;Address added successfully.&quot;;
+
+  /**
+   * Message indicating successful update of an address.
+   */
+  public static final String ADDRESS_UPDATE_SUCCESS = &quot;Address updated successfully.&quot;;
+
+  /**
+   * Message indicating successful deletion of an address.
+   */
+  public static final String ADDRESS_DELETION_SUCCESS = &quot;Address deleted successfully.&quot;;
+
+  /**
+   * Message indicating successful addition of funds to the wallet.
+   */
+  public static final String WALLET_ADDITION_SUCCESS = &quot;Funds added to wallet successfully.&quot;;
+
+  /**
+   * Message indicating successful withdrawal of funds from the wallet.
+   */
+  public static final String WALLET_FUND_WITHDRAWAL_SUCCESS = &quot;Funds withdrawn from wallet successfully.&quot;;
 
   /**
    * Private constructor to prevent instantiation of the utility class.
@@ -38,8 +99,8 @@ public final class UserConstants {
    *
    * @throws UnsupportedOperationException if an attempt is made to instantiate the class
    */
-<span class="nc" id="L41">  private UserConstants() {</span>
-<span class="nc" id="L42">    throw new UnsupportedOperationException(&quot;Utility class&quot;);</span>
+<span class="nc" id="L102">  private UserConstants() {</span>
+<span class="nc" id="L103">    throw new UnsupportedOperationException(&quot;Utility class&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
