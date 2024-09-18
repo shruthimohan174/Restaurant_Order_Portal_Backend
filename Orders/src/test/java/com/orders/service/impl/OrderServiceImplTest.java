@@ -225,45 +225,6 @@ class OrderServiceImplTest {
     verify(userClient, times(1)).updateWalletBalance(order.getUserId(), order.getTotalPrice());
   }
 
-//  @Test
-//  void getOrdersByUserIdTests() {
-//    Integer userId = 1;
-//
-//    Order order = new Order();
-//    order.setId(1);
-//    order.setOrderStatus(OrderStatus.PLACED);
-//    order.setTotalPrice(BigDecimal.valueOf(100));
-//    order.setUserId(userId);
-//
-//    UserOutDto userOutDto = new UserOutDto();
-//    userOutDto.setId(userId);
-//    userOutDto.setUserRole(UserRole.CUSTOMER);
-//
-//    OrderOutDto expectedOrderOutDto = new OrderOutDto();
-//    expectedOrderOutDto.setId(order.getId());
-//    expectedOrderOutDto.setOrderStatus(order.getOrderStatus());
-//    expectedOrderOutDto.setTotalPrice(order.getTotalPrice());
-//
-//    when(userClient.getUserById(userId)).thenReturn(userOutDto);
-//    when(orderRepository.findByUserId(userId)).thenReturn(Collections.singletonList(order));
-//  }
-//
-//
-//  @Test
-//  void testGetOrdersByRestaurantId() {
-//    Integer restaurantId = 1;
-//    FoodItemOutDto restaurantDto = new FoodItemOutDto();
-//    restaurantDto.setId(restaurantId);
-//    when(restaurantClient.getRestaurantById(restaurantId)).thenReturn(restaurantDto);
-//
-//    Order order = new Order();
-//    order.setId(1);
-//    order.setOrderStatus(OrderStatus.PLACED);
-//    order.setTotalPrice(BigDecimal.valueOf(100));
-//    when(orderRepository.findByRestaurantId(restaurantId)).thenReturn(Collections.singletonList(order));
-//
-//  }
-//
   @Test
   void testCalculateTotalPrice() {
     List<CartItemDto> cartItems = Arrays.asList(
@@ -300,12 +261,6 @@ class OrderServiceImplTest {
 
     assertThrows(ResourceConflictException.class, () -> orderService.cancelOrder(order.getId()));
   }
-//
-//  @Test
-//  void getOrdersByUserIdSuccessful() {
-//    when(userClient.getUserById(orderInDto.getUserId())).thenReturn(userOutDto);
-//    when(orderRepository.findByUserId(orderInDto.getUserId())).thenReturn(Collections.singletonList(order));
-//  }
 
   @Test
   void markOrderAsCompletedSuccessful() {
@@ -391,55 +346,6 @@ class OrderServiceImplTest {
     expectedDto.setRestaurantId(order.getRestaurantId());
     expectedDto.setOrderTime(order.getOrderTime());
   }
-
-//  @Test
-//  void testGetOrdersByUserIdSuccess() {
-//    Integer userId = 1;
-//    UserOutDto userOutDto = new UserOutDto();
-//    userOutDto.setId(userId);
-//    userOutDto.setUserRole(UserRole.CUSTOMER);
-//
-//    Order order1 = new Order();
-//    order1.setId(1);
-//    order1.setUserId(userId);
-//    Order order2 = new Order();
-//    order2.setId(2);
-//    order2.setUserId(userId);
-//
-//  }
-
-//  @Test
-//  void testGetOrdersByUserIdUserNotCustomer() {
-//    Integer userId = 1;
-//    UserOutDto userOutDto = new UserOutDto();
-//    userOutDto.setId(userId);
-//    userOutDto.setUserRole(UserRole.RESTAURANT_OWNER);
-//
-//    when(userClient.getUserById(userId)).thenReturn(userOutDto);
-//
-//    assertThrows(AccessDeniedException.class, () -> orderService.getOrdersByUserId(userId));
-//    verify(userClient).getUserById(userId);
-//    verify(orderRepository, never()).findByUserId(anyInt());
-//  }
-
-//  @Test
-//  void testGetOrdersByRestaurantIdSuccess() {
-//    Integer restaurantId = 1;
-//    FoodItemOutDto restaurantDto = new FoodItemOutDto();
-//    restaurantDto.setId(restaurantId);
-//
-//    Order order1 = new Order();
-//    order1.setId(1);
-//    order1.setRestaurantId(restaurantId);
-//    Order order2 = new Order();
-//    order2.setId(2);
-//    order2.setRestaurantId(restaurantId);
-//
-//    List<Order> orders = Arrays.asList(order1, order2);
-//
-//    when(restaurantClient.getRestaurantById(restaurantId)).thenReturn(restaurantDto);
-//    when(orderRepository.findByRestaurantId(restaurantId)).thenReturn(orders);
-//  }
 
   @Test
   void testConvertOrderToOrderOutDtoSuccess() throws JsonProcessingException {
