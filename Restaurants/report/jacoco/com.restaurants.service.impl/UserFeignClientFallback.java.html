@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserFeignClientFallback.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Restaurants</a> &gt; <a href="index.source.html" class="el_package">com.restaurants.service.impl</a> &gt; <span class="el_source">UserFeignClientFallback.java</span></div><h1>UserFeignClientFallback.java</h1><pre class="source lang-java linenums">package com.restaurants.service.impl;
+
+import com.restaurants.dto.UserOutDto;
+import com.restaurants.service.UserFeignClient;
+import com.restaurants.utils.UserRole;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Fallback implementation of {@link UserFeignClient} to handle scenarios where the User service is unavailable.
+ * &lt;p&gt;
+ * This class provides default responses for the methods in {@link UserFeignClient} when the main service fails.
+ * &lt;/p&gt;
+ */
+<span class="nc" id="L14">@Slf4j</span>
+<span class="nc" id="L15">public class UserFeignClientFallback implements UserFeignClient {</span>
+
+  /**
+   * Fallback method for retrieving a user by their ID.
+   * &lt;p&gt;
+   * Provides a default response when the User service is down or unreachable.
+   * &lt;/p&gt;
+   *
+   * @param id The ID of the user.
+   * @return A {@link UserOutDto} object with default values.
+   */
+  @Override
+  public UserOutDto getUserById(final Integer id) {
+<span class="nc" id="L28">    log.error(&quot;Fallback triggered for getUserById with id: {}&quot;, id);</span>
+<span class="nc" id="L29">    UserOutDto fallbackUser = new UserOutDto();</span>
+<span class="nc" id="L30">    fallbackUser.setId(id);</span>
+<span class="nc" id="L31">    fallbackUser.setUserRole(UserRole.RESTAURANT_OWNER);</span>
+<span class="nc" id="L32">    return fallbackUser;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

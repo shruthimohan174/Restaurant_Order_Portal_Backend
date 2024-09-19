@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Users</a> &gt; <a href="index.source.html" class="el_package">com.users.service.impl</a> &gt; <span class="el_source">EmailServiceImpl.java</span></div><h1>EmailServiceImpl.java</h1><pre class="source lang-java linenums">package com.users.service.impl;
+
+import com.users.constants.UserConstants;
+import com.users.exception.InvalidRequestException;
+import com.users.service.EmailService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailSendException;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.util.List;
+
+/**
+ * Implementation of the {@link EmailService} interface.
+ * &lt;p&gt;
+ * Provides functionality to send emails, specifically for &quot;Contact Us&quot; inquiries.
+ * Uses Spring's {@link JavaMailSender} to handle the actual sending of emails.
+ * &lt;/p&gt;
+ */
+@Service
+<span class="fc" id="L26">@Slf4j</span>
+<span class="fc" id="L27">public class EmailServiceImpl implements EmailService {</span>
+
+  /**
+   * {@link JavaMailSender} used to send emails.
+   * &lt;p&gt;
+   * This is auto-wired by Spring and used to create and send {@link MimeMessage} instances.
+   * &lt;/p&gt;
+   */
+  @Autowired
+  private JavaMailSender mailSender;
+
+  /**
+   * Email address used as the sender in the emails.
+   * &lt;p&gt;
+   * This value is injected from application properties using the key {@code spring.mail.username}.
+   * &lt;/p&gt;
+   */
+  @Value(&quot;${spring.mail.username}&quot;)
+  private String senderEmail;
+
+  /**
+   * Name of the support team or individual handling the email inquiries.
+   * &lt;p&gt;
+   * This value is injected from application properties using the key {@code support.contact.name}.
+   * &lt;/p&gt;
+   */
+  @Value(&quot;${support.contact.name}&quot;)
+  private String supportName;
+
+  /**
+   * Contact information for the support team or individual.
+   * &lt;p&gt;
+   * This value is injected from application properties using the key {@code support.contact.info}.
+   * &lt;/p&gt;
+   */
+  @Value(&quot;${support.contact.info}&quot;)
+  private String supportContactInfo;
+
+  /**
+   * Sends an email in response to a &quot;Contact Us&quot; form submission.
+   * &lt;p&gt;
+   * The email is sent to the specified recipients with the provided subject and message.
+   * The sender and contact information are configured through application properties.
+   * &lt;/p&gt;
+   *
+   * @param recipientEmails a list of email addresses of the recipients
+   * @param subject         the subject of the email
+   * @param customerName    the name of the customer sending the message
+   * @param customMessage   the message content to be included in the email
+   */
+  @Override
+  public void sendContactUsEmail(final List&lt;String&gt; recipientEmails, final String subject,
+                                 final String customerName, final String customMessage) {
+    try {
+<span class="fc" id="L81">      MimeMessage mimeMessage = mailSender.createMimeMessage();</span>
+<span class="fc" id="L82">      MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);</span>
+
+<span class="fc" id="L84">      String emailBody = &quot;Hello &quot; + customerName + &quot;!\n\n&quot;</span>
+        + customMessage + &quot;\n\n&quot;
+        + &quot;Best regards,\n&quot;
+        + supportName + &quot;\n&quot;
+        + supportContactInfo;
+
+<span class="fc" id="L90">      helper.setFrom(senderEmail);</span>
+<span class="fc" id="L91">      helper.setSubject(subject);</span>
+<span class="fc" id="L92">      helper.setText(emailBody);</span>
+
+<span class="fc bfc" id="L94" title="All 2 branches covered.">      for (String recipientEmail : recipientEmails) {</span>
+<span class="fc" id="L95">        helper.setTo(recipientEmail);</span>
+<span class="fc" id="L96">        mailSender.send(mimeMessage);</span>
+<span class="fc" id="L97">        log.info(&quot;Contact Us email sent to {} with subject '{}'&quot;, recipientEmail, subject);</span>
+<span class="fc" id="L98">      }</span>
+<span class="fc" id="L99">    } catch (MessagingException | MailSendException e) {</span>
+<span class="fc" id="L100">      log.error(&quot;Failed to send Contact Us email with subject '{}'&quot;, subject, e);</span>
+<span class="fc" id="L101">      throw new InvalidRequestException(UserConstants.EMAIL_SENT_FAILURE);</span>
+<span class="fc" id="L102">    }</span>
+<span class="fc" id="L103">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

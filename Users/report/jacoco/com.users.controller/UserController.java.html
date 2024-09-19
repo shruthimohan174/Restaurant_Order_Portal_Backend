@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Users</a> &gt; <a href="index.source.html" class="el_package">com.users.controller</a> &gt; <span class="el_source">UserController.java</span></div><h1>UserController.java</h1><pre class="source lang-java linenums">package com.users.controller;
+
+import com.users.dto.UpdateUserInDto;
+import com.users.dto.UserInDto;
+import com.users.dto.UserLoginInDto;
+import com.users.dto.ContactUsInDto;
+import com.users.dto.MessageOutDto;
+import com.users.dto.UserOutDto;
+import com.users.converter.DtoConversion;
+import com.users.entities.User;
+import com.users.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+import java.math.BigDecimal;
+import java.util.List;
+
+/**
+ * REST controller for managing users.
+ * &lt;p&gt;
+ * This controller provides endpoints to register, login, update, delete, and fetch user details.
+ * It interacts with the {@link UserService} to perform these operations.
+ * &lt;/p&gt;
+ */
+@RestController
+@RequestMapping(&quot;/user&quot;)
+<span class="fc" id="L37">@Slf4j</span>
+<span class="fc" id="L38">public class UserController {</span>
+  /**
+   * Service layer dependency for user-related operations.
+   */
+  @Autowired
+  private UserService userService;
+
+  /**
+   * Registers a new user.
+   * &lt;p&gt;
+   * This endpoint creates a new user based on the provided details in the request body.
+   * It returns the created user's details with HTTP 201 Created status upon successful registration.
+   * &lt;/p&gt;
+   *
+   * @param userRequest the request body containing user registration details
+   * @return a {@link ResponseEntity} containing the user response and HTTP status
+   */
+  @PostMapping(&quot;/register&quot;)
+  public ResponseEntity&lt;MessageOutDto&gt; registerUser(final @Valid @RequestBody UserInDto userRequest) {
+<span class="fc" id="L57">    log.info(&quot;Registering user with email: {}&quot;, userRequest.getEmail());</span>
+<span class="fc" id="L58">    MessageOutDto userResponse = userService.registerUser(userRequest);</span>
+<span class="fc" id="L59">    log.info(&quot;User registered successfully with email: {}&quot;, userRequest.getEmail());</span>
+<span class="fc" id="L60">    return new ResponseEntity&lt;&gt;(userResponse, HttpStatus.CREATED);</span>
+  }
+
+  /**
+   * Logs in a user.
+   * &lt;p&gt;
+   * This endpoint authenticates the user based on the provided login details in the request body.
+   * It returns the user's details with HTTP 200 OK status upon successful login.
+   * &lt;/p&gt;
+   *
+   * @param userRequest the request body containing user login details
+   * @return a {@link ResponseEntity} containing the user response and HTTP status
+   */
+  @PostMapping(&quot;/login&quot;)
+  public ResponseEntity&lt;UserOutDto&gt; loginUser(final @RequestBody UserLoginInDto userRequest) {
+<span class="fc" id="L75">    log.info(&quot;Logging in user with email: {}&quot;, userRequest.getEmail());</span>
+<span class="fc" id="L76">    UserOutDto userResponse = userService.loginUser(userRequest);</span>
+<span class="fc" id="L77">    log.info(&quot;User logged in successfully with email: {}&quot;, userRequest.getEmail());</span>
+<span class="fc" id="L78">    return new ResponseEntity&lt;&gt;(userResponse, HttpStatus.OK);</span>
+  }
+
+  /**
+   * Retrieves all users.
+   * &lt;p&gt;
+   * This endpoint fetches and returns a list of all users with HTTP 200 OK status.
+   * &lt;/p&gt;
+   *
+   * @return a {@link ResponseEntity} containing a list of users and HTTP status
+   */
+  @GetMapping(&quot;&quot;)
+  public ResponseEntity&lt;List&lt;UserOutDto&gt;&gt; getAllUsers() {
+<span class="fc" id="L91">    log.info(&quot;Fetching all users&quot;);</span>
+<span class="fc" id="L92">    List&lt;UserOutDto&gt; userList = userService.getAllUsers();</span>
+<span class="fc" id="L93">    return new ResponseEntity&lt;&gt;(userList, HttpStatus.OK);</span>
+  }
+
+  /**
+   * Updates an existing user's details.
+   * &lt;p&gt;
+   * This endpoint updates the user identified by the provided ID with the details
+   * in the request body. It returns the updated user details with HTTP 200 OK status.
+   * &lt;/p&gt;
+   *
+   * @param id      the ID of the user to update
+   * @param request the request body containing updated user details
+   * @return a {@link ResponseEntity} containing the updated user response and HTTP status
+   */
+  @PutMapping(&quot;/update/{id}&quot;)
+  public ResponseEntity&lt;MessageOutDto&gt; updateUser(final @PathVariable Integer id,
+                                                  final @Valid @RequestBody UpdateUserInDto request) {
+<span class="nc" id="L110">    log.info(&quot;Updating user with ID: {}&quot;, id);</span>
+<span class="nc" id="L111">    MessageOutDto userResponse = userService.updateUser(id, request);</span>
+<span class="nc" id="L112">    log.info(&quot;User updated successfully with ID: {}&quot;, id);</span>
+<span class="nc" id="L113">    return new ResponseEntity&lt;&gt;(userResponse, HttpStatus.OK);</span>
+  }
+
+  /**
+   * Retrieves a user by ID.
+   * &lt;p&gt;
+   * This endpoint fetches user details by the provided ID and returns them in the response body with HTTP 200 OK.
+   * &lt;/p&gt;
+   *
+   * @param id the ID of the user to fetch
+   * @return a {@link ResponseEntity} containing the user response and HTTP status
+   */
+  @GetMapping(&quot;/{id}&quot;)
+  public ResponseEntity&lt;UserOutDto&gt; getByUserId(final @PathVariable Integer id) {
+<span class="fc" id="L127">    log.info(&quot;Fetching user details with id: {}&quot;, id);</span>
+<span class="fc" id="L128">    User user = userService.findUserById(id);</span>
+<span class="fc" id="L129">    UserOutDto userResponse = DtoConversion.convertUserToUserResponse(user);</span>
+<span class="fc" id="L130">    return new ResponseEntity&lt;&gt;(userResponse, HttpStatus.OK);</span>
+  }
+
+  /**
+   * Updates the wallet balance of a user.
+   * &lt;p&gt;
+   * This endpoint updates the wallet balance for the user identified by the provided ID.
+   * It returns the updated user details with HTTP 200 OK status.
+   * &lt;/p&gt;
+   *
+   * @param id     the ID of the user whose wallet balance is to be updated
+   * @param amount the amount to be deducted or added to the user's wallet balance
+   * @return a {@link ResponseEntity} containing the updated user response and HTTP status
+   */
+  @PutMapping(&quot;/wallet/{id}&quot;)
+  public ResponseEntity&lt;MessageOutDto&gt; updateWalletBalance(final @PathVariable Integer id,
+                                                           final @RequestBody BigDecimal amount) {
+<span class="fc" id="L147">    log.info(&quot;Deducting {} from user ID: {}&quot;, amount, id);</span>
+<span class="fc" id="L148">    MessageOutDto userResponse = userService.updateWalletBalance(id, amount);</span>
+<span class="fc" id="L149">    return new ResponseEntity&lt;&gt;(userResponse, HttpStatus.OK);</span>
+  }
+
+  /**
+   * Sends a &quot;Contact Us&quot; email.
+   * &lt;p&gt;
+   * This endpoint allows users to send a contact us email with the details provided in the request body.
+   * It returns a message indicating the success or failure of the operation.
+   * &lt;/p&gt;
+   *
+   * @param contactUsDto the request body containing contact us details
+   * @return a {@link ResponseEntity} containing the response message and HTTP status
+   */
+  @PostMapping(&quot;/contact-us&quot;)
+  public ResponseEntity&lt;MessageOutDto&gt; sendContactUsEmail(final @RequestBody @Valid ContactUsInDto contactUsDto) {
+<span class="fc" id="L164">    log.info(&quot;Sending contact us email from user&quot;);</span>
+<span class="fc" id="L165">    MessageOutDto response = userService.sendContactUsEmail(contactUsDto);</span>
+<span class="fc" id="L166">    return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+  }
+
+  /**
+   * Adds money to a user's wallet.
+   * &lt;p&gt;
+   * This endpoint allows a user to add a specified amount of money to their wallet.
+   * It returns a message indicating the success of the operation.
+   * &lt;/p&gt;
+   *
+   * @param userId the ID of the user to whom money will be added
+   * @param amount the amount of money to be added to the user's wallet
+   * @return a {@link ResponseEntity} containing the response message and HTTP status
+   */
+  @PostMapping(&quot;/{userId}/addWallet&quot;)
+  public ResponseEntity&lt;MessageOutDto&gt; addMoneyToWallet(final @PathVariable Integer userId,
+                                                        final @RequestBody BigDecimal amount) {
+<span class="nc" id="L183">    log.info(&quot;Adding {} to user ID: {}&quot;, amount, userId);</span>
+<span class="nc" id="L184">    MessageOutDto response = userService.addMoneyToWallet(userId, amount);</span>
+<span class="nc" id="L185">    return ResponseEntity.ok(response);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

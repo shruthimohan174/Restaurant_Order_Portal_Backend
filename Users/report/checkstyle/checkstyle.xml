@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="9.3">
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\config\CorsConfig.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\constants\UserConstants.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\controller\AddressController.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\controller\UserController.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\converter\DtoConversion.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\dto\AddressInDto.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\dto\AddressOutDto.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\dto\ContactUsInDto.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\dto\MessageOutDto.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\dto\UpdateUserInDto.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\dto\UpdateUserOutDto.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\dto\UserInDto.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\dto\UserLoginInDto.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\dto\UserOutDto.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\entities\Address.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\entities\User.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\exception\GlobalExceptionHandler.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\exception\InvalidRequestException.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\exception\ResourceConflictException.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\exception\ResourceNotFoundException.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\exception\UnauthorizedAccessException.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\repositories\AddressRepository.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\repositories\UserRepository.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\service\AddressService.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\service\EmailService.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\service\impl\AddressServiceImpl.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\service\impl\EmailServiceImpl.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\service\impl\UserServiceImpl.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\service\UserService.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\UsersApplication.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\utils\PasswordEncodingDecodingUtils.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\java\com\users\utils\UserRole.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\controller\AddressControllerTest.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\controller\UserControllerTest.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\dto\AddressInDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\dto\AddressOutDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\dto\ContactUsInDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\dto\UpdateUserInDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\dto\UpdateUserOutDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\dto\UserInDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\dto\UserLoginInDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\dto\UserOutDtoTest.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\entities\AddressTests.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\entities\UserTests.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\service\impl\AddressServiceImplTest.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\service\impl\EmailServiceImplTests.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\service\impl\UserServiceImplTest.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\test\java\com\users\UsersApplicationTests.java">
+</file>
+<file name="D:\Capstone\backend\Users\src\main\resources\application.properties">
+</file>
+</checkstyle>

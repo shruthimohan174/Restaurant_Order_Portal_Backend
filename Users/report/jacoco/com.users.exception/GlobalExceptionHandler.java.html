@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Users</a> &gt; <a href="index.source.html" class="el_package">com.users.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.users.exception;
+
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * Global exception handler for managing various exceptions across the application.
+ * &lt;p&gt;
+ * This class uses Spring's {@link ControllerAdvice} to handle exceptions globally
+ * and return standardized error responses for different types of exceptions.
+ * &lt;/p&gt;
+ */
+@ControllerAdvice
+<span class="fc" id="L28">public class GlobalExceptionHandler {</span>
+
+  /**
+   * Handles {@link ResourceConflictException} and returns a standardized error response with HTTP status 409 (Conflict).
+   *
+   * @param ex     the exception to handle
+   * @param request the HTTP request
+   * @return an {@link ErrorResponse} containing error details
+   */
+  @ExceptionHandler(ResourceConflictException.class)
+  @ResponseStatus(HttpStatus.CONFLICT)
+  @ResponseBody
+  public final ErrorResponse handleConflictException(final ResourceConflictException ex,
+                                                     final HttpServletRequest request) {
+<span class="nc" id="L42">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link UnauthorizedAccessException} and returns a standardized error response with HTTP status 401 (Unauthorized).
+   *
+   * @param ex     the exception to handle
+   * @param request the HTTP request
+   * @return an {@link ErrorResponse} containing error details
+   */
+  @ExceptionHandler(UnauthorizedAccessException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  public ErrorResponse handleUnauthorizedException(final UnauthorizedAccessException ex,
+                                                   final HttpServletRequest request) {
+<span class="nc" id="L57">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.UNAUTHORIZED.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link MethodArgumentNotValidException} and returns a standardized error response with HTTP status 400 (Bad Request).
+   * &lt;p&gt;
+   * This method extracts validation error messages from the exception and includes them in the error response.
+   * &lt;/p&gt;
+   *
+   * @param ex     the exception to handle
+   * @param request the HTTP request
+   * @return an {@link ErrorResponse} containing error details
+   */
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorResponse handleValidationException(final MethodArgumentNotValidException ex,
+                                                 final HttpServletRequest request) {
+<span class="nc" id="L75">    List&lt;String&gt; errors = ex.getBindingResult()</span>
+<span class="nc" id="L76">      .getFieldErrors()</span>
+<span class="nc" id="L77">      .stream()</span>
+<span class="nc" id="L78">      .map(FieldError::getDefaultMessage)</span>
+<span class="nc" id="L79">      .collect(Collectors.toList());</span>
+
+<span class="nc" id="L81">    String errorMessage = String.join(&quot;,&quot;, errors);</span>
+<span class="nc" id="L82">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), &quot;Validation failed: &quot; + errorMessage,</span>
+<span class="nc" id="L83">      request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link ResourceNotFoundException} and returns a standardized error response with HTTP status 404 (Not Found).
+   *
+   * @param ex     the exception to handle
+   * @param request the HTTP request
+   * @return an {@link ErrorResponse} containing error details
+   */
+  @ExceptionHandler(ResourceNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public ErrorResponse handleResourceNotFoundException(final ResourceNotFoundException ex,
+                                                       final HttpServletRequest request) {
+<span class="nc" id="L98">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link InvalidRequestException} and returns a standardized error response with HTTP status 400 (Bad Request).
+   *
+   * @param ex     the exception to handle
+   * @param request the HTTP request
+   * @return an {@link ErrorResponse} containing error details
+   */
+  @ExceptionHandler(InvalidRequestException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public final ErrorResponse handleInvalidRequestException(final InvalidRequestException ex,
+                                                           final HttpServletRequest request) {
+<span class="nc" id="L113">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link HttpMessageNotReadableException} and returns a standardized error response with HTTP status 400 (Bad Request).
+   * &lt;p&gt;
+   * This method provides a more detailed error message if the exception is caused by an invalid format for an enum value.
+   * &lt;/p&gt;
+   *
+   * @param ex     the exception to handle
+   * @param request the HTTP request
+   * @return an {@link ErrorResponse} containing error details
+   */
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public ErrorResponse handleHttpMessageNotReadableException(final HttpMessageNotReadableException ex,
+                                                             final HttpServletRequest request) {
+<span class="nc" id="L131">    String errorMessage = &quot;Invalid input format&quot;;</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">    if (ex.getCause() instanceof InvalidFormatException) {</span>
+<span class="nc" id="L133">      InvalidFormatException ife = (InvalidFormatException) ex.getCause();</span>
+<span class="nc bnc" id="L134" title="All 4 branches missed.">      if (ife.getTargetType() != null &amp;&amp; ife.getTargetType().isEnum()) {</span>
+<span class="nc" id="L135">        errorMessage = String.format(&quot;Invalid value for %s. Accepted values are: %s&quot;,</span>
+<span class="nc" id="L136">          ife.getPath().get(ife.getPath().size() - 1).getFieldName(),</span>
+<span class="nc" id="L137">          String.join(&quot;, &quot;, getEnumValues(ife.getTargetType())));</span>
+      }
+    }
+<span class="nc" id="L140">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), errorMessage, request.getRequestURI());</span>
+  }
+
+  /**
+   * Represents an error response returned to the client.
+   */
+<span class="nc bnc" id="L146" title="All 32 branches missed.">  @Data</span>
+<span class="nc" id="L147">  @AllArgsConstructor</span>
+  public static class ErrorResponse {
+    /**
+     * The timestamp when the error occurred.
+     * This is useful for logging and debugging to determine when the error happened.
+     */
+<span class="nc" id="L153">    private LocalDateTime timestamp;</span>
+
+    /**
+     * The HTTP status code associated with the error.
+     * This code indicates the type of error that occurred (e.g., 404 for Not Found, 500 for Internal Server Error).
+     */
+<span class="nc" id="L159">    private int status;</span>
+
+    /**
+     * A descriptive message explaining the error.
+     * This message provides more details about the error to help understand what went wrong.
+     */
+<span class="nc" id="L165">    private String message;</span>
+
+    /**
+     * The path or endpoint where the error occurred.
+     * This helps in identifying which part of the application triggered the error.
+     */
+<span class="nc" id="L171">    private String path;</span>
+  }
+
+
+  /**
+   * Retrieves the list of enum values for a given enum class.
+   *
+   * @param enumClass the enum class
+   * @return a list of enum values as strings
+   */
+  private List&lt;String&gt; getEnumValues(final Class&lt;?&gt; enumClass) {
+<span class="nc" id="L182">    return java.util.Arrays.stream(enumClass.getEnumConstants())</span>
+<span class="nc" id="L183">      .map(Object::toString)</span>
+<span class="nc" id="L184">      .collect(Collectors.toList());</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
