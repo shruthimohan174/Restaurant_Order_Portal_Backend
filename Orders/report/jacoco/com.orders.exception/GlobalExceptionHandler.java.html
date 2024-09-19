@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Orders</a> &gt; <a href="index.source.html" class="el_package">com.orders.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.orders.exception;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Global exception handler for managing application-wide exceptions.
+ * &lt;p&gt;
+ * This class handles various types of exceptions thrown in the application, including custom exceptions and validation errors.
+ * &lt;/p&gt;
+ */
+@ControllerAdvice
+<span class="fc" id="L29">public class GlobalExceptionHandler {</span>
+
+  /**
+   * Handles {@link ResourceNotFoundException} and returns an appropriate error response.
+   *
+   * @param ex The exception that was thrown.
+   * @param request The HTTP request that resulted in the exception.
+   * @return An {@link ErrorResponse} with details about the error.
+   */
+  @ExceptionHandler(ResourceNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public final ErrorResponse handleResourceNotFoundException(final ResourceNotFoundException ex,
+                                                             final HttpServletRequest request) {
+<span class="nc" id="L43">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link ResourceConflictException} and returns an appropriate error response.
+   *
+   * @param ex The exception that was thrown.
+   * @param request The HTTP request that resulted in the exception.
+   * @return An {@link ErrorResponse} with details about the error.
+   */
+  @ExceptionHandler(ResourceConflictException.class)
+  @ResponseStatus(HttpStatus.CONFLICT)
+  @ResponseBody
+  public final ErrorResponse handleConflictException(final ResourceConflictException ex, final HttpServletRequest request) {
+<span class="nc" id="L57">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link MethodArgumentNotValidException} and returns validation error details.
+   *
+   * @param ex The exception that was thrown.
+   * @param request The HTTP request that resulted in the exception.
+   * @return An {@link ErrorResponse} with details about the validation errors.
+   */
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorResponse handleValidationException(final MethodArgumentNotValidException ex, final HttpServletRequest request) {
+<span class="nc" id="L71">    List&lt;String&gt; errors = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">    for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {</span>
+<span class="nc" id="L73">      errors.add(fieldError.getDefaultMessage());</span>
+<span class="nc" id="L74">    }</span>
+
+<span class="nc" id="L76">    String errorMessage = String.join(&quot;, &quot;, errors);</span>
+<span class="nc" id="L77">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), &quot;Validation failed: &quot; + errorMessage,</span>
+<span class="nc" id="L78">      request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles generic exceptions and returns a generic error response.
+   *
+   * @param ex The exception that was thrown.
+   * @param request The HTTP request that resulted in the exception.
+   * @return An {@link ErrorResponse} with details about the error.
+   */
+  @ExceptionHandler(Exception.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ResponseBody
+  public final ErrorResponse handleGenericException(final Exception ex, final HttpServletRequest request) {
+<span class="nc" id="L92">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.value(),</span>
+<span class="nc" id="L93">      &quot;An error occurred. Please try again later.&quot;, request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link AccessDeniedException} and returns an appropriate error response.
+   *
+   * @param ex The exception that was thrown.
+   * @param request The HTTP request that resulted in the exception.
+   * @return An {@link ErrorResponse} with details about the error.
+   */
+  @ExceptionHandler(AccessDeniedException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  @ResponseBody
+  public final ErrorResponse handleInvalidRequestException(final AccessDeniedException ex, final HttpServletRequest request) {
+<span class="nc" id="L107">    return new ErrorResponse(LocalDateTime.now(), HttpStatus.FORBIDDEN.value(), ex.getMessage(), request.getRequestURI());</span>
+  }
+
+  /**
+   * Handles {@link FeignException} and returns an appropriate error response.
+   * &lt;p&gt;
+   * Extracts and processes the error message from the Feign client exception response.
+   * &lt;/p&gt;
+   *
+   * @param ex The Feign exception that was thrown.
+   * @param request The HTTP request that resulted in the exception.
+   * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with details about the error.
+   */
+  @ExceptionHandler(FeignException.class)
+  public ResponseEntity&lt;ErrorResponse&gt; handleFeignException(final FeignException ex, final HttpServletRequest request) {
+<span class="nc" id="L122">    HttpStatus status = HttpStatus.valueOf(ex.status());</span>
+<span class="nc" id="L123">    String message = &quot;An error occurred while processing your request&quot;;</span>
+
+<span class="nc" id="L125">    String feignResponseBody = ex.contentUTF8();</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">    if (feignResponseBody != null) {</span>
+      try {
+<span class="nc" id="L128">        ObjectMapper objectMapper = new ObjectMapper();</span>
+<span class="nc" id="L129">        JsonNode jsonNode = objectMapper.readTree(feignResponseBody);</span>
+<span class="nc" id="L130">        message = jsonNode.get(&quot;message&quot;).asText();</span>
+<span class="nc" id="L131">      } catch (Exception e) {</span>
+<span class="nc" id="L132">        message = ex.getMessage();</span>
+<span class="nc" id="L133">      }</span>
+    }
+
+<span class="nc" id="L136">    ErrorResponse errorResponse = new ErrorResponse(</span>
+<span class="nc" id="L137">      LocalDateTime.now(),</span>
+<span class="nc" id="L138">      status.value(),</span>
+      message,
+<span class="nc" id="L140">      request.getRequestURI()</span>
+    );
+
+<span class="nc" id="L143">    return new ResponseEntity&lt;&gt;(errorResponse, status);</span>
+  }
+
+  /**
+   * ErrorResponse class to encapsulate error details.
+   */
+<span class="nc bnc" id="L149" title="All 32 branches missed.">  @Data</span>
+<span class="nc" id="L150">  @AllArgsConstructor</span>
+  public static class ErrorResponse {
+
+    /**
+     * The timestamp when the error occurred.
+     * This is useful for logging and debugging to determine when the error happened.
+     */
+<span class="nc" id="L157">    private LocalDateTime timestamp;</span>
+
+    /**
+     * The HTTP status code associated with the error.
+     * This code indicates the type of error that occurred (e.g., 404 for Not Found, 500 for Internal Server Error).
+     */
+<span class="nc" id="L163">    private int status;</span>
+
+    /**
+     * A descriptive message explaining the error.
+     * This message provides more details about the error to help understand what went wrong.
+     */
+<span class="nc" id="L169">    private String message;</span>
+
+    /**
+     * The path or endpoint where the error occurred.
+     * This helps in identifying which part of the application triggered the error.
+     */
+<span class="nc" id="L175">    private String path;</span>
+  }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

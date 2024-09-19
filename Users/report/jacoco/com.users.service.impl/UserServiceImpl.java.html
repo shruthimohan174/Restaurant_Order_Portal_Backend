@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Users</a> &gt; <a href="index.source.html" class="el_package">com.users.service.impl</a> &gt; <span class="el_source">UserServiceImpl.java</span></div><h1>UserServiceImpl.java</h1><pre class="source lang-java linenums">package com.users.service.impl;
+
+import com.users.constants.UserConstants;
+import com.users.dto.ContactUsInDto;
+import com.users.dto.MessageOutDto;
+import com.users.dto.UpdateUserInDto;
+import com.users.dto.UserInDto;
+import com.users.dto.UserLoginInDto;
+import com.users.dto.UserOutDto;
+import com.users.converter.DtoConversion;
+import com.users.entities.User;
+import com.users.exception.ResourceConflictException;
+import com.users.exception.InvalidRequestException;
+import com.users.exception.ResourceNotFoundException;
+import com.users.exception.UnauthorizedAccessException;
+import com.users.repositories.UserRepository;
+import com.users.service.UserService;
+import com.users.utils.PasswordEncodingDecodingUtils;
+import com.users.utils.UserRole;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Implementation of the {@link UserService} interface.
+ * &lt;p&gt;
+ * This service provides methods for managing users, including registration, login,
+ * updating user information, and managing wallet balances.
+ * &lt;/p&gt;
+ */
+@Service
+<span class="fc" id="L39">@Slf4j</span>
+<span class="fc" id="L40">public class UserServiceImpl implements UserService {</span>
+
+  /**
+   * Service layer dependency for email service-related operations.
+   */
+  @Autowired
+  private EmailServiceImpl emailService;
+
+  /**
+   * Service layer dependency for userRepository-related operations.
+   */
+  @Autowired
+  private UserRepository userRepository;
+
+  /**
+   * Registers a new user in the system.
+   *
+   * @param userRequest the user information to be registered
+   * @return a message indicating the success of the registration
+   * @throws ResourceConflictException if a user with the given email already exists
+   * @throws InvalidRequestException if the user role is invalid
+   */
+  @Override
+  public MessageOutDto registerUser(final UserInDto userRequest) {
+<span class="fc" id="L64">    String normalizedEmail = normalizeEmail(userRequest.getEmail());</span>
+<span class="fc" id="L65">    log.info(&quot;Registering new user with email: {}&quot;, normalizedEmail);</span>
+
+<span class="fc" id="L67">    Optional&lt;User&gt; emailExists = userRepository.findByEmail(normalizedEmail);</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">    if (emailExists.isPresent()) {</span>
+<span class="fc" id="L69">      log.error(&quot;User with email {} already exists&quot;, normalizedEmail);</span>
+<span class="fc" id="L70">      throw new ResourceConflictException(UserConstants.USER_ALREADY_EXISTS);</span>
+    }
+
+<span class="fc" id="L73">    validateUserRole(userRequest.getUserRole());</span>
+
+<span class="fc" id="L75">    User user = DtoConversion.convertUserRequestToUser(userRequest);</span>
+<span class="fc" id="L76">    user.setEmail(normalizedEmail);</span>
+<span class="fc" id="L77">    user.setPassword(PasswordEncodingDecodingUtils.encodePassword(userRequest.getPassword()));</span>
+<span class="fc" id="L78">    User savedUser = userRepository.save(user);</span>
+<span class="fc" id="L79">    log.info(&quot;User registered successfully with ID: {}&quot;, savedUser.getId());</span>
+<span class="fc" id="L80">    DtoConversion.convertUserToUserResponse(savedUser);</span>
+<span class="fc" id="L81">    return new MessageOutDto(UserConstants.USER_REGISTRATION_SUCCESS);</span>
+  }
+
+  /**
+   * Logs in a user based on provided credentials.
+   *
+   * @param userRequest the login credentials
+   * @return the user details if login is successful
+   * @throws UnauthorizedAccessException if the credentials are invalid
+   */
+  @Override
+  public UserOutDto loginUser(final UserLoginInDto userRequest) {
+<span class="fc" id="L93">    String normalizedEmail = normalizeEmail(userRequest.getEmail());</span>
+<span class="fc" id="L94">    log.info(&quot;Login for email: {}&quot;, normalizedEmail);</span>
+
+<span class="fc" id="L96">    Optional&lt;User&gt; user = userRepository.findByEmail(normalizedEmail);</span>
+
+<span class="fc bfc" id="L98" title="All 2 branches covered.">    if (!user.isPresent()</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">      || !PasswordEncodingDecodingUtils.decodePassword(user.get().getPassword()).equals(userRequest.getPassword())) {</span>
+<span class="fc" id="L100">      log.error(&quot;Invalid credentials for email: {}&quot;, normalizedEmail);</span>
+<span class="fc" id="L101">      throw new UnauthorizedAccessException(UserConstants.INVALID_CREDENTIALS);</span>
+    }
+
+<span class="fc" id="L104">    validateUserRole(user.get().getUserRole());</span>
+
+<span class="fc" id="L106">    log.info(&quot;Login successful for email: {}&quot;, normalizedEmail);</span>
+<span class="fc" id="L107">    return DtoConversion.convertUserToUserResponse(user.get());</span>
+  }
+
+  private String normalizeEmail(final String email) {
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">    if (email == null) {</span>
+<span class="nc" id="L112">      return null;</span>
+    }
+<span class="fc" id="L114">    return email.trim().toLowerCase();</span>
+  }
+
+  /**
+   * Updates user information based on provided data.
+   *
+   * @param id      the ID of the user to be updated
+   * @param request the updated user information
+   * @return a message indicating the success of the update
+   */
+  @Override
+  public MessageOutDto updateUser(final Integer id, final UpdateUserInDto request) {
+<span class="fc" id="L126">    log.info(&quot;Updating user with ID: {}&quot;, id);</span>
+<span class="fc" id="L127">    User existingUser = findUserById(id);</span>
+
+<span class="fc" id="L129">    DtoConversion.convertUpdateUserRequestToUser(existingUser, request);</span>
+<span class="fc" id="L130">    existingUser.setPassword(PasswordEncodingDecodingUtils.encodePassword(request.getPassword()));</span>
+
+<span class="fc" id="L132">    User updatedUser = userRepository.save(existingUser);</span>
+<span class="fc" id="L133">    log.info(&quot;User updated successfully with ID: {}&quot;, updatedUser.getId());</span>
+<span class="fc" id="L134">    DtoConversion.convertUserToUpdateUserResponse(updatedUser);</span>
+<span class="fc" id="L135">    return new MessageOutDto(UserConstants.USER_PROFILE_UPDATE_SUCCESS);</span>
+  }
+  /**
+   * Retrieves all users from the system.
+   *
+   * @return a list of all users
+   */
+  @Override
+  public List&lt;UserOutDto&gt; getAllUsers() {
+<span class="fc" id="L144">    log.info(&quot;Fetching all users&quot;);</span>
+<span class="fc" id="L145">    List&lt;User&gt; userList = userRepository.findAll();</span>
+<span class="fc" id="L146">    List&lt;UserOutDto&gt; list = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">    for (User user : userList) {</span>
+<span class="fc" id="L148">      list.add(DtoConversion.convertUserToUserResponse(user));</span>
+<span class="fc" id="L149">    }</span>
+<span class="fc" id="L150">    log.info(&quot;Number of users fetched: {}&quot;, list.size());</span>
+<span class="fc" id="L151">    return list;</span>
+  }
+
+  /**
+   * Retrieves a specific user by ID.
+   *
+   * @param id the ID of the user to be retrieved
+   * @return the user with the specified ID
+   * @throws ResourceNotFoundException if the user is not found
+   */
+  @Override
+  public User findUserById(final Integer id) {
+<span class="fc" id="L163">    log.info(&quot;Finding user by ID: {}&quot;, id);</span>
+<span class="fc" id="L164">    return userRepository.findById(id).orElseThrow(() -&gt; {</span>
+<span class="fc" id="L165">      log.error(&quot;User not found with ID: {}&quot;, id);</span>
+<span class="fc" id="L166">      return new ResourceNotFoundException(UserConstants.USER_NOT_FOUND);</span>
+    });
+  }
+  /**
+   * Updates the wallet balance for a user.
+   *
+   * @param userId        the ID of the user whose wallet is to be updated
+   * @param amount    the amount to be added to the wallet
+   * @return a message indicating the success of the operation
+   * @throws InvalidRequestException if the operation is not valid
+   */
+  @Override
+  @Transactional
+  public MessageOutDto updateWalletBalance(final Integer userId, final BigDecimal amount) {
+<span class="fc" id="L180">    log.info(&quot;Updating wallet balance for user ID: {}&quot;, userId);</span>
+<span class="fc" id="L181">    User user = findUserById(userId);</span>
+<span class="fc" id="L182">    BigDecimal currentBalance = user.getWalletBalance();</span>
+
+<span class="pc bpc" id="L184" title="3 of 4 branches missed.">    if (amount.compareTo(BigDecimal.ZERO) &lt; 0 &amp;&amp; currentBalance.compareTo(amount.negate()) &lt; 0) {</span>
+<span class="nc" id="L185">      log.error(&quot;Insufficient funds for user ID: {}&quot;, userId);</span>
+<span class="nc" id="L186">      throw new InvalidRequestException(UserConstants.INSUFFICIENT_BALANCE);</span>
+    }
+
+<span class="fc" id="L189">    user.setWalletBalance(currentBalance.add(amount));</span>
+<span class="fc" id="L190">    userRepository.save(user);</span>
+
+<span class="fc" id="L192">    log.info(&quot;Wallet balance updated successfully for user ID: {}&quot;, userId);</span>
+<span class="fc" id="L193">    DtoConversion.convertUserToUserResponse(user);</span>
+<span class="fc" id="L194">    return new MessageOutDto(UserConstants.WALLET_FUND_WITHDRAWAL_SUCCESS);</span>
+  }
+
+  /**
+   * Updates the add money to the wallet for a user.
+   *
+   * @param userId        the ID of the user whose wallet is to be updated
+   * @param amount    the amount to be added to the wallet
+   * @return a message indicating the success of the operation
+   * @throws InvalidRequestException if the operation is not valid
+   */
+  @Override
+  @Transactional
+  public MessageOutDto addMoneyToWallet(final Integer userId, final BigDecimal amount) {
+<span class="fc" id="L208">    log.info(&quot;Adding money to wallet for user ID: {}&quot;, userId);</span>
+<span class="fc" id="L209">    User user = findUserById(userId);</span>
+
+<span class="fc bfc" id="L211" title="All 2 branches covered.">    if (amount.compareTo(BigDecimal.ZERO) &lt;= 0) {</span>
+<span class="fc" id="L212">      log.error(&quot;Invalid amount: {}. Amount must be greater than zero.&quot;, amount);</span>
+<span class="fc" id="L213">      throw new InvalidRequestException(UserConstants.INVALID_AMOUNT);</span>
+    }
+
+<span class="fc" id="L216">    user.setWalletBalance(user.getWalletBalance().add(amount));</span>
+<span class="fc" id="L217">    userRepository.save(user);</span>
+
+<span class="fc" id="L219">    log.info(&quot;Money added to wallet successfully for user ID: {}&quot;, userId);</span>
+<span class="fc" id="L220">    DtoConversion.convertUserToUserResponse(user);</span>
+<span class="fc" id="L221">    return new MessageOutDto(UserConstants.WALLET_ADDITION_SUCCESS);</span>
+  }
+  /**
+   * Sends an email in response to a &quot;Contact Us&quot; form submission.
+   * &lt;p&gt;
+   * The email is sent to the specified recipient with the provided subject and message.
+   * The sender and contact information are configured through application properties.
+   * &lt;/p&gt;
+   **/
+  @Override
+  public MessageOutDto sendContactUsEmail(final ContactUsInDto contactUsDto) {
+<span class="fc" id="L232">    List&lt;String&gt; supportEmails = Arrays.asList(&quot;shruthimohan174@gmail.com&quot;,</span>
+      &quot;shruthimohan104@gmail.com&quot;, &quot;shruthimohan1708@gmail.com&quot;);
+
+<span class="fc" id="L235">    String subject = contactUsDto.getSubject();</span>
+<span class="fc" id="L236">    String customerName = contactUsDto.getName();</span>
+<span class="fc" id="L237">    String customMessage = contactUsDto.getMessage();</span>
+<span class="fc" id="L238">    log.info(&quot;Sending contact us email...&quot;);</span>
+
+<span class="fc" id="L240">    emailService.sendContactUsEmail(supportEmails, subject, customerName, customMessage);</span>
+<span class="fc" id="L241">    return new MessageOutDto(UserConstants.EMAIL_SENT_SUCCESS);</span>
+  }
+
+  /**
+   * Validates the user role.
+   *
+   * @param role the role to be validated
+   * @throws InvalidRequestException if the user role is invalid
+   */
+  public void validateUserRole(final UserRole role) {
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">    if (role == null) {</span>
+<span class="nc" id="L252">      log.error(&quot;User role is null&quot;);</span>
+<span class="nc" id="L253">      throw new InvalidRequestException(UserConstants.INVALID_USER_ROLE);</span>
+    }
+<span class="fc" id="L255">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

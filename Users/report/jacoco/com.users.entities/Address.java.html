@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Address.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Users</a> &gt; <a href="index.source.html" class="el_package">com.users.entities</a> &gt; <span class="el_source">Address.java</span></div><h1>Address.java</h1><pre class="source lang-java linenums">package com.users.entities;
+
+import lombok.Data;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+/**
+ * Entity representing an address.
+ * &lt;p&gt;
+ * This entity maps to the 'Address' table in the database and holds address-related information
+ * for users, including the street, city, state, and pincode.
+ * &lt;/p&gt;
+ */
+<span class="pc bpc" id="L17" title="9 of 54 branches missed.">@Data</span>
+@Entity
+public class Address {
+
+  /**
+   * Unique identifier for the address.
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+<span class="fc" id="L26">  private Integer id;</span>
+
+  /**
+   * The street address.
+   */
+<span class="fc" id="L31">  private String street;</span>
+
+  /**
+   * The city of the address.
+   */
+<span class="fc" id="L36">  private String city;</span>
+
+  /**
+   * The state of the address.
+   */
+<span class="fc" id="L41">  private String state;</span>
+
+  /**
+   * The postal code (pincode) of the address.
+   */
+<span class="fc" id="L46">  private Integer pincode;</span>
+
+  /**
+   * The ID of the user associated with this address.
+   */
+<span class="fc" id="L51">  private Integer userId;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
