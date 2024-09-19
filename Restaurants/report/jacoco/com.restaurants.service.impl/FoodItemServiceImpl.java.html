@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FoodItemServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Restaurants</a> &gt; <a href="index.source.html" class="el_package">com.restaurants.service.impl</a> &gt; <span class="el_source">FoodItemServiceImpl.java</span></div><h1>FoodItemServiceImpl.java</h1><pre class="source lang-java linenums">package com.restaurants.service.impl;
+
+import com.restaurants.constants.RestaurantConstants;
+import com.restaurants.dto.FoodItemInDto;
+import com.restaurants.dto.FoodItemUpdateInDto;
+import com.restaurants.dto.FoodItemOutDto;
+import com.restaurants.dto.MessageOutDto;
+import com.restaurants.converter.DtoConversion;
+import com.restaurants.entities.FoodCategory;
+import com.restaurants.entities.FoodItem;
+import com.restaurants.entities.Restaurant;
+import com.restaurants.exception.ResourceConflictException;
+import com.restaurants.exception.InvalidRequestException;
+import com.restaurants.exception.ResourceNotFoundException;
+import com.restaurants.repositories.FoodItemRepository;
+import com.restaurants.service.FoodCategoryService;
+import com.restaurants.service.FoodItemService;
+import com.restaurants.service.RestaurantService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Implementation of the {@link FoodItemService} interface.
+ * Provides methods to manage food items.
+ */
+@Service
+<span class="fc" id="L33">@Slf4j</span>
+<span class="fc" id="L34">public class FoodItemServiceImpl implements FoodItemService {</span>
+
+  /**
+   * The maximum allowed file size for uploads, set to 5 megabytes (5 MB).
+   */
+  private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+  /**
+   * Service layer dependency for foodItem-related operations.
+   */
+  @Autowired
+  private FoodItemRepository foodItemRepository;
+
+  /**
+   * Service layer dependency for restaurant-related operations.
+   */
+  @Autowired
+  private RestaurantService restaurantService;
+
+  /**
+   * Service layer dependency for category-related operations.
+   */
+  @Autowired
+  private FoodCategoryService foodCategoryService;
+
+  /**
+   * Adds a new food item.
+   *
+   * @param request the details of the food item to be added
+   * @param image   the image representing the food item
+   * @return the success message wrapped in {@link MessageOutDto}
+   */
+  @Override
+  public MessageOutDto addFoodItems(final FoodItemInDto request, final MultipartFile image) {
+<span class="fc" id="L68">    log.info(&quot;Adding food item&quot;);</span>
+<span class="fc" id="L69">    Restaurant restaurant = restaurantService.findRestaurantById(request.getRestaurantId());</span>
+<span class="fc" id="L70">    FoodCategory category = foodCategoryService.findCategoryById(request.getCategoryId());</span>
+
+<span class="fc" id="L72">    String normalizedItemName = normalizeItemName(request.getItemName());</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">    if (itemExistsInRestaurant(restaurant.getId(), normalizedItemName)) {</span>
+<span class="nc" id="L74">      throw new ResourceConflictException(RestaurantConstants.ITEM_ALREADY_EXISTS);</span>
+    }
+
+<span class="fc" id="L77">    FoodItem foodItem = DtoConversion.convertFoodItemRequestToFoodItem(request);</span>
+<span class="fc" id="L78">    foodItem.setItemName(normalizedItemName);</span>
+
+<span class="pc bpc" id="L80" title="2 of 4 branches missed.">    if (image != null &amp;&amp; !image.isEmpty()) {</span>
+      try {
+<span class="fc" id="L82">        validateImageFile(image);</span>
+<span class="fc" id="L83">        foodItem.setImageData(image.getBytes());</span>
+<span class="nc" id="L84">      } catch (IOException e) {</span>
+<span class="nc" id="L85">        log.error(&quot;Error occurred while processing the image file for food item: {}&quot;, normalizedItemName, e);</span>
+<span class="fc" id="L86">      }</span>
+    }
+
+<span class="fc" id="L89">    foodItemRepository.save(foodItem);</span>
+<span class="fc" id="L90">    log.info(&quot;Food item added successfully: {}&quot;, normalizedItemName);</span>
+<span class="fc" id="L91">    return new MessageOutDto(RestaurantConstants.FOOD_ITEM_ADDED_SUCCESSFULLY);</span>
+  }
+  /**
+   * Updates an existing food item.
+   *
+   * @param request the updated details of the food item
+   * @param id      the ID of the food item to be updated
+   * @return the success message wrapped in {@link MessageOutDto}
+   */
+  @Override
+  public MessageOutDto updateFoodItems(final FoodItemUpdateInDto request, final Integer id,
+                                       final MultipartFile image) {
+<span class="fc" id="L103">    log.info(&quot;Updating food item with ID: {}&quot;, id);</span>
+<span class="fc" id="L104">    FoodItem existingItem = findFoodItemsById(id);</span>
+
+<span class="fc" id="L106">    String normalizedItemName = normalizeItemName(request.getItemName());</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">    if (!existingItem.getItemName().equals(normalizedItemName)</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">      &amp;&amp; itemExistsInRestaurant(existingItem.getRestaurantId(), normalizedItemName)) {</span>
+<span class="nc" id="L109">      throw new ResourceConflictException(RestaurantConstants.ITEM_ALREADY_EXISTS);</span>
+    }
+
+<span class="fc" id="L112">    existingItem.setItemName(normalizedItemName);</span>
+<span class="fc" id="L113">    existingItem.setDescription(request.getDescription());</span>
+<span class="fc" id="L114">    existingItem.setPrice(request.getPrice());</span>
+<span class="fc" id="L115">    existingItem.setIsVeg(request.getIsVeg());</span>
+
+<span class="pc bpc" id="L117" title="2 of 4 branches missed.">    if (image != null &amp;&amp; !image.isEmpty()) {</span>
+      try {
+<span class="fc" id="L119">        validateImageFile(image);</span>
+<span class="fc" id="L120">        existingItem.setImageData(image.getBytes());</span>
+<span class="nc" id="L121">      } catch (IOException e) {</span>
+<span class="nc" id="L122">        log.error(&quot;Error occurred while processing the image file for food item: {}&quot;, normalizedItemName, e);</span>
+<span class="fc" id="L123">      }</span>
+    }
+
+<span class="fc" id="L126">    foodItemRepository.save(existingItem);</span>
+<span class="fc" id="L127">    log.info(&quot;Food item updated successfully: {}&quot;, normalizedItemName);</span>
+<span class="fc" id="L128">    return new MessageOutDto(RestaurantConstants.FOOD_ITEM_UPDATED_SUCCESSFULLY);</span>
+  }
+
+  /**
+   * Finds a food item by its ID.
+   *
+   * @param id the ID of the food item
+   * @return the food item
+//   * @throws FoodItemNotFoundException if the food item is not found
+   */
+  @Override
+  public FoodItem findFoodItemsById(final Integer id) {
+<span class="fc" id="L140">    log.info(&quot;Finding food item by ID: {}&quot;, id);</span>
+<span class="fc" id="L141">    return foodItemRepository.findById(id).orElseThrow(() -&gt; {</span>
+<span class="fc" id="L142">      log.error(&quot;Food item not found for ID: {}&quot;, id);</span>
+<span class="fc" id="L143">      return new ResourceNotFoundException(RestaurantConstants.FOOD_ITEM_NOT_FOUND);</span>
+    });
+  }
+
+  /**
+   * Retrieves all food items.
+   *
+   * @return a list of all food items
+   */
+  @Override
+  public List&lt;FoodItemOutDto&gt; getAllFoodItems() {
+<span class="fc" id="L154">    log.info(&quot;Retrieving all food items&quot;);</span>
+<span class="fc" id="L155">    List&lt;FoodItem&gt; foodItemList = foodItemRepository.findAll();</span>
+<span class="fc" id="L156">    List&lt;FoodItemOutDto&gt; foodItemResponsesList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">    for (FoodItem foodItem : foodItemList) {</span>
+<span class="fc" id="L158">      foodItemResponsesList.add(DtoConversion.convertFoodItemToFoodItemResponse(foodItem));</span>
+<span class="fc" id="L159">    }</span>
+<span class="fc" id="L160">    log.info(&quot;Retrieved {} food items&quot;, foodItemResponsesList.size());</span>
+<span class="fc" id="L161">    return foodItemResponsesList;</span>
+  }
+
+  /**
+   * Retrieves food items for a specific restaurant.
+   *
+   * @param restaurantId the ID of the restaurant
+   * @return a list of food items for the given restaurant
+   */
+  @Override
+  public List&lt;FoodItemOutDto&gt; getAllByRestaurantId(final Integer restaurantId) {
+<span class="fc" id="L172">    log.info(&quot;Retrieving food items for restaurant ID: {}&quot;, restaurantId);</span>
+<span class="fc" id="L173">    List&lt;FoodItem&gt; foodItemList = foodItemRepository.findByRestaurantId(restaurantId);</span>
+<span class="fc" id="L174">    List&lt;FoodItemOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">    for (FoodItem foodItem : foodItemList) {</span>
+<span class="fc" id="L176">      responseList.add(DtoConversion.convertFoodItemToFoodItemResponse(foodItem));</span>
+<span class="fc" id="L177">    }</span>
+<span class="fc" id="L178">    log.info(&quot;Retrieved {} food items for restaurant ID: {}&quot;, responseList.size(), restaurantId);</span>
+<span class="fc" id="L179">    return responseList;</span>
+  }
+
+  /**
+   * Retrieves food items for a specific category.
+   *
+   * @param categoryId the ID of the category
+   * @return a list of food items for the given category
+   */
+  @Override
+  public List&lt;FoodItemOutDto&gt; getAllByCategoryId(final Integer categoryId) {
+<span class="fc" id="L190">    log.info(&quot;Retrieving food items for category ID: {}&quot;, categoryId);</span>
+<span class="fc" id="L191">    List&lt;FoodItem&gt; foodItemList = foodItemRepository.findByCategoryId(categoryId);</span>
+<span class="fc" id="L192">    List&lt;FoodItemOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">    for (FoodItem foodItem : foodItemList) {</span>
+<span class="fc" id="L194">      responseList.add(DtoConversion.convertFoodItemToFoodItemResponse(foodItem));</span>
+<span class="fc" id="L195">    }</span>
+<span class="fc" id="L196">    log.info(&quot;Retrieved {} food items for category ID: {}&quot;, responseList.size(), categoryId);</span>
+<span class="fc" id="L197">    return responseList;</span>
+  }
+
+  /**
+   * Retrieves the image data for a food item by its ID.
+   *
+   * @param id the ID of the food item
+   * @return the image data as a byte array
+   */
+  @Override
+  public byte[] getFoodItemImage(final Integer id) {
+<span class="fc" id="L208">    log.info(&quot;Fetching image for Food Item with ID: {}&quot;, id);</span>
+<span class="fc" id="L209">    FoodItem foodItem = findFoodItemsById(id);</span>
+<span class="fc" id="L210">    return foodItem.getImageData();</span>
+  }
+
+  /**
+   * Checks if a food item with the same name exists in the same restaurant.
+   *
+   * @param restaurantId the ID of the restaurant
+   * @param itemName     the name of the food item
+   * @return true if the item exists, false otherwise
+   */
+  public boolean itemExistsInRestaurant(final Integer restaurantId, final String itemName) {
+<span class="fc" id="L221">    String normalizedItemName = normalizeItemName(itemName);</span>
+<span class="fc" id="L222">    return foodItemRepository.existsByRestaurantIdAndItemNameIgnoreCase(restaurantId, normalizedItemName);</span>
+  }
+  /**
+   * Validates the image file to ensure it is of a valid type (JPEG or PNG).
+   *
+   * @param image the image file to validate
+   */
+  @Override
+  public void validateImageFile(final MultipartFile image) {
+<span class="fc" id="L231">    String contentType = image.getContentType();</span>
+<span class="pc bpc" id="L232" title="2 of 6 branches missed.">    if (contentType == null || !contentType.equals(&quot;image/jpeg&quot;) &amp;&amp; !contentType.equals(&quot;image/png&quot;)) {</span>
+<span class="fc" id="L233">      throw new InvalidRequestException(RestaurantConstants.INVALID_FILE_TYPE);</span>
+    }
+
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">    if (image.getSize() &gt; MAX_FILE_SIZE) {</span>
+<span class="nc" id="L237">      throw new InvalidRequestException(RestaurantConstants.FILE_SIZE_EXCEEDED);</span>
+    }
+<span class="fc" id="L239">  }</span>
+  /**
+   * Normalizes a category name by trimming whitespace and replacing multiple spaces with a single space.
+   *
+   * @param itemName the category name to normalize; can be {@code null}
+   * @return the normalized category name, or {@code null} if the input was {@code null}
+   */
+  private String normalizeItemName(final String itemName) {
+<span class="fc" id="L247">    return itemName.trim().replaceAll(&quot;\\s+&quot;, &quot;&quot;).toLowerCase();</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

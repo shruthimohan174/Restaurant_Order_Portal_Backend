@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FoodCategoryServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Restaurants</a> &gt; <a href="index.source.html" class="el_package">com.restaurants.service.impl</a> &gt; <span class="el_source">FoodCategoryServiceImpl.java</span></div><h1>FoodCategoryServiceImpl.java</h1><pre class="source lang-java linenums">package com.restaurants.service.impl;
+
+import com.restaurants.constants.RestaurantConstants;
+import com.restaurants.dto.FoodCategoryInDto;
+import com.restaurants.dto.FoodCategoryOutDto;
+import com.restaurants.dto.MessageOutDto;
+import com.restaurants.converter.DtoConversion;
+import com.restaurants.entities.FoodCategory;
+import com.restaurants.entities.Restaurant;
+import com.restaurants.exception.ResourceConflictException;
+import com.restaurants.exception.ResourceNotFoundException;
+import com.restaurants.repositories.FoodCategoryRepository;
+import com.restaurants.service.FoodCategoryService;
+import com.restaurants.service.RestaurantService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Implementation of the {@link FoodCategoryService} interface.
+ * Provides methods to manage food categories.
+ */
+@Service
+<span class="fc" id="L27">@Slf4j</span>
+<span class="fc" id="L28">public class FoodCategoryServiceImpl implements FoodCategoryService {</span>
+
+  /**
+   * Service layer dependency for category repository-related operations.
+   */
+  @Autowired
+  private FoodCategoryRepository foodCategoryRepository;
+
+  /**
+   * Service layer dependency for restaurant-related operations.
+   */
+  @Autowired
+  private RestaurantService restaurantService;
+
+  /**
+   * Adds a new food category.
+   *
+   * @param request the food category data to be added
+   * @return the response message indicating success or failure
+   */
+  @Override
+  public MessageOutDto addCategory(final FoodCategoryInDto request) {
+<span class="fc" id="L50">    log.info(&quot;Adding category &quot;);</span>
+<span class="fc" id="L51">    Restaurant restaurant = restaurantService.findRestaurantById(request.getRestaurantId());</span>
+<span class="fc" id="L52">    String sanitizedCategoryName = normalizedCategoryName(request.getCategoryName());</span>
+
+<span class="fc bfc" id="L54" title="All 2 branches covered.">    if (categoryExistsRestaurant(restaurant.getId(), sanitizedCategoryName)) {</span>
+<span class="fc" id="L55">      throw new ResourceConflictException(RestaurantConstants.CATEGORY_ALREADY_EXISTS);</span>
+    }
+
+<span class="fc" id="L58">    FoodCategory category = DtoConversion.convertCategoryRequestToCategory(request);</span>
+<span class="fc" id="L59">    category.setCategoryName(sanitizedCategoryName);</span>
+<span class="fc" id="L60">    foodCategoryRepository.save(category);</span>
+
+<span class="fc" id="L62">    log.info(&quot;Category added successfully: {}&quot;, request.getCategoryName());</span>
+<span class="fc" id="L63">    return new MessageOutDto(RestaurantConstants.FOOD_CATEGORY_ADDED_SUCCESSFULLY);</span>
+  }
+
+  /**
+   * Updates an existing food category.
+   *
+   * @param request the updated food category data
+   * @param id      the ID of the food category to be updated
+   * @return the response message indicating success or failure
+   */
+  @Override
+  public MessageOutDto updateCategory(final FoodCategoryInDto request, final Integer id) {
+<span class="fc" id="L75">    log.info(&quot;Updating category with ID: {}&quot;, id);</span>
+<span class="fc" id="L76">    FoodCategory existingCategory = findCategoryById(id);</span>
+<span class="fc" id="L77">    String sanitizedCategoryName = normalizedCategoryName(request.getCategoryName());</span>
+
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">    if (!existingCategory.getCategoryName().equalsIgnoreCase(sanitizedCategoryName)</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">      &amp;&amp; categoryExistsRestaurant(request.getRestaurantId(), sanitizedCategoryName)) {</span>
+<span class="nc" id="L81">      throw new ResourceConflictException(RestaurantConstants.CATEGORY_ALREADY_EXISTS);</span>
+    }
+
+<span class="fc" id="L84">    existingCategory.setCategoryName(sanitizedCategoryName);</span>
+<span class="fc" id="L85">    foodCategoryRepository.save(existingCategory);</span>
+
+<span class="fc" id="L87">    log.info(&quot;Category updated successfully: {}&quot;, request.getCategoryName());</span>
+<span class="fc" id="L88">    return new MessageOutDto(RestaurantConstants.FOOD_CATEGORY_UPDATED_SUCCESSFULLY);</span>
+  }
+
+  /**
+   * Retrieves all food categories.
+   *
+   * @return a list of all food categories
+   */
+  @Override
+  public List&lt;FoodCategoryOutDto&gt; viewAllCategory() {
+<span class="fc" id="L98">    log.info(&quot;Retrieving all categories&quot;);</span>
+<span class="fc" id="L99">    List&lt;FoodCategory&gt; categoryList = foodCategoryRepository.findAll();</span>
+<span class="fc" id="L100">    List&lt;FoodCategoryOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L102" title="All 2 branches covered.">    for (FoodCategory category : categoryList) {</span>
+<span class="fc" id="L103">      responseList.add(DtoConversion.convertCategoryToResponse(category));</span>
+<span class="fc" id="L104">    }</span>
+
+<span class="fc" id="L106">    log.info(&quot;Retrieved {} categories&quot;, responseList.size());</span>
+<span class="fc" id="L107">    return responseList;</span>
+  }
+
+  /**
+   * Retrieves food categories for a specific restaurant.
+   *
+   * @param restaurantId the ID of the restaurant
+   * @return a list of food categories for the given restaurant
+   */
+  @Override
+  public List&lt;FoodCategoryOutDto&gt; findCategoryByRestaurantId(final Integer restaurantId) {
+<span class="fc" id="L118">    log.info(&quot;Retrieving categories for restaurant ID: {}&quot;, restaurantId);</span>
+<span class="fc" id="L119">    List&lt;FoodCategory&gt; categoryList = foodCategoryRepository.findByRestaurantId(restaurantId);</span>
+<span class="fc" id="L120">    List&lt;FoodCategoryOutDto&gt; responseList = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L122" title="All 2 branches covered.">    for (FoodCategory category : categoryList) {</span>
+<span class="fc" id="L123">      responseList.add(DtoConversion.convertCategoryToResponse(category));</span>
+<span class="fc" id="L124">    }</span>
+
+<span class="fc" id="L126">    log.info(&quot;Retrieved {} categories for restaurant ID: {}&quot;, responseList.size(), restaurantId);</span>
+<span class="fc" id="L127">    return responseList;</span>
+  }
+
+
+  /**
+   * Finds a food category by its ID.
+   *
+   * @param id the ID of the food category
+   * @return the food category
+   */
+  @Override
+  public FoodCategory findCategoryById(final Integer id) {
+<span class="fc" id="L139">    log.info(&quot;Finding category by ID: {}&quot;, id);</span>
+<span class="fc" id="L140">    return foodCategoryRepository.findById(id).orElseThrow(() -&gt; {</span>
+<span class="fc" id="L141">      log.error(&quot;Category not found for ID: {}&quot;, id);</span>
+<span class="fc" id="L142">      return new ResourceNotFoundException(RestaurantConstants.CATEGORY_NOT_FOUND);</span>
+    });
+  }
+
+  /**
+   * Checks if a food category with the given name exists for a specific restaurant.
+   *
+   * @param restaurantId the ID of the restaurant
+   * @param categoryName the name of the food category
+   * @return true if the category exists, false otherwise
+   */
+  private boolean categoryExistsRestaurant(final Integer restaurantId, final String categoryName) {
+<span class="fc" id="L154">    return foodCategoryRepository.existsByRestaurantIdAndCategoryNameIgnoreCase(</span>
+<span class="fc" id="L155">      restaurantId, categoryName.trim().replaceAll(&quot;\\s+&quot;, &quot; &quot;)</span>
+    );
+  }
+
+  /**
+   * Normalizes a category name by trimming whitespace and replacing multiple spaces with a single space.
+   *
+   * @param categoryName the category name to normalize; can be {@code null}
+   * @return the normalized category name, or {@code null} if the input was {@code null}
+   */
+  private String normalizedCategoryName(final String categoryName) {
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">    if (categoryName == null) {</span>
+<span class="nc" id="L167">      return null;</span>
+    }
+<span class="fc" id="L169">    return categoryName.trim().replaceAll(&quot;\\s+&quot;, &quot; &quot;);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

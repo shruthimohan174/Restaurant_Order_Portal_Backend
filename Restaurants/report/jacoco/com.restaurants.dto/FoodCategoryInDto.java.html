@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FoodCategoryInDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Restaurants</a> &gt; <a href="index.source.html" class="el_package">com.restaurants.dto</a> &gt; <span class="el_source">FoodCategoryInDto.java</span></div><h1>FoodCategoryInDto.java</h1><pre class="source lang-java linenums">package com.restaurants.dto;
+
+import lombok.Data;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
+
+/**
+ * Data transfer object for input data related to food categories.
+ */
+<span class="pc bpc" id="L13" title="3 of 22 branches missed.">@Data</span>
+public class FoodCategoryInDto {
+
+  /**
+   * The ID of the restaurant that the category belongs to.
+   * Cannot be null.
+   */
+  @NotNull(message = &quot;Restaurant ID cannot be null&quot;)
+<span class="fc" id="L21">  private Integer restaurantId;</span>
+
+  /**
+   * The name of the food category.
+   * Cannot be blank and must contain only alphabets.
+   */
+  @NotBlank(message = &quot;Category name cannot be blank&quot;)
+  @Pattern(regexp = &quot;^[A-Za-z\\s]+$&quot;, message = &quot;Category name must contain only alphabets&quot;)
+<span class="fc" id="L29">  private String categoryName;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

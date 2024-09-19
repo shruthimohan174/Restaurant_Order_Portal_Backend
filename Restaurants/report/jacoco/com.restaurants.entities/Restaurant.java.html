@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Restaurant.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Restaurants</a> &gt; <a href="index.source.html" class="el_package">com.restaurants.entities</a> &gt; <span class="el_source">Restaurant.java</span></div><h1>Restaurant.java</h1><pre class="source lang-java linenums">package com.restaurants.entities;
+
+import lombok.Data;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+
+/**
+ * Entity class representing a restaurant.
+ */
+@Entity
+<span class="pc bpc" id="L15" title="27 of 56 branches missed.">@Data</span>
+public class Restaurant {
+
+  /**
+   * The unique identifier for the restaurant.
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+<span class="fc" id="L23">  private Integer id;</span>
+
+  /**
+   * The ID of the user who owns the restaurant.
+   */
+<span class="fc" id="L28">  private Integer userId;</span>
+
+  /**
+   * The name of the restaurant.
+   */
+<span class="fc" id="L33">  private String restaurantName;</span>
+
+  /**
+   * The address of the restaurant.
+   */
+<span class="fc" id="L38">  private String address;</span>
+
+  /**
+   * The contact number of the restaurant.
+   */
+<span class="fc" id="L43">  private String contactNumber;</span>
+
+  /**
+   * The opening hours of the restaurant.
+   */
+<span class="fc" id="L48">  private String openingHours;</span>
+
+  /**
+   * The binary data of the image representing the food item.
+   * This field stores the image in byte array format.
+   */
+  @Lob
+<span class="fc" id="L55">  private byte[] imageData;</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
