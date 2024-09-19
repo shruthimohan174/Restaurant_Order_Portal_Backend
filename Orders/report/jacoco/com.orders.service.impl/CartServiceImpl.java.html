@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CartServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Orders</a> &gt; <a href="index.source.html" class="el_package">com.orders.service.impl</a> &gt; <span class="el_source">CartServiceImpl.java</span></div><h1>CartServiceImpl.java</h1><pre class="source lang-java linenums">package com.orders.service.impl;
+
+import com.orders.constants.OrderConstants;
+import com.orders.dto.CartInDto;
+import com.orders.dto.FoodItemOutDto;
+import com.orders.dto.MessageOutDto;
+import com.orders.dto.UserOutDto;
+import com.orders.entities.Cart;
+import com.orders.exception.AccessDeniedException;
+import com.orders.exception.ResourceConflictException;
+import com.orders.exception.ResourceNotFoundException;
+import com.orders.repositories.CartRepository;
+import com.orders.service.CartService;
+import com.orders.service.RestaurantFeignClient;
+import com.orders.service.UserFeignClient;
+import com.orders.utils.UserRole;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Service implementation for Cart-related operations.
+ */
+@Service
+<span class="fc" id="L29">@Slf4j</span>
+<span class="fc" id="L30">public class CartServiceImpl implements CartService {</span>
+
+  /**
+   * Service layer dependency for user-related operations.
+   */
+  @Autowired
+  private UserFeignClient userClient;
+
+  /**
+   * Service layer dependency for cart-related operations.
+   */
+  @Autowired
+  private CartRepository cartRepository;
+
+  /**
+   * Service layer dependency for restaurant-related operations.
+   */
+  @Autowired
+  private RestaurantFeignClient restaurantClient;
+
+  /**
+   * Adds an item to the cart. If the item already exists in the cart, updates its quantity.
+   *
+   * @param cartInDto Data transfer object containing cart details.
+   * @return Success message indicating the action performed.
+   */
+  @Override
+  public MessageOutDto addItemToCart(final CartInDto cartInDto) {
+<span class="fc" id="L58">    log.info(&quot;Adding item to cart for userId: {}, foodItemId: {}&quot;, cartInDto.getUserId(), cartInDto.getFoodItemId());</span>
+
+<span class="fc" id="L60">    UserOutDto user = userClient.getUserById(cartInDto.getUserId());</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">    if (!user.getUserRole().equals(UserRole.CUSTOMER)) {</span>
+<span class="fc" id="L62">      log.error(&quot;User is not a customer. userId: {}&quot;, cartInDto.getUserId());</span>
+<span class="fc" id="L63">      throw new AccessDeniedException(OrderConstants.CUSTOMER_NOT_FOUND);</span>
+    }
+<span class="fc" id="L65">    restaurantClient.getRestaurantById(cartInDto.getRestaurantId());</span>
+<span class="fc" id="L66">    FoodItemOutDto foodItem = restaurantClient.getFoodItemById(cartInDto.getFoodItemId());</span>
+
+<span class="fc bfc" id="L68" title="All 2 branches covered.">    if (foodItem.getPrice().compareTo(cartInDto.getPrice()) != 0) {</span>
+<span class="fc" id="L69">      throw new ResourceConflictException(OrderConstants.PRICE_MISMATCH);</span>
+    }
+
+<span class="fc" id="L72">    Optional&lt;Cart&gt; existingCart = cartRepository.findByUserIdAndFoodItemIdAndRestaurantId(</span>
+<span class="fc" id="L73">      cartInDto.getUserId(),</span>
+<span class="fc" id="L74">      cartInDto.getFoodItemId(),</span>
+<span class="fc" id="L75">      cartInDto.getRestaurantId()</span>
+    );
+
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">    if (existingCart.isPresent()) {</span>
+<span class="nc" id="L79">      log.info(&quot;Item already in cart. Updating quantity for cartId: {}&quot;, existingCart.get().getId());</span>
+<span class="nc" id="L80">      return updateCartItemQuantity(existingCart.get().getId(), 1);</span>
+    } else {
+<span class="fc" id="L82">      log.info(&quot;Adding new item to cart for userId: {}&quot;, cartInDto.getUserId());</span>
+<span class="fc" id="L83">      return addNewCartItem(cartInDto);</span>
+    }
+  }
+
+  /**
+   * Adds a new item to the cart.
+   *
+   * @param cartInDto DTO containing cart details.
+   * @return Success message indicating the item has been added to the cart.
+   */
+  private MessageOutDto addNewCartItem(final CartInDto cartInDto) {
+<span class="fc" id="L94">    log.info(&quot;Creating new cart item for userId: {}, foodItemId: {}&quot;, cartInDto.getUserId(), cartInDto.getFoodItemId());</span>
+
+<span class="fc" id="L96">    Cart newCart = new Cart();</span>
+<span class="fc" id="L97">    newCart.setUserId(cartInDto.getUserId());</span>
+<span class="fc" id="L98">    newCart.setFoodItemId(cartInDto.getFoodItemId());</span>
+<span class="fc" id="L99">    newCart.setRestaurantId(cartInDto.getRestaurantId());</span>
+<span class="fc" id="L100">    newCart.setQuantity(1);</span>
+<span class="fc" id="L101">    newCart.setPrice(cartInDto.getPrice());</span>
+
+<span class="fc" id="L103">    cartRepository.save(newCart);</span>
+<span class="fc" id="L104">    log.info(&quot;Cart item added successfully for userId: {}&quot;, cartInDto.getUserId());</span>
+<span class="fc" id="L105">    return new MessageOutDto(OrderConstants.CART_ADDED_SUCCESSFULLY);</span>
+  }
+
+  /**
+   * Updates the quantity of an existing cart item.
+   *
+   * @param cartId         The ID of the cart item.
+   * @param quantityChange The amount to change the quantity by.
+   * @return Success message indicating the action performed.
+   */
+  @Override
+  public MessageOutDto updateCartItemQuantity(final Integer cartId, final int quantityChange) {
+<span class="fc" id="L117">    log.info(&quot;Updating cart item quantity for cartId: {}&quot;, cartId);</span>
+
+<span class="fc" id="L119">    Cart cart = getCartById(cartId);</span>
+<span class="fc" id="L120">    BigDecimal unitPrice = cart.getPrice().divide(BigDecimal.valueOf(cart.getQuantity()), BigDecimal.ROUND_HALF_EVEN);</span>
+
+<span class="fc" id="L122">    int newQuantity = Math.max(0, cart.getQuantity() + quantityChange);</span>
+
+<span class="fc bfc" id="L124" title="All 2 branches covered.">    if (newQuantity == 0) {</span>
+<span class="fc" id="L125">      cartRepository.deleteById(cartId);</span>
+<span class="fc" id="L126">      log.info(&quot;Cart item removed successfully for cartId: {}&quot;, cartId);</span>
+<span class="fc" id="L127">      return new MessageOutDto(OrderConstants.ITEM_REMOVED_SUCCESSFULLY);</span>
+    }
+
+<span class="fc" id="L130">    BigDecimal newPrice = unitPrice.multiply(BigDecimal.valueOf(newQuantity));</span>
+
+<span class="fc" id="L132">    cart.setQuantity(newQuantity);</span>
+<span class="fc" id="L133">    cart.setPrice(newPrice);</span>
+<span class="fc" id="L134">    cartRepository.save(cart);</span>
+<span class="fc" id="L135">    log.info(&quot;Cart item updated successfully for cartId: {}&quot;, cartId);</span>
+<span class="fc" id="L136">    return new MessageOutDto(OrderConstants.CART_UPDATED_SUCCESSFULLY);</span>
+  }
+
+  /**
+   * Removes an item from the cart.
+   *
+   * @param cartId The ID of the cart item to remove.
+   * @return Success message indicating the item has been removed.
+   */
+  @Override
+  public MessageOutDto removeItemFromCart(final Integer cartId) {
+<span class="fc" id="L147">    log.info(&quot;Removing item from cart for cartId: {}&quot;, cartId);</span>
+<span class="fc" id="L148">    Cart cart = getCartById(cartId);</span>
+<span class="fc" id="L149">    cartRepository.deleteById(cartId);</span>
+<span class="fc" id="L150">    log.info(&quot;Item removed successfully from cart for cartId: {}&quot;, cartId);</span>
+<span class="fc" id="L151">    return new MessageOutDto(OrderConstants.ITEM_REMOVED_SUCCESSFULLY);</span>
+  }
+
+  /**
+   * Clears the cart after an order is placed.
+   *
+   * @param userId       The user ID whose cart should be cleared.
+   * @param restaurantId The restaurant ID related to the cart.
+   * @return Success message indicating the cart has been cleared.
+   */
+  @Override
+  public MessageOutDto clearCartAfterOrderPlaced(final Integer userId, final Integer restaurantId) {
+<span class="fc" id="L163">    log.info(&quot;Clearing cart for userId: {}, restaurantId: {}&quot;, userId, restaurantId);</span>
+<span class="fc" id="L164">    UserOutDto user = userClient.getUserById(userId);</span>
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">    if (!user.getUserRole().equals(UserRole.CUSTOMER)) {</span>
+<span class="nc" id="L166">      throw new AccessDeniedException(OrderConstants.CUSTOMER_NOT_FOUND);</span>
+    }
+
+<span class="fc" id="L169">    FoodItemOutDto restaurant = restaurantClient.getRestaurantById(restaurantId);</span>
+
+<span class="fc" id="L171">    List&lt;Cart&gt; cartItems = cartRepository.findByUserIdAndRestaurantId(userId, restaurantId);</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">    if (!cartItems.isEmpty()) {</span>
+<span class="fc" id="L173">      cartRepository.deleteAll(cartItems);</span>
+<span class="fc" id="L174">      log.info(&quot;Cart cleared successfully for userId: {}&quot;, userId);</span>
+<span class="fc" id="L175">      return new MessageOutDto(OrderConstants.CART_DELETED_SUCCESSFULLY);</span>
+    } else {
+<span class="fc" id="L177">      log.info(&quot;Cart already empty for userId: {}&quot;, userId);</span>
+<span class="fc" id="L178">      return new MessageOutDto(OrderConstants.CART_ALREADY_EMPTY);</span>
+    }
+  }
+
+  /**
+   * Retrieves all cart items for a specific user and restaurant.
+   *
+   * @param userId       The user ID.
+   * @param restaurantId The restaurant ID.
+   * @return List of cart items.
+   */
+  @Override
+  public List&lt;Cart&gt; getCartItemsByUserIdAndRestaurantId(final Integer userId, final Integer restaurantId) {
+<span class="fc" id="L191">    log.info(&quot;Retrieving cart items for userId: {}, restaurantId: {}&quot;, userId, restaurantId);</span>
+<span class="fc" id="L192">    UserOutDto user = userClient.getUserById(userId);</span>
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">    if (!user.getUserRole().equals(UserRole.CUSTOMER)) {</span>
+<span class="nc" id="L194">      throw new AccessDeniedException(OrderConstants.CUSTOMER_NOT_FOUND);</span>
+    }
+
+<span class="fc" id="L197">    FoodItemOutDto restaurant = restaurantClient.getRestaurantById(restaurantId);</span>
+<span class="fc" id="L198">    return cartRepository.findByUserIdAndRestaurantId(userId, restaurantId);</span>
+  }
+
+  /**
+   * Retrieves all cart items for a specific user.
+   *
+   * @param userId The user ID.
+   * @return List of cart items.
+   */
+  @Override
+  public List&lt;Cart&gt; getCartByUserId(final Integer userId) {
+<span class="fc" id="L209">    log.info(&quot;Retrieving cart items for userId: {}&quot;, userId);</span>
+<span class="fc" id="L210">    UserOutDto user = userClient.getUserById(userId);</span>
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">    if (!user.getUserRole().equals(UserRole.CUSTOMER)) {</span>
+<span class="nc" id="L212">      throw new AccessDeniedException(OrderConstants.CUSTOMER_NOT_FOUND);</span>
+    }
+<span class="fc" id="L214">    return cartRepository.findByUserId(userId);</span>
+  }
+
+  /**
+   * Retrieves a specific cart item by its ID.
+   *
+   * @param cartId The cart ID.
+   * @return The cart item.
+   * @throws ResourceNotFoundException If the cart item is not found.
+   */
+  @Override
+  public Cart getCartById(final Integer cartId) {
+<span class="fc" id="L226">    log.info(&quot;Retrieving cart item for cartId: {}&quot;, cartId);</span>
+<span class="fc" id="L227">    return cartRepository.findById(cartId)</span>
+<span class="fc" id="L228">      .orElseThrow(() -&gt; new ResourceNotFoundException(OrderConstants.CART_NOT_FOUND));</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
