@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserInDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Users</a> &gt; <a href="index.source.html" class="el_package">com.users.dto</a> &gt; <span class="el_source">UserInDto.java</span></div><h1>UserInDto.java</h1><pre class="source lang-java linenums">package com.users.dto;
+
+import com.users.utils.UserRole;
+import lombok.Data;
+import org.apache.logging.log4j.core.config.plugins.validation.constraints.NotBlank;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+/**
+ * Data Transfer Object for user information.
+ * Contains fields for first name, last name, email, password, phone number, and user role,
+ * with validation constraints for each field.
+ */
+<span class="pc bpc" id="L16" title="13 of 54 branches missed.">@Data</span>
+public class UserInDto {
+
+  /**
+   * The user's first name. Must contain only alphabets and cannot be blank.
+   */
+  @NotBlank(message = &quot;First name is required&quot;)
+  @Pattern(
+    regexp = &quot;^[a-zA-Z]+$&quot;,
+    message = &quot;First name must contain only alphabets.&quot;
+  )
+<span class="fc" id="L27">  private String firstName;</span>
+
+  /**
+   * The user's last name. Must contain only alphabets and cannot be blank.
+   */
+  @NotBlank(message = &quot;Last name is required&quot;)
+  @Pattern(
+    regexp = &quot;^[a-zA-Z]+$&quot;,
+    message = &quot;Last name must contain only alphabets.&quot;
+  )
+<span class="fc" id="L37">  private String lastName;</span>
+
+  /**
+   * The user's email address. Must be a valid email format and either @gmail.com or @nucleusteq.com.
+   */
+  @Email(message = &quot;Invalid email format.&quot;)
+  @Pattern(
+    regexp = &quot;^[a-zA-Z]+[a-zA-Z0-9._%+-]*@(nucleusteq\\.com)$&quot;,
+    message = &quot;Email must be a valid,  @nucleusteq.com and contain at least one alphabet before the '@' symbol.&quot;
+  )
+  @NotBlank(message = &quot;Email is required&quot;)
+<span class="fc" id="L48">  private String email;</span>
+
+  /**
+   * The user's password. Must be at least 5 characters long and contain at least one digit,
+   * one lowercase letter, one uppercase letter, and one special character.
+   */
+  @NotBlank(message = &quot;Password is required&quot;)
+  @Size(min = 5, message = &quot;Password must be at least 5 characters long&quot;)
+  @Pattern(
+    regexp = &quot;^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&amp;+=]).{5,}$&quot;,
+    message = &quot;Password must contain at least one digit, one lowercase letter, one uppercase letter, and one special character.&quot;
+  )
+<span class="fc" id="L60">  private String password;</span>
+
+  /**
+   * The user's phone number. Must be exactly 10 digits long and start with 7, 8, or 9.
+   */
+  @Pattern(
+    regexp = &quot;^[789]\\d{9}$&quot;,
+    message = &quot;Phone number must be exactly 10 digits and start with 7, 8, or 9.&quot;
+  )
+<span class="fc" id="L69">  private String phoneNumber;</span>
+
+  /**
+   * The user's role. Must be either CUSTOMER or RESTAURANT_OWNER.
+   */
+<span class="fc" id="L74">  private UserRole userRole;</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
